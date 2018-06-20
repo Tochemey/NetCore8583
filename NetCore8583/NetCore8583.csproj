@@ -7,6 +7,10 @@
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
+    <RepositoryUrl>https://github.com/Tochemey/NetCore8583</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/Tochemey/NetCore8583</PackageProjectUrl>
+    <PackageTags>Iso8583 NetCore Banking C#</PackageTags>
+    <Copyright>Tochemey 2018</Copyright>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
