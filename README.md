@@ -3,7 +3,7 @@ NetCore8583
 
 ## Introduction
 
-NetCore8583 is a NetCore implementation of the ISO 8583 protocol. 
+NetCore8583 is a NetCore 2.1 implementation of the ISO 8583 protocol. 
 
 NetCore8583 is a library that helps parse/read and generate ISO 8583 messages. It does not handle sending or reading them over a network connection, but it does parse the data you have read and can generate the data you need to write over a network connection. 
 
