@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<n8583-config>
+    <header type="100">ISO999999999</header>
+    <parse type="100">
+        <field num="2" type="LLLLVAR" />
+    </parse>
+</n8583-config>

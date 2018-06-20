@@ -1,0 +1,10 @@
+<n8583-config>
+    <template type="0100">
+        <field num="2" type="LLLLVAR">X</field>
+        <field num="3" type="LLLLBIN">FF</field>
+    </template>
+    <parse type="0100">
+        <field num="2" type="LLLLVAR" />
+        <field num="3" type="LLLLBIN" />
+    </parse>
+</n8583-config>

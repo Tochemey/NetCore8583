@@ -1,0 +1,10 @@
+<n8583-config>
+    <parse type="0100">
+        <field num="2" type="LLVAR" />
+        <field num="3" type="LLLVAR" />
+        <field num="4" type="LLLLVAR" />
+        <field num="5" type="LLBIN" />
+        <field num="6" type="LLLBIN" />
+        <field num="7" type="LLLLBIN" />
+    </parse>
+</n8583-config>

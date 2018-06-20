@@ -1,0 +1,7 @@
+<n8583-config>
+
+    <template type="0200">
+        <field num="3" type="NUMERIC" length="6"></field>
+    </template>
+
+</n8583-config>

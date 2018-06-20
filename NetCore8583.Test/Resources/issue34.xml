@@ -1,0 +1,32 @@
+<n8583-config>
+    <parse type="0200">
+        <field num="2" type="LLVAR" />
+        <field num="3" type="NUMERIC" length="6" />
+        <field num="4" type="NUMERIC" length="12" />
+        <field num="7" type="DATE10" />
+        <field num="11" type="NUMERIC" length="6" />
+        <field num="12" type="TIME" />
+        <field num="13" type="DATE4" />
+        <field num="15" type="DATE4" />
+        <field num="18" type="NUMERIC" length="4" />
+        <field num="32" type="LLVAR" />
+        <field num="37" type="NUMERIC" length="12" />
+        <field num="41" type="ALPHA" length="8" />
+        <field num="42" type="ALPHA" length="15" />
+        <field num="48" type="LLLVAR" />
+        <field num="49" type="ALPHA" length="3" />
+    </parse>
+    <parse type="0210" extends="0200">
+        <field num="39" type="ALPHA" length="2" />
+        <field num="62" type="LLLVAR" />
+    </parse>
+
+    <parse type="0400" extends="0200">
+        <field num="62" type="LLLVAR" />
+    </parse>
+
+    <parse type="0410" extends="0400">
+        <field num="39" type="ALPHA" length="2" />
+        <field num="61" type="LLLVAR" />
+    </parse>
+</n8583-config>

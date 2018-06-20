@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<n8583-config>
+    <template type="0800">
+        <field num="3" type="NUMERIC" length="6">990000</field>
+        <field num="7" type="DATE10">1227120330</field>
+        <field num="11" type="NUMERIC" length="6">2</field>
+        <field num="24" type="NUMERIC" length="3">831</field>
+        <field num="41" type="ALPHA" length="8">42001</field>
+        <field num="42" type="ALPHA" length="15">420000000000001</field>
+    </template>
+    <parse type="0800">
+        <field num="3" type="NUMERIC" length="6" />
+        <field num="7" type="DATE10" />
+        <field num="11" type="NUMERIC" length="6" />
+        <field num="24" type="NUMERIC" length="3" />
+        <field num="41" type="ALPHA" length="8" />
+        <field num="42" type="ALPHA" length="15" />
+    </parse>
+</n8583-config>

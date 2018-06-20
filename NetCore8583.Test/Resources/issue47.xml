@@ -1,0 +1,14 @@
+<n8583-config>
+
+    <!-- Parent -->
+    <parse type="000">
+        <field num="4" type="AMOUNT" />
+    </parse>
+
+    <parse type="0200" extends="000">
+        <field num="62" type="LLLVAR">
+            <field num="4" type="ALPHA" length="13" />
+        </field>
+    </parse>
+
+</n8583-config>
