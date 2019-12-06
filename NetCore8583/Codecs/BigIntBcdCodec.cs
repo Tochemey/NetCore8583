@@ -1,7 +1,7 @@
-﻿using NetCore8583.Util;
-using System;
+﻿using System;
 using System.Globalization;
 using System.Numerics;
+using NetCore8583.Util;
 
 namespace NetCore8583.Codecs
 {
@@ -36,7 +36,7 @@ namespace NetCore8583.Codecs
 
         public sbyte[] EncodeBinaryField(object val)
         {
-            var value = (BigInteger)val;
+            var value = (BigInteger) val;
             var s = value.ToString(NumberFormatInfo.InvariantInfo);
             var buf = new sbyte[s.Length / 2 + s.Length % 2];
             Bcd.Encode(

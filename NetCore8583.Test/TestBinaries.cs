@@ -10,7 +10,7 @@ namespace NetCore8583.Test
     {
         public TestBinaries()
         {
-            string configXml = @"/Resources/config.xml";
+            var configXml = @"/Resources/config.xml";
             _mfactAscii.Encoding = Encoding.UTF8;
             _mfactAscii.SetConfigPath(configXml);
             _mfactAscii.AssignDate = true;
@@ -120,21 +120,21 @@ namespace NetCore8583.Test
             Assert.False(ascii.Binary || ascii.BinBitmap);
             Assert.True(bin.Binary);
             //HEXencode the binary message, headers should be similar to the ASCII version
-            sbyte[] v = bin.WriteData();
+            var v = bin.WriteData();
             var hexBin = HexCodec.HexEncode(v, 0, v.Length);
-            var hexAscii = ascii.WriteData().SignedBytesToString(Encoding.Default).ToUpper(CultureInfo.CurrentCulture);
+            var hexAscii = ascii.WriteData().BytesToString(Encoding.Default).ToUpper(CultureInfo.CurrentCulture);
 
             Assert.Equal("0600", hexBin.Substring(0, 4));
 
             //Should be the same up to the field 42 (first 80 chars)
             Assert.Equal(hexAscii.Substring(0, 88), hexBin.Substring(0, 88));
-            Assert.Equal(ascii.GetObjectValue(43), v.SignedBytesToString(44, 40, Encoding.Default).Trim());
+            Assert.Equal(ascii.GetObjectValue(43), v.BytesToString(44, 40, Encoding.Default).Trim());
             //Parse both messages
-            sbyte[] asciiBuf = ascii.WriteData();
-            IsoMessage ascii2 = _mfactAscii.ParseMessage(asciiBuf, 0);
+            var asciiBuf = ascii.WriteData();
+            var ascii2 = _mfactAscii.ParseMessage(asciiBuf, 0);
             TestParsed(ascii2);
             Assert.Equal(ascii.GetObjectValue(7).ToString(), ascii2.GetObjectValue(7).ToString());
-            IsoMessage bin2 = _mfactBin.ParseMessage(bin.WriteData(), 0);
+            var bin2 = _mfactBin.ParseMessage(bin.WriteData(), 0);
             //Compare values, should be the same
             TestParsed(bin2);
             Assert.Equal(bin.GetObjectValue(7).ToString(), bin2.GetObjectValue(7).ToString());

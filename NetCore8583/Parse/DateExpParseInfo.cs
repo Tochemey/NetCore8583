@@ -1,5 +1,5 @@
-﻿using NetCore8583.Util;
-using System;
+﻿using System;
+using NetCore8583.Util;
 
 namespace NetCore8583.Parse
 {
@@ -26,11 +26,11 @@ namespace NetCore8583.Parse
 
             if (ForceStringDecoding)
             {
-                year = DateTime.Today.Year - DateTime.Today.Year % 100 + Convert.ToInt32(buf.SignedBytesToString(pos,
+                year = DateTime.Today.Year - DateTime.Today.Year % 100 + Convert.ToInt32(buf.BytesToString(pos,
                            2,
                            Encoding), 10);
 
-                month = Convert.ToInt32(buf.SignedBytesToString(pos + 2,
+                month = Convert.ToInt32(buf.BytesToString(pos + 2,
                     2,
                     Encoding), 10);
             }

@@ -78,7 +78,7 @@ namespace NetCore8583
         /// <summary>
         ///     Flag to enforce secondary bitmap even if empty.
         /// </summary>
-        public bool Forceb2 { get; set; }
+        public bool EnforceSecondBitmap { get; set; }
 
         public bool BinBitmap { get; set; }
 
@@ -102,10 +102,7 @@ namespace NetCore8583
         /// </summary>
         /// <param name="field">The field index (2 to 128).</param>
         /// <returns>The IsoValue for the specified field.</returns>
-        public IsoValue GetField(int field)
-        {
-            return _fields[field];
-        }
+        public IsoValue GetField(int field) => _fields[field];
 
         /// <summary>
         ///     Stored the field in the specified index. The first field is the secondary bitmap and has index 1,
@@ -130,9 +127,9 @@ namespace NetCore8583
         /// <returns></returns>
         public IsoMessage SetFields(Dictionary<int, IsoValue> values)
         {
-            foreach (var isoValue in values)
-                SetField(isoValue.Key,
-                    isoValue.Value);
+            foreach (var (key, value) in values)
+                SetField(key,
+                    value);
             return this;
         }
 
@@ -152,14 +149,9 @@ namespace NetCore8583
             int length)
         {
             if (index < 2 || index > 128) throw new IndexOutOfRangeException("Field index must be between 2 and 128");
-            if (value == null)
+            if (value != null)
             {
-                _fields[index] = null;
-            }
-            else
-            {
-                IsoValue v;
-                v = t.NeedsLength()
+                var v = t.NeedsLength()
                     ? new IsoValue(t,
                         value,
                         length,
@@ -170,6 +162,11 @@ namespace NetCore8583
                 v.Encoding = Encoding;
                 _fields[index] = v;
             }
+            else
+            {
+                _fields[index] = null;
+            }
+
             return this;
         }
 
@@ -184,14 +181,12 @@ namespace NetCore8583
         public IsoMessage SetValue(int index,
             object value,
             IsoType t,
-            int length)
-        {
-            return SetValue(index,
+            int length) =>
+            SetValue(index,
                 value,
                 null,
                 t,
                 length);
-        }
 
         /// <summary>
         ///     A convenience method to set new values in fields that already contain values.
@@ -222,12 +217,7 @@ namespace NetCore8583
         /// </summary>
         /// <param name="idx">The field number.</param>
         /// <returns></returns>
-        public bool HasField(int idx)
-        {
-            {
-                return _fields[idx] != null;
-            }
-        }
+        public bool HasField(int idx) => _fields[idx] != null;
 
         /// <summary>
         ///     Writes a message to a stream, after writing the specified number of bytes indicating
@@ -247,29 +237,35 @@ namespace NetCore8583
 
             if (lengthBytes > 0)
             {
-                var l = data.Length;
-                if (Etx > -1) l++;
+                var len = data.Length;
+                if (Etx > -1) len++;
                 var buf = new sbyte[lengthBytes];
                 var pos = 0;
                 if (lengthBytes == 4)
                 {
-                    buf[0] = (sbyte) ((l & 0xff000000) >> 24);
+                    buf[0] = (sbyte) ((len & 0xff000000) >> 24);
                     pos++;
                 }
+
                 if (lengthBytes > 2)
                 {
-                    buf[pos] = (sbyte) ((l & 0xff0000) >> 16);
+                    buf[pos] = (sbyte) ((len & 0xff0000) >> 16);
                     pos++;
                 }
+
                 if (lengthBytes > 1)
                 {
-                    buf[pos] = (sbyte) ((l & 0xff00) >> 8);
+                    buf[pos] = (sbyte) ((len & 0xff00) >> 8);
                     pos++;
                 }
-                buf[pos] = (sbyte) (l & 0xff);
-                foreach (var @sbyte in buf) outs.Add(@sbyte);
+
+                buf[pos] = (sbyte) (len & 0xff);
+                outs.AddRange(buf);
             }
-            foreach (var @sbyte in data) outs.Add(@sbyte);
+
+
+            outs.AddRange(data);
+
             //ETX
             if (Etx > -1) outs.Add((sbyte) Etx);
         }
@@ -278,24 +274,25 @@ namespace NetCore8583
         ///     Creates a BitSet for the bitmap.
         /// </summary>
         /// <returns></returns>
-        protected BitArray CreateBitmapBitSet()
+        private BitArray CreateBitmapBitSet()
         {
-            var bs = new BitArray(Forceb2 ? 128 : 64);
+            var bs = new BitArray(EnforceSecondBitmap ? 128 : 64);
             for (var i = 2; i < 129; i++)
                 if (_fields[i] != null)
                 {
-                    if (i > 64 && !Forceb2)
+                    if (i > 64 && !EnforceSecondBitmap)
                     {
                         //Extend to 128 if needed
                         bs.Length = 128;
                         bs.Set(0,
                             true);
                     }
+
                     bs.Set(i - 1,
                         true);
                 }
 
-            if (Forceb2)
+            if (EnforceSecondBitmap)
             {
                 bs.Set(0,
                     true);
@@ -309,6 +306,7 @@ namespace NetCore8583
                 bs.Set(0,
                     true);
             }
+
             return bs;
         }
 
@@ -323,8 +321,8 @@ namespace NetCore8583
             if (IsoHeader != null)
                 try
                 {
-                    var bytes = IsoHeader.GetSignedbytes(Encoding);
-                    foreach (var @sbyte in bytes) sbyteList.Add(@sbyte);
+                    var bytes = IsoHeader.GetSignedBytes(Encoding);
+                    sbyteList.AddRange(bytes);
                 }
                 catch (IOException)
                 {
@@ -333,7 +331,7 @@ namespace NetCore8583
             else if (BinIsoHeader != null)
                 try
                 {
-                    foreach (var @sbyte in BinIsoHeader) sbyteList.Add(@sbyte);
+                    sbyteList.AddRange(BinIsoHeader);
                 }
                 catch (IOException)
                 {
@@ -351,14 +349,15 @@ namespace NetCore8583
                 try
                 {
                     var x = Type.ToString("x4");
-                    var bytes = x.GetSignedbytes(Encoding);
-                    foreach (var @sbyte in bytes) sbyteList.Add(@sbyte);
+                    var bytes = x.GetSignedBytes(Encoding);
+                    sbyteList.AddRange(bytes);
                 }
                 catch (IOException)
                 {
                     //should never happen, writing to a ByteArrayOutputStream
                 }
             }
+
             //Bitmap
             var bits = CreateBitmapBitSet();
 
@@ -385,6 +384,7 @@ namespace NetCore8583
                     sbyteList2 = sbyteList;
                     sbyteList = new List<sbyte>();
                 }
+
                 var pos = 0;
                 var lim = bits.Length / 4;
                 for (var i = 0; i < lim; i++)
@@ -399,12 +399,11 @@ namespace NetCore8583
 
                 if (ForceStringEncoding)
                 {
-                    var hb = sbyteList.ToArray().SignedBytesToString(Encoding.Default);
+                    var hb = sbyteList.ToArray().BytesToString(Encoding.Default);
                     sbyteList = sbyteList2;
                     try
                     {
-                        var sbytes = hb.GetSignedbytes(Encoding);
-                        foreach (var @sbyte in sbytes) sbyteList.Add(@sbyte);
+                        sbyteList.AddRange(hb.GetSignedBytes(Encoding));
                     }
                     catch (IOException)
                     {
@@ -434,6 +433,7 @@ namespace NetCore8583
                     //should never happen, writing to a ByteArrayOutputStream
                 }
             }
+
             Debug.Assert(stream != null,
                 "stream != null");
             return stream.ToArray().ToSignedBytes();
@@ -452,15 +452,16 @@ namespace NetCore8583
             var stream = new List<sbyte>(lengthBytes + data.Length + (Etx > -1 ? 1 : 0));
             if (lengthBytes > 0)
             {
-                var l = data.Length;
-                if (Etx > -1) l++;
-                if (lengthBytes == 4) stream.Add((sbyte) ((l & 0xff000000) >> 24));
-                if (lengthBytes > 2) stream.Add((sbyte) ((l & 0xff0000) >> 16));
-                if (lengthBytes > 1) stream.Add((sbyte) ((l & 0xff00) >> 8));
-                stream.Add((sbyte) (l & 0xff));
+                var len = data.Length;
+                if (Etx > -1) len++;
+                if (lengthBytes == 4) stream.Add((sbyte) ((len & 0xff000000) >> 24));
+                if (lengthBytes > 2) stream.Add((sbyte) ((len & 0xff0000) >> 16));
+                if (lengthBytes > 1) stream.Add((sbyte) ((len & 0xff00) >> 8));
+                stream.Add((sbyte) (len & 0xff));
             }
 
-            foreach (var @sbyte in data) stream.Add(@sbyte);
+            stream.AddRange(data);
+
             //ETX
             if (Etx > -1) stream.Add((sbyte) Etx);
 
@@ -487,7 +488,7 @@ namespace NetCore8583
                 if (bs.Get(pos++)) nibble |= 4;
                 if (bs.Get(pos++)) nibble |= 2;
                 if (bs.Get(pos++)) nibble |= 1;
-                var string0 = Hex.SignedBytesToString(nibble,
+                var string0 = Hex.BytesToString(nibble,
                     1,
                     Encoding);
                 sb.Append(string0);
@@ -499,11 +500,24 @@ namespace NetCore8583
                 var v = _fields[i];
                 if (v == null) continue;
                 var desc = v.ToString();
-                if (v.Type == IsoType.LLBIN || v.Type == IsoType.LLVAR) sb.Append(desc.Length.ToString("D2"));
-                else if (v.Type == IsoType.LLLBIN || v.Type == IsoType.LLLVAR) sb.Append(desc.Length.ToString("D3"));
-                else if (v.Type == IsoType.LLLLBIN || v.Type == IsoType.LLLLVAR) sb.Append(desc.Length.ToString("D4"));
+                switch (v.Type)
+                {
+                    case IsoType.LLBIN:
+                    case IsoType.LLVAR:
+                        sb.Append(desc.Length.ToString("D2"));
+                        break;
+                    case IsoType.LLLBIN:
+                    case IsoType.LLLVAR:
+                        sb.Append(desc.Length.ToString("D3"));
+                        break;
+                    case IsoType.LLLLBIN:
+                    case IsoType.LLLLVAR:
+                        sb.Append(desc.Length.ToString("D4"));
+                        break;
+                }
                 sb.Append(desc);
             }
+
             return sb.ToString();
         }
 
@@ -513,10 +527,7 @@ namespace NetCore8583
         /// </summary>
         /// <param name="idx"></param>
         /// <returns></returns>
-        public bool HasEveryField(params int[] idx)
-        {
-            return idx.All(HasField);
-        }
+        public bool HasEveryField(params int[] idx) => idx.All(HasField);
 
         /// <summary>
         ///     Returns true is the message contains at least one of the specified fields.
@@ -524,9 +535,6 @@ namespace NetCore8583
         /// </summary>
         /// <param name="idx"></param>
         /// <returns></returns>
-        public bool HasAnyField(params int[] idx)
-        {
-            return idx.Any(HasField);
-        }
+        public bool HasAnyField(params int[] idx) => idx.Any(HasField);
     }
 }

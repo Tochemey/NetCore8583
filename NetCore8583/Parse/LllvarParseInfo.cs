@@ -1,6 +1,6 @@
-﻿using NetCore8583.Util;
-using System;
+﻿using System;
 using System.Text;
+using NetCore8583.Util;
 
 namespace NetCore8583.Parse
 {
@@ -26,7 +26,7 @@ namespace NetCore8583.Parse
 
             if (len < 0)
                 throw new ParseException(
-                    $"Invalid LLLVAR length {len}({buf.SignedBytesToString(pos, 3, Encoding.Default)}) field {field} pos {pos}");
+                    $"Invalid LLLVAR length {len}({buf.BytesToString(pos, 3, Encoding.Default)}) field {field} pos {pos}");
 
             if (len + pos + 3 > buf.Length)
                 throw new ParseException($"Insufficient data for LLLVAR field {field}, pos {pos}");
@@ -35,8 +35,8 @@ namespace NetCore8583.Parse
             try
             {
                 v = len == 0
-                    ? ""
-                    : buf.SignedBytesToString(pos + 3,
+                    ? string.Empty
+                    : buf.BytesToString(pos + 3,
                         len,
                         Encoding);
             }
@@ -49,14 +49,16 @@ namespace NetCore8583.Parse
             //buffer, there are probably some extended characters. So we create a String from
             //the rest of the buffer, and then cut it to the specified length.
             if (v.Length != len)
-                v = buf.SignedBytesToString(pos + 3,
+                v = buf.BytesToString(pos + 3,
                     buf.Length - pos - 3,
                     Encoding).Substring(0,
                     len);
+            
             if (custom == null)
                 return new IsoValue(IsoType,
                     v,
                     len);
+            
             var decoded = custom.DecodeField(v);
             //If decode fails, return string; otherwise use the decoded object and its codec
             return decoded == null
@@ -89,17 +91,19 @@ namespace NetCore8583.Parse
 
             if (custom == null)
                 return new IsoValue(IsoType,
-                    buf.SignedBytesToString(pos + 2,
+                    buf.BytesToString(pos + 2,
                         len,
                         Encoding));
+            
             var v = new IsoValue(IsoType,
-                custom.DecodeField(buf.SignedBytesToString(pos + 2,
+                custom.DecodeField(buf.BytesToString(pos + 2,
                     len,
                     Encoding)),
                 custom);
+            
             if (v.Value == null)
                 return new IsoValue(IsoType,
-                    buf.SignedBytesToString(pos + 2,
+                    buf.BytesToString(pos + 2,
                         len,
                         Encoding.Default));
             return v;

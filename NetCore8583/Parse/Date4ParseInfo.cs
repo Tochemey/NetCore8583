@@ -1,5 +1,5 @@
-﻿using NetCore8583.Util;
-using System;
+﻿using System;
+using NetCore8583.Util;
 
 namespace NetCore8583.Parse
 {
@@ -26,12 +26,12 @@ namespace NetCore8583.Parse
             //Set the month and the day in the date
             if (ForceStringDecoding)
             {
-                var c = buf.SignedBytesToString(pos,
+                var c = buf.BytesToString(pos,
                     2,
                     Encoding);
                 month = Convert.ToInt32(c,
                     10);
-                c = buf.SignedBytesToString(pos + 2,
+                c = buf.BytesToString(pos + 2,
                     2,
                     Encoding);
                 day = Convert.ToInt32(c,
@@ -58,10 +58,9 @@ namespace NetCore8583.Parse
             if (TimeZoneInfo != null)
                 dt = TimeZoneInfo.ConvertTime(dt,
                     TimeZoneInfo);
-
-            var ajusted = AdjustWithFutureTolerance(new DateTimeOffset(dt));
+            
             return new IsoValue(IsoType,
-                ajusted.DateTime);
+                AdjustWithFutureTolerance(new DateTimeOffset(dt)).DateTime);
         }
 
         public override IsoValue ParseBinary(int field,
@@ -72,8 +71,10 @@ namespace NetCore8583.Parse
             var tens = new int[2];
             var sbytes = buf;
             var start = 0;
+            
             if (buf.Length - pos < 2)
                 throw new ParseException($"Insufficient data to parse binary DATE4 field {field} pos {pos}");
+            
             for (var i = pos; i < pos + tens.Length; i++)
                 tens[start++] = ((sbytes[i] & 0xf0) >> 4) * 10 + (sbytes[i] & 0x0f);
 
@@ -83,12 +84,13 @@ namespace NetCore8583.Parse
                 0,
                 0,
                 0).AddMilliseconds(0);
+            
             if (TimeZoneInfo != null)
                 calendar = TimeZoneInfo.ConvertTime(calendar,
                     TimeZoneInfo);
-            var ajusted = AdjustWithFutureTolerance(new DateTimeOffset(calendar));
+
             return new IsoValue(IsoType,
-                ajusted.DateTime);
+                AdjustWithFutureTolerance(new DateTimeOffset(calendar)).DateTime);
         }
     }
 }

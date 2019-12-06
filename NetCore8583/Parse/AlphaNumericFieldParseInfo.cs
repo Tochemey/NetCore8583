@@ -1,5 +1,5 @@
-﻿using NetCore8583.Util;
-using System;
+﻿using System;
+using NetCore8583.Util;
 
 namespace NetCore8583.Parse
 {
@@ -25,19 +25,21 @@ namespace NetCore8583.Parse
                     $"Insufficient data for {IsoType} field {field} of length {Length}, pos {pos}");
             try
             {
-                var v = buf.SignedBytesToString(pos,
+                var v = buf.BytesToString(pos,
                     Length,
                     Encoding);
 
                 if (v.Length != Length)
-                    v = buf.SignedBytesToString(pos,
+                    v = buf.BytesToString(pos,
                         buf.Length - pos,
                         Encoding).Substring(0,
                         Length);
+                
                 if (custom == null)
                     return new IsoValue(IsoType,
                         v,
                         Length);
+                
                 var decoded = custom.DecodeField(v);
                 return decoded == null
                     ? new IsoValue(IsoType,

@@ -1,6 +1,6 @@
-﻿using NetCore8583.Util;
-using System;
+﻿using System;
 using System.Text;
+using NetCore8583.Util;
 
 namespace NetCore8583.Parse
 {
@@ -17,8 +17,8 @@ namespace NetCore8583.Parse
             Length = length;
         }
 
-        public IsoType IsoType { get; }
-        public int Length { get; }
+        protected IsoType IsoType { get; }
+        protected int Length { get; }
         public bool ForceStringDecoding { get; set; }
         public ICustomField Decoder { get; set; }
         public Encoding Encoding { get; set; } = Encoding.Default;
@@ -62,24 +62,26 @@ namespace NetCore8583.Parse
         {
             if (ForceStringDecoding)
             {
-                var string0 = buf.SignedBytesToString(pos,
+                var string0 = buf.BytesToString(pos,
                     digits,
                     Encoding);
                 return Convert.ToInt32(string0, 10);
             }
+
             switch (digits)
             {
                 case 2:
-                    return ((buf[pos] - 48) * 10) + (buf[pos + 1] - 48);
+                    return (buf[pos] - 48) * 10 + (buf[pos + 1] - 48);
 
                 case 3:
-                    return ((buf[pos] - 48) * 100) + ((buf[pos + 1] - 48) * 10)
-                           + (buf[pos + 2] - 48);
+                    return (buf[pos] - 48) * 100 + (buf[pos + 1] - 48) * 10
+                                                 + (buf[pos + 2] - 48);
 
                 case 4:
-                    return ((buf[pos] - 48) * 1000) + ((buf[pos + 1] - 48) * 100)
-                           + ((buf[pos + 2] - 48) * 10) + (buf[pos + 3] - 48);
+                    return (buf[pos] - 48) * 1000 + (buf[pos + 1] - 48) * 100
+                                                  + (buf[pos + 2] - 48) * 10 + (buf[pos + 3] - 48);
             }
+
             return -1;
         }
 
@@ -154,6 +156,7 @@ namespace NetCore8583.Parse
                     fpi = new LlllbinParseInfo();
                     break;
             }
+
             if (fpi == null) throw new ArgumentException($"Cannot parse type {t}");
             fpi.Encoding = encoding;
             return fpi;

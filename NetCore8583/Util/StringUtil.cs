@@ -157,7 +157,9 @@ namespace NetCore8583.Util
         {
             // convert the string into characters array and loop through the array
             var stringArray = string0.ToCharArray();
-            for (var i = 0; i < stringArray.Length; i++) if (!stringArray[i].IsSafeChar()) return false;
+            for (var i = 0; i < stringArray.Length; i++)
+                if (!stringArray[i].IsSafeChar())
+                    return false;
             return true;
         }
 
@@ -393,8 +395,12 @@ namespace NetCore8583.Util
         {
             var len = ccnumber.Length - 4;
             var sb = new StringBuilder();
-            if (string.IsNullOrEmpty(prefix)) for (var i = 0; i < len; i++) sb.Append("*");
-            else for (var i = 0; i < len - prefix.Length; i++) sb.Append("*");
+            if (string.IsNullOrEmpty(prefix))
+                for (var i = 0; i < len; i++)
+                    sb.Append("*");
+            else
+                for (var i = 0; i < len - prefix.Length; i++)
+                    sb.Append("*");
 
             var last4Digit = ccnumber.Substring(ccnumber.Length - 4,
                 4);
@@ -477,6 +483,7 @@ namespace NetCore8583.Util
                         regex);
                 }
             }
+
             return false;
         }
 
@@ -530,6 +537,7 @@ namespace NetCore8583.Util
                 // Perform the validation check
                 valid = date.IsValidDate(format) && time.IsValidTime();
             }
+
             return valid;
         }
 
@@ -645,6 +653,7 @@ namespace NetCore8583.Util
                 sb.Append(string0.Substring(1));
                 return sb.ToString();
             }
+
             return string0;
         }
 
@@ -705,6 +714,7 @@ namespace NetCore8583.Util
             catch (Exception)
             {
             }
+
             return false;
         }
 
@@ -713,12 +723,12 @@ namespace NetCore8583.Util
             return Encoding.UTF8.GetBytes(check);
         }
 
-        public static sbyte[] GetSignedbytes(this string check,
+        public static sbyte[] GetSignedBytes(this string check,
             Encoding encoding = null)
         {
             var bytes = encoding == null ? Encoding.Default.GetBytes(check) : encoding.GetBytes(check);
             return Array.ConvertAll(bytes,
-                b => unchecked((sbyte)b));
+                b => unchecked((sbyte) b));
         }
 
         #region Private Routines

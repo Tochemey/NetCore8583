@@ -1,15 +1,15 @@
-﻿using NetCore8583.Codecs;
-using NetCore8583.Util;
-using Serilog;
-using Serilog.Core;
-using Serilog.Events;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml;
+using NetCore8583.Codecs;
+using NetCore8583.Util;
+using Serilog;
+using Serilog.Core;
+using Serilog.Events;
 
 namespace NetCore8583.Parse
 {
@@ -56,7 +56,7 @@ namespace NetCore8583.Parse
             List<XmlElement> refs = null;
             for (var i = 0; i < nodes.Count; i++)
             {
-                var elem = (XmlElement)nodes.Item(i);
+                var elem = (XmlElement) nodes.Item(i);
                 if (elem != null)
                 {
                     var type = ParseType(elem.GetAttribute("type"));
@@ -134,7 +134,7 @@ namespace NetCore8583.Parse
             List<XmlElement> subs = null;
             for (var i = 0; i < nodes.Count; i++)
             {
-                var elem = (XmlElement)nodes.Item(i);
+                var elem = (XmlElement) nodes.Item(i);
                 if (elem == null) continue;
                 var type = ParseType(elem.GetAttribute("type"));
                 if (type == -1)
@@ -146,20 +146,24 @@ namespace NetCore8583.Parse
                     continue;
                 }
 
-                var m = (T)new IsoMessage();
+                var m = (T) new IsoMessage();
                 m.Type = type;
                 m.Encoding = mfact.Encoding;
                 var fields = elem.GetElementsByTagName("field");
+                
                 for (var j = 0; j < fields.Count; j++)
                 {
-                    var f = (XmlElement)fields.Item(j);
+                    var f = (XmlElement) fields.Item(j);
                     if (f.ParentNode != elem) continue;
                     var num = int.Parse(f.GetAttribute("num"));
+                    
                     var v = GetTemplateField(
                         f,
                         mfact,
                         true);
+                    
                     if (v != null) v.Encoding = mfact.Encoding;
+                    
                     m.SetField(
                         num,
                         v);
@@ -168,48 +172,59 @@ namespace NetCore8583.Parse
                 mfact.AddMessageTemplate(m);
             }
 
-            if (subs != null)
-                foreach (var elem in subs)
+            if (subs == null) return;
+            
+            foreach (var elem in subs)
+            {
+                var type = ParseType(elem.GetAttribute("type"));
+                var @ref = ParseType(elem.GetAttribute("extends"));
+                
+                if (@ref == -1)
+                    throw new ArgumentException(
+                        "Message template " + elem.GetAttribute("type") +
+                        " extends invalid template " + elem.GetAttribute("extends"));
+                
+                IsoMessage tref = mfact.GetMessageTemplate(@ref);
+                
+                if (tref == null)
+                    throw new ArgumentException(
+                        "Message template " + elem.GetAttribute("type") +
+                        " extends nonexistent template " + elem.GetAttribute("extends"));
+                
+                var m = (T) new IsoMessage();
+                
+                m.Type = type;
+                m.Encoding = mfact.Encoding;
+                
+                for (var i = 2; i < 128; i++)
+                    if (tref.HasField(i))
+                        m.SetField(
+                            i,
+                            (IsoValue) tref.GetField(i).Clone());
+                
+                var fields = elem.GetElementsByTagName("field");
+                
+                for (var j = 0; j < fields.Count; j++)
                 {
-                    var type = ParseType(elem.GetAttribute("type"));
-                    var @ref = ParseType(elem.GetAttribute("extends"));
-                    if (@ref == -1)
-                        throw new ArgumentException(
-                            "Message template " + elem.GetAttribute("type") +
-                            " extends invalid template " + elem.GetAttribute("extends"));
-                    IsoMessage tref = mfact.GetMessageTemplate(@ref);
-                    if (tref == null)
-                        throw new ArgumentException(
-                            "Message template " + elem.GetAttribute("type") +
-                            " extends nonexistent template " + elem.GetAttribute("extends"));
-                    var m = (T)new IsoMessage();
-                    m.Type = type;
-                    m.Encoding = mfact.Encoding;
-                    for (var i = 2; i < 128; i++)
-                        if (tref.HasField(i))
-                            m.SetField(
-                                i,
-                                (IsoValue)tref.GetField(i).Clone());
-                    var fields = elem.GetElementsByTagName("field");
-                    for (var j = 0; j < fields.Count; j++)
-                    {
-                        var f = (XmlElement)fields.Item(j);
-                        var num = int.Parse(f.GetAttribute("num"));
-                        if (f.ParentNode == elem)
-                        {
-                            var v = GetTemplateField(
-                                f,
-                                mfact,
-                                true);
-                            if (v != null) v.Encoding = mfact.Encoding;
-                            m.SetField(
-                                num,
-                                v);
-                        }
-                    }
-
-                    mfact.AddMessageTemplate(m);
+                    var f = (XmlElement) fields.Item(j);
+                    var num = int.Parse(f.GetAttribute("num"));
+                    
+                    if (f.ParentNode != elem) continue;
+                    
+                    var v = GetTemplateField(
+                        f,
+                        mfact,
+                        true);
+                    
+                    if (v != null) v.Encoding = mfact.Encoding;
+                    
+                    m.SetField(
+                        num,
+                        v);
                 }
+
+                mfact.AddMessageTemplate(m);
+            }
         }
 
         private static int ParseType(string type)
@@ -237,16 +252,20 @@ namespace NetCore8583.Parse
             var num = int.Parse(f.GetAttribute("num"));
             var typedef = f.GetAttribute("type");
             if ("exclude".Equals(typedef)) return null;
+            
             var length = 0;
+            
             if (f.GetAttribute("length").Length > 0) length = int.Parse(f.GetAttribute("length"));
+            
             var itype = Enumm.Parse<IsoType>(typedef);
             var subs = f.GetElementsByTagName("field");
+            
             if (subs != null && subs.Count > 0)
             {
                 var cf = new CompositeField();
                 for (var j = 0; j < subs.Count; j++)
                 {
-                    var sub = (XmlElement)subs.Item(j);
+                    var sub = (XmlElement) subs.Item(j);
                     if (sub != null && sub.ParentNode != f) continue;
                     var sv = GetTemplateField(
                         sub,
@@ -274,11 +293,13 @@ namespace NetCore8583.Parse
 
             var v = f.ChildNodes.Count == 0 ? string.Empty : f.ChildNodes.Item(0).Value;
             var customField = toplevel ? mfact.GetCustomField(num) : null;
+            
             if (customField != null)
             {
                 Debug.Assert(
                     itype != null,
                     "itype != null");
+                
                 return itype.Value.NeedsLength()
                     ? new IsoValue(
                         itype.Value,
@@ -294,6 +315,7 @@ namespace NetCore8583.Parse
             Debug.Assert(
                 itype != null,
                 "itype != null");
+            
             return itype.Value.NeedsLength()
                 ? new IsoValue(
                     itype.Value,
@@ -310,32 +332,37 @@ namespace NetCore8583.Parse
             var itype = Enumm.Parse<IsoType>(f.GetAttribute("type"));
             var length = 0;
             if (f.GetAttribute("length").Length > 0) length = int.Parse(f.GetAttribute("length"));
+            
             Debug.Assert(
                 itype != null,
                 "itype != null");
+            
             var fpi = FieldParseInfo.GetInstance(
                 itype.Value,
                 length,
                 mfact.Encoding);
+            
             var subs = f.GetElementsByTagName("field");
-            if (subs != null && subs.Count > 0)
-            {
-                var combo = new CompositeField();
-                for (var i = 0; i < subs.Count; i++)
-                {
-                    var sf = (XmlElement)subs.Item(i);
-                    Debug.Assert(
-                        sf != null,
-                        "sf != null");
-                    if (sf.ParentNode == f)
-                        combo.AddParser(
-                            GetParser(
-                                sf,
-                                mfact));
-                }
 
-                fpi.Decoder = combo;
+            if (subs == null || subs.Count <= 0) return fpi;
+            
+            var combo = new CompositeField();
+            for (var i = 0; i < subs.Count; i++)
+            {
+                var sf = (XmlElement) subs.Item(i);
+                
+                Debug.Assert(
+                    sf != null,
+                    "sf != null");
+                
+                if (sf.ParentNode == f)
+                    combo.AddParser(
+                        GetParser(
+                            sf,
+                            mfact));
             }
+
+            fpi.Decoder = combo;
 
             return fpi;
         }
@@ -347,87 +374,92 @@ namespace NetCore8583.Parse
             var guides = new Dictionary<int, Dictionary<int, FieldParseInfo>>();
             for (var i = 0; i < nodes.Count; i++)
             {
-                var elem = (XmlElement)nodes.Item(i);
-                if (elem != null)
+                var elem = (XmlElement) nodes.Item(i);
+                if (elem == null) continue;
+                
+                var type = ParseType(elem.GetAttribute("type"));
+                if (type == -1)
+                    throw new IOException("Invalid ISO8583 type for parse guide: " + elem.GetAttribute("type"));
+                
+                if (elem.GetAttribute("extends") != null && !elem.GetAttribute("extends").IsEmpty())
                 {
-                    var type = ParseType(elem.GetAttribute("type"));
-                    if (type == -1)
-                        throw new IOException("Invalid ISO8583 type for parse guide: " + elem.GetAttribute("type"));
-                    if (elem.GetAttribute("extends") != null && !elem.GetAttribute("extends").IsEmpty())
-                    {
-                        if (subs == null) subs = new List<XmlElement>(nodes.Count - i);
-                        subs.Add(elem);
-                        continue;
-                    }
+                    if (subs == null) subs = new List<XmlElement>(nodes.Count - i);
+                    subs.Add(elem);
+                    continue;
+                }
 
-                    var parseMap = new Dictionary<int, FieldParseInfo>();
-                    var fields = elem.GetElementsByTagName("field");
-                    for (var j = 0; j < fields.Count; j++)
-                    {
-                        var f = (XmlElement)fields.Item(j);
-                        if (f != null && f.ParentNode == elem)
-                        {
-                            var num = int.Parse(f.GetAttribute("num"));
-                            parseMap.Add(
-                                num,
-                                GetParser(
-                                    f,
-                                    mfact));
-                        }
-                    }
+                var parseMap = new Dictionary<int, FieldParseInfo>();
+                var fields = elem.GetElementsByTagName("field");
+                
+                for (var j = 0; j < fields.Count; j++)
+                {
+                    var f = (XmlElement) fields.Item(j);
+                    if (f == null || f.ParentNode != elem) continue;
+                    
+                    var num = int.Parse(f.GetAttribute("num"));
+                    parseMap.Add(
+                        num,
+                        GetParser(
+                            f,
+                            mfact));
+                }
 
-                    mfact.SetParseMap(
+                mfact.SetParseMap(
+                    type,
+                    parseMap);
+                if (guides.ContainsKey(type)) guides[type] = parseMap;
+                else
+                    guides.Add(
                         type,
                         parseMap);
-                    if (guides.ContainsKey(type)) guides[type] = parseMap;
-                    else
-                        guides.Add(
-                            type,
-                            parseMap);
-                }
             }
 
-            if (subs != null)
-                foreach (var elem in subs)
-                {
-                    var type = ParseType(elem.GetAttribute("type"));
-                    var @ref = ParseType(elem.GetAttribute("extends"));
-                    if (@ref == -1)
-                        throw new ArgumentException(
-                            "Message template " + elem.GetAttribute("type") +
-                            " extends invalid template " + elem.GetAttribute("extends"));
-                    var parent = guides[@ref];
-                    if (parent == null)
-                        throw new ArgumentException(
-                            "Parsing guide " + elem.GetAttribute("type") +
-                            " extends nonexistent guide " + elem.GetAttribute("extends"));
-                    var child = new Dictionary<int, FieldParseInfo>();
-                    child.AddAll(parent);
-                    var fields = GetDirectChildrenByTagName(
-                        elem,
-                        "field");
-                    foreach (var f in fields)
-                    {
-                        var num = int.Parse(f.GetAttribute("num"));
-                        var typedef = f.GetAttribute("type");
-                        if ("exclude".Equals(typedef)) child.Remove(num);
-                        else
-                            child.Add(
-                                num,
-                                GetParser(
-                                    f,
-                                    mfact));
-                    }
+            if (subs == null) return;
 
-                    mfact.SetParseMap(
+            foreach (var elem in subs)
+            {
+                var type = ParseType(elem.GetAttribute("type"));
+                var @ref = ParseType(elem.GetAttribute("extends"));
+                if (@ref == -1)
+                    throw new ArgumentException(
+                        "Message template " + elem.GetAttribute("type") +
+                        " extends invalid template " + elem.GetAttribute("extends"));
+                var parent = guides[@ref];
+                if (parent == null)
+                    throw new ArgumentException(
+                        "Parsing guide " + elem.GetAttribute("type") +
+                        " extends nonexistent guide " + elem.GetAttribute("extends"));
+                
+                var child = new Dictionary<int, FieldParseInfo>();
+                child.AddAll(parent);
+                
+                var fields = GetDirectChildrenByTagName(
+                    elem,
+                    "field");
+                
+                foreach (var f in fields)
+                {
+                    var num = int.Parse(f.GetAttribute("num"));
+                    var typedef = f.GetAttribute("type");
+                    if ("exclude".Equals(typedef)) child.Remove(num);
+                    else
+                        child.Add(
+                            num,
+                            GetParser(
+                                f,
+                                mfact));
+                }
+
+                mfact.SetParseMap(
+                    type,
+                    child);
+                
+                if (guides.ContainsKey(type)) guides[type] = child;
+                else
+                    guides.Add(
                         type,
                         child);
-                    if (guides.ContainsKey(type)) guides[type] = child;
-                    else
-                        guides.Add(
-                            type,
-                            child);
-                }
+            }
         }
 
         private static List<XmlElement> GetDirectChildrenByTagName(XmlElement elem,
@@ -435,10 +467,11 @@ namespace NetCore8583.Parse
         {
             var childElementsByTagName = new List<XmlElement>();
             var childNodes = elem.ChildNodes;
+            
             for (var i = 0; i < childNodes.Count; i++)
                 if (childNodes.Item(i).NodeType == XmlNodeType.Element)
                 {
-                    var childElem = (XmlElement)childNodes.Item(i);
+                    var childElem = (XmlElement) childNodes.Item(i);
                     if (childElem.Name.Equals(tagName)) childElementsByTagName.Add(childElem);
                 }
 
@@ -467,9 +500,11 @@ namespace NetCore8583.Parse
                 ParseHeaders(
                     root.GetElementsByTagName("header"),
                     mfact);
+                
                 ParseTemplates(
                     root.GetElementsByTagName("template"),
                     mfact);
+                
                 //Read the parsing guides
                 ParseGuides(
                     root.GetElementsByTagName("parse"),
@@ -531,9 +566,11 @@ namespace NetCore8583.Parse
                 using (client)
                 {
                     var stream = await client.GetStreamAsync(url);
+                    
                     Logger.Debug(
                         "ISO8583 Parsing config from classpath file {Path}",
                         url.ToString());
+                    
                     Parse(
                         mfact,
                         stream);
@@ -559,6 +596,7 @@ namespace NetCore8583.Parse
             var configFile = Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
                 "n8583.xml");
+            
             if (!File.Exists(configFile))
             {
                 Logger.Warning("ISO8583 config file n8583.xml not found!");

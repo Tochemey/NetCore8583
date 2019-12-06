@@ -6,7 +6,7 @@ namespace NetCore8583.Util
     {
         public static T? Parse<T>(string name) where T : struct
         {
-            return (T)Enum.Parse(typeof(T),
+            return (T) Enum.Parse(typeof(T),
                 name,
                 true);
         }

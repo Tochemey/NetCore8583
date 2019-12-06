@@ -34,6 +34,7 @@ namespace NetCore8583
                         var enc = Encoder.EncodeField(value) ?? (value?.ToString() ?? string.Empty);
                         Length = enc.Length;
                     }
+
                     if (t == IsoType.LLVAR && Length > 99)
                         throw new ArgumentException("LLVAR can only hold values up to 99 chars");
                     if (t == IsoType.LLLVAR && Length > 999)
@@ -65,6 +66,7 @@ namespace NetCore8583
                         var enc = Encoder.EncodeField(value) ?? (value?.ToString() ?? string.Empty);
                         Length = enc.Length;
                     }
+
                     if (t == IsoType.LLBIN && Length > 99)
                         throw new ArgumentException("LLBIN can only hold values up to 99 chars");
                     if (t == IsoType.LLLBIN && Length > 999)
@@ -122,8 +124,10 @@ namespace NetCore8583
                         {
                             Length = Encoder.EncodeField(Value).Length;
                         }
+
                         Length = Encoder?.EncodeField(Value).Length ?? ((sbyte[]) val).Length;
                     }
+
                     if (t == IsoType.LLBIN && Length > 99)
                         throw new ArgumentException("LLBIN can only hold values up to 99 chars");
                     if (t == IsoType.LLLBIN && Length > 999)
@@ -175,6 +179,7 @@ namespace NetCore8583
                 case IsoType.LLLVAR:
                 case IsoType.LLLLVAR: return Encoder == null ? Value.ToString() : Encoder.EncodeField(Value);
             }
+
             if (Value is DateTime) return Type.Format((DateTime) Value);
             switch (Type)
             {
@@ -212,6 +217,7 @@ namespace NetCore8583
                         return s.Length % 2 == 1 ? $"0{s}" : s;
                     }
             }
+
             return Encoder == null ? Value.ToString() : Encoder.EncodeField(Value);
         }
 
@@ -249,6 +255,7 @@ namespace NetCore8583
                         sbytes.Add((sbyte) (l / 100)); //00 to 09 automatically in BCD
                         break;
                 }
+
                 //BCD encode the rest of the length
                 sbytes.Add((sbyte) (((l % 100 / 10) << 4) | (l % 10)));
             }
@@ -268,7 +275,8 @@ namespace NetCore8583
                         lhead = "000" + lhead;
                         break;
                 }
-                var bytes = lhead.GetSignedbytes(Encoding);
+
+                var bytes = lhead.GetSignedBytes(Encoding);
                 foreach (var @sbyte in bytes) sbytes.Add(@sbyte);
             }
             else
@@ -284,10 +292,12 @@ namespace NetCore8583
                         sbytes.Add((sbyte) (l / 100 + 48));
                         break;
                 }
+
                 if (l >= 10) sbytes.Add((sbyte) (l % 100 / 10 + 48));
                 else sbytes.Add(48);
                 sbytes.Add((sbyte) (l % 10 + 48));
             }
+
             outs.Write(sbytes.ToArray().ToUnsignedBytes(),
                 0,
                 sbytes.Count);
@@ -339,6 +349,7 @@ namespace NetCore8583
                                 buf = new sbyte[Length / 2];
                                 break;
                         }
+
                         //Encode in BCD if it's one of these types
                         if (buf != null)
                         {
@@ -351,8 +362,10 @@ namespace NetCore8583
                             return;
                         }
                     }
+
                     break;
             }
+
             if (binary && (Type == IsoType.BINARY || Type == IsoType.LLBIN || Type == IsoType.LLLBIN ||
                            Type == IsoType.LLLLBIN))
             {
@@ -390,7 +403,7 @@ namespace NetCore8583
             }
             else
             {
-                var bytes = ToString().GetSignedbytes(Encoding);
+                var bytes = ToString().GetSignedBytes(Encoding);
                 outs.Write(bytes.ToUnsignedBytes(),
                     0,
                     bytes.Length);

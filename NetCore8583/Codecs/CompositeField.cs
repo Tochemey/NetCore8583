@@ -1,9 +1,9 @@
-﻿using NetCore8583.Parse;
-using NetCore8583.Util;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using NetCore8583.Parse;
+using NetCore8583.Util;
 
 namespace NetCore8583.Codecs
 {
@@ -18,7 +18,7 @@ namespace NetCore8583.Codecs
         public object DecodeField(string value)
         {
             var vals = new List<IsoValue>(parsers.Count);
-            var buf = value.GetSignedbytes();
+            var buf = value.GetSignedBytes();
             var pos = 0;
             try
             {
@@ -68,7 +68,7 @@ namespace NetCore8583.Codecs
         {
             try
             {
-                var value = (CompositeField)val;
+                var value = (CompositeField) val;
                 Encoding encoding = null;
                 var bout = new MemoryStream();
                 foreach (var v in value.Values)
@@ -145,7 +145,7 @@ namespace NetCore8583.Codecs
             var stream = new MemoryStream();
             try
             {
-                var value = (CompositeField)val;
+                var value = (CompositeField) val;
                 foreach (var v in value.Values)
                     v.Write(
                         stream,

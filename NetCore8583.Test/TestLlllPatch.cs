@@ -29,7 +29,7 @@ namespace NetCore8583.Test
             sb.Append("01004000000000000000").Append(fieldLength.ToString("D4")).Append(llllvar);
 
             // parse
-            var m = mfact.ParseMessage(sb.ToString().GetSignedbytes(),
+            var m = mfact.ParseMessage(sb.ToString().GetSignedBytes(),
                 0);
             Assert.NotNull(m);
             var f2 = (string) m.GetObjectValue(2);

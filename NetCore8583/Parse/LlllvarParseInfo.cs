@@ -1,5 +1,5 @@
-﻿using NetCore8583.Util;
-using System;
+﻿using System;
+using NetCore8583.Util;
 
 namespace NetCore8583.Parse
 {
@@ -29,7 +29,7 @@ namespace NetCore8583.Parse
             {
                 v = len == 0
                     ? ""
-                    : buf.SignedBytesToString(pos + 4,
+                    : buf.BytesToString(pos + 4,
                         len,
                         Encoding);
             }
@@ -43,7 +43,7 @@ namespace NetCore8583.Parse
             // So we create a String from the rest of the buffer, and then cut it to
             // the specified length.
             if (v.Length != len)
-                v = buf.SignedBytesToString(pos + 4,
+                v = buf.BytesToString(pos + 4,
                     buf.Length - pos - 4,
                     Encoding).Substring(0,
                     len);
@@ -51,7 +51,9 @@ namespace NetCore8583.Parse
                 return new IsoValue(IsoType,
                     v,
                     len);
+            
             var dec = custom.DecodeField(v);
+            
             return dec == null
                 ? new IsoValue(IsoType,
                     v,
@@ -80,17 +82,20 @@ namespace NetCore8583.Parse
 
             if (len + pos + 2 > sbytes.Length)
                 throw new ParseException($"Insufficient data for bin LLLLVAR field {field}, pos {pos}");
+            
             if (custom == null)
                 return new IsoValue(IsoType,
-                    buf.SignedBytesToString(pos + 2,
+                    buf.BytesToString(pos + 2,
                         len,
                         Encoding));
-            var dec = custom.DecodeField(buf.SignedBytesToString(pos + 2,
+            
+            var dec = custom.DecodeField(buf.BytesToString(pos + 2,
                 len,
                 Encoding));
+            
             return dec == null
                 ? new IsoValue(IsoType,
-                    buf.SignedBytesToString(pos + 2,
+                    buf.BytesToString(pos + 2,
                         len,
                         Encoding))
                 : new IsoValue(IsoType,

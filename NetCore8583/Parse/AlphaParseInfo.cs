@@ -1,5 +1,5 @@
-﻿using NetCore8583.Util;
-using System;
+﻿using System;
+using NetCore8583.Util;
 
 namespace NetCore8583.Parse
 {
@@ -27,7 +27,7 @@ namespace NetCore8583.Parse
                 string v;
                 if (custom == null)
                 {
-                    v = buf.SignedBytesToString(pos,
+                    v = buf.BytesToString(pos,
                         Length,
                         Encoding);
                     return new IsoValue(IsoType,
@@ -35,7 +35,7 @@ namespace NetCore8583.Parse
                         Length);
                 }
 
-                v = buf.SignedBytesToString(pos,
+                v = buf.BytesToString(pos,
                     Length,
                     Encoding);
 

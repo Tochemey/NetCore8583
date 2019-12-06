@@ -1,5 +1,5 @@
-﻿using NetCore8583.Util;
-using System;
+﻿using System;
+using NetCore8583.Util;
 
 namespace NetCore8583.Parse
 {
@@ -22,7 +22,7 @@ namespace NetCore8583.Parse
             if (pos + 12 > buf.Length)
                 throw new ParseException($"Insufficient data for AMOUNT field {field}, pos {pos}");
 
-            var v = buf.SignedBytesToString(pos,
+            var v = buf.BytesToString(pos,
                 12,
                 Encoding);
 
@@ -49,18 +49,16 @@ namespace NetCore8583.Parse
             int pos,
             ICustomField custom)
         {
-            char[] digits = new char[13];
+            var digits = new char[13];
             digits[10] = '.';
-            int start = 0;
-            for (int i = pos; i < pos + 6; i++)
+            var start = 0;
+            for (var i = pos; i < pos + 6; i++)
             {
-                digits[start++] = (char)(((buf[i] & 0xf0) >> 4) + 48);
-                digits[start++] = (char)((buf[i] & 0x0f) + 48);
-                if (start == 10)
-                {
-                    start++;
-                }
+                digits[start++] = (char) (((buf[i] & 0xf0) >> 4) + 48);
+                digits[start++] = (char) ((buf[i] & 0x0f) + 48);
+                if (start == 10) start++;
             }
+
             try
             {
                 return new IsoValue(IsoType.AMOUNT,

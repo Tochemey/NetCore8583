@@ -13,7 +13,7 @@ namespace NetCore8583.Util
         public static sbyte[] ToSignedBytes(this byte[] bytes)
         {
             return Array.ConvertAll(bytes,
-                b => unchecked((sbyte)b));
+                b => unchecked((sbyte) b));
         }
 
         /// <summary>
@@ -24,79 +24,10 @@ namespace NetCore8583.Util
         public static byte[] ToUnsignedBytes(this sbyte[] bytes)
         {
             return Array.ConvertAll(bytes,
-                a => (byte)a);
+                a => (byte) a);
         }
 
-        /// <summary>
-        ///     Converts a byte array to string using the the underling signed byte array using the ANSI encoding
-        /// </summary>
-        /// <param name="bytes">the bytes array</param>
-        /// <returns></returns>
-        public static string BytesToString(this byte[] bytes)
-        {
-            var sbytes = Array.ConvertAll(bytes,
-                b => unchecked((sbyte)b));
-            unsafe
-            {
-                string s;
-                fixed (sbyte* pAsciiUpper = sbytes)
-                {
-                    s = new string(pAsciiUpper,
-                        0,
-                        sbytes.Length);
-                    return s;
-                }
-            }
-        }
-
-        /// <summary>
-        ///     Converts a byte array to string using the the underling signed byte array using the ANSI encoding.
-        /// </summary>
-        /// <param name="bytes">the byte array</param>
-        /// <param name="pos">the starting position in the byte array</param>
-        /// <param name="len">the number of bytes to</param>
-        /// <returns></returns>
-        public static string BytesToString(this byte[] bytes,
-            int pos,
-            int len)
-        {
-            var sbytes = Array.ConvertAll(bytes,
-                b => unchecked((sbyte)b));
-            unsafe
-            {
-                string s;
-                fixed (sbyte* pAsciiUpper = sbytes)
-                {
-                    s = new string(pAsciiUpper,
-                        pos,
-                        len);
-                    return s;
-                }
-            }
-        }
-
-        public static string BytesToString(this byte[] bytes,
-            int pos,
-            int len,
-            Encoding encoding)
-        {
-            var sbytes = Array.ConvertAll(bytes,
-                b => unchecked((sbyte)b));
-            unsafe
-            {
-                string s;
-                fixed (sbyte* pAsciiUpper = sbytes)
-                {
-                    s = new string(pAsciiUpper,
-                        pos,
-                        len,
-                        encoding);
-                    return s;
-                }
-            }
-        }
-
-        public static string SignedBytesToString(this sbyte[] sbytes,
+        public static string BytesToString(this sbyte[] sbytes,
             int pos,
             int len,
             Encoding encoding)
@@ -115,7 +46,7 @@ namespace NetCore8583.Util
             }
         }
 
-        public static string SignedBytesToString(this sbyte[] sbytes,
+        public static string BytesToString(this sbyte[] sbytes,
             Encoding encoding)
         {
             unsafe
