@@ -100,6 +100,7 @@ namespace NetCore8583.Test.Parse
                 Assert.Equal(b,
                     buf[i + offset1]);
             }
+
             for (var i = 0; i < 15; i++)
                 Assert.Equal(bigintData1[i],
                     buf[i + offset2]);

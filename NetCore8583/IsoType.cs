@@ -174,6 +174,7 @@ namespace NetCore8583
                 for (var i = value.Length; i < length; i++) c[i] = ' ';
                 return new string(c);
             }
+
             if (isoType == IsoType.LLVAR || isoType == IsoType.LLLVAR || isoType == IsoType.LLLLVAR) return value;
             if (isoType == IsoType.NUMERIC)
             {
@@ -234,6 +235,7 @@ namespace NetCore8583
                         0,
                         value.Length);
                 }
+
                 for (var i = end; i < c.Length; i++) c[i] = '0';
                 return new string(c);
             }
@@ -255,6 +257,7 @@ namespace NetCore8583
                                                 length);
                 return x;
             }
+
             if (isoType == IsoType.ALPHA || isoType == IsoType.LLVAR || isoType == IsoType.LLLVAR ||
                 isoType == IsoType.LLLLVAR)
                 return isoType.Format(Convert.ToString(value),
@@ -265,6 +268,7 @@ namespace NetCore8583
             {
                 //TODO
             }
+
             throw new ArgumentException("Cannot format number as " + isoType);
         }
 
@@ -299,6 +303,7 @@ namespace NetCore8583
             {
                 //TODO
             }
+
             throw new ArgumentException("Cannot format decimal as " + isoType);
         }
     }

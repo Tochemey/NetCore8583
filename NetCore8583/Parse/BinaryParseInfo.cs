@@ -1,6 +1,6 @@
-﻿using NetCore8583.Util;
-using System;
+﻿using System;
 using System.Text;
+using NetCore8583.Util;
 
 namespace NetCore8583.Parse
 {
@@ -24,7 +24,7 @@ namespace NetCore8583.Parse
             if (pos + Length * 2 > buf.Length)
                 throw new ParseException($"Insufficient data for BINARY field {field} of length {Length}, pos {pos}");
 
-            var s = buf.SignedBytesToString(pos,
+            var s = buf.BytesToString(pos,
                 Length * 2,
                 Encoding.Default);
             //var binval = HexCodec.HexDecode(Encoding.ASCII.GetString(buf,
@@ -38,7 +38,7 @@ namespace NetCore8583.Parse
                     binval,
                     binval.Length);
 
-            s = buf.SignedBytesToString(pos,
+            s = buf.BytesToString(pos,
                 Length * 2,
                 Encoding);
             //var dec = custom.DecodeField(Encoding.GetString(buf,

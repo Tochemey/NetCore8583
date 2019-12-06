@@ -19,6 +19,7 @@ namespace NetCore8583.Util
                 l += ((buf[i] & 0xf0) >> 4) * power;
                 power *= 10L;
             }
+
             return l;
         }
 
@@ -30,14 +31,15 @@ namespace NetCore8583.Util
             if (value.Length % 2 == 1)
             {
                 //for odd lengths we encode just the first digit in the first byte
-                buf[0] = (sbyte)(value[0] - 48);
+                buf[0] = (sbyte) (value[0] - 48);
                 charpos = 1;
                 bufpos = 1;
             }
+
             //encode the rest of the string
             while (charpos < value.Length)
             {
-                buf[bufpos] = (sbyte)(((value[charpos] - 48) << 4) | (value[charpos + 1] - 48));
+                buf[bufpos] = (sbyte) (((value[charpos] - 48) << 4) | (value[charpos + 1] - 48));
                 charpos += 2;
                 bufpos++;
             }
@@ -52,13 +54,14 @@ namespace NetCore8583.Util
             var i = pos;
             if (length % 2 != 0)
             {
-                digits[start++] = (char)((buf[i] & 0x0f) + 48);
+                digits[start++] = (char) ((buf[i] & 0x0f) + 48);
                 i++;
             }
+
             for (; i < pos + length / 2 + length % 2; i++)
             {
-                digits[start++] = (char)(((buf[i] & 0xf0) >> 4) + 48);
-                digits[start++] = (char)((buf[i] & 0x0f) + 48);
+                digits[start++] = (char) (((buf[i] & 0xf0) >> 4) + 48);
+                digits[start++] = (char) ((buf[i] & 0x0f) + 48);
             }
 
             return BigInteger.Parse(new string(digits));

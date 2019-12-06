@@ -1,5 +1,5 @@
-﻿using NetCore8583.Util;
-using System;
+﻿using System;
+using NetCore8583.Util;
 
 namespace NetCore8583.Codecs
 {

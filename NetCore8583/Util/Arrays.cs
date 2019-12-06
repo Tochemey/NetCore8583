@@ -9,9 +9,9 @@ namespace NetCore8583.Util
             int count,
             T value)
         {
-            if (array == null) throw new ArgumentNullException("array");
-            if (count < 0) throw new ArgumentOutOfRangeException("count");
-            if (start + count >= array.Length) throw new ArgumentOutOfRangeException("count");
+            if (array == null) throw new ArgumentNullException(nameof(array));
+            if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
+            if (start + count >= array.Length) throw new ArgumentOutOfRangeException(nameof(count));
             for (var i = start; i < start + count; i++) array[i] = value;
         }
     }

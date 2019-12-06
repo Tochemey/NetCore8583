@@ -5,8 +5,8 @@ using System.Text;
 using NetCore8583.Parse;
 using NetCore8583.Util;
 using Serilog;
+using Serilog.Core;
 using Serilog.Events;
-using Logger = Serilog.Core.Logger;
 
 namespace NetCore8583
 {
@@ -23,11 +23,6 @@ namespace NetCore8583
     /// </summary>
     public class MessageFactory<T> where T : IsoMessage
     {
-        private readonly Logger _logger = new LoggerConfiguration().MinimumLevel.Debug()
-            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-            .Enrich.FromLogContext()
-            .WriteTo.Console().CreateLogger();
-
         /// <summary>
         /// </summary>
         private readonly Dictionary<int, sbyte[]> _binIsoHeaders = new Dictionary<int, sbyte[]>();
@@ -41,6 +36,11 @@ namespace NetCore8583
         ///     The ISO header to be included in each message type
         /// </summary>
         private readonly Dictionary<int, string> _isoHeaders = new Dictionary<int, string>();
+
+        private readonly Logger _logger = new LoggerConfiguration().MinimumLevel.Debug()
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+            .Enrich.FromLogContext()
+            .WriteTo.Console().CreateLogger();
 
         /// <summary>
         ///     This map stores the message template for each message type.
@@ -78,7 +78,8 @@ namespace NetCore8583
         public int Etx { get; set; } = -1;
 
         public bool IgnoreLast { get; set; }
-        public bool Forceb2 { get; set; }
+
+        public bool EnforceSecondBitmap { get; set; }
         public bool UseBinaryBitmap { get; set; }
 
         public bool ForceStringEncoding
@@ -88,7 +89,8 @@ namespace NetCore8583
             {
                 _forceStringEncoding = value;
                 foreach (var mapValue in ParseMap.Values)
-                foreach (var parser in mapValue.Values) parser.ForceStringDecoding = value;
+                foreach (var parser in mapValue.Values)
+                    parser.ForceStringDecoding = value;
             }
         }
 
@@ -101,7 +103,9 @@ namespace NetCore8583
                 if (_encoding == null) throw new ArgumentException("Cannot set null encoding.");
 
                 if (ParseMap.Count > 0)
-                    foreach (var mapValue in ParseMap.Values) foreach (var fpi in mapValue.Values) fpi.Encoding = value;
+                    foreach (var mapValue in ParseMap.Values)
+                    foreach (var fpi in mapValue.Values)
+                        fpi.Encoding = value;
 
                 if (_typeTemplates.Count == 0) return;
 
@@ -154,13 +158,13 @@ namespace NetCore8583
 
             if (keyPresent)
                 val = _binIsoHeaders[type];
-            else if(_isoHeaders.ContainsKey(type))
-               valStr = _isoHeaders[type];
+            else if (_isoHeaders.ContainsKey(type))
+                valStr = _isoHeaders[type];
             var m = keyPresent ? CreateIsoMessageWithBinaryHeader(val) : CreateIsoMessage(valStr);
             m.Type = type;
             m.Etx = Etx;
             m.Binary = UseBinaryMessages;
-            m.Forceb2 = Forceb2;
+            m.EnforceSecondBitmap = EnforceSecondBitmap;
             m.BinBitmap = UseBinaryBitmap;
             m.Encoding = Encoding;
             m.ForceStringEncoding = ForceStringEncoding;
@@ -200,7 +204,7 @@ namespace NetCore8583
             resp.BinBitmap = request.BinBitmap;
             resp.Type = request.Type + 16;
             resp.Etx = request.Etx;
-            resp.Forceb2 = request.Forceb2;
+            resp.EnforceSecondBitmap = request.EnforceSecondBitmap;
             IsoMessage templ = _typeTemplates[resp.Type];
             if (templ == null)
             {
@@ -219,6 +223,7 @@ namespace NetCore8583
                         resp.SetField(i,
                             templ.GetField(i).Clone() as IsoValue);
             }
+
             return resp;
         }
 
@@ -242,6 +247,7 @@ namespace NetCore8583
                     return;
                 }
             }
+
             _logger.Warning("Field {@Field} for message type {@MessageType} is not for dates, cannot set timezone",
                 field,
                 messageType);
@@ -283,11 +289,12 @@ namespace NetCore8583
             }
             else
             {
-                var string0 = buf.SignedBytesToString(0,
+                var string0 = buf.BytesToString(0,
                     isoHeaderLength,
                     _encoding);
                 m = CreateIsoMessage(isoHeaderLength > 0 ? string0 : null);
             }
+
             m.Encoding = _encoding;
             int type;
             if (UseBinaryMessages)
@@ -296,7 +303,7 @@ namespace NetCore8583
             }
             else if (ForceStringEncoding)
             {
-                var string0 = buf.SignedBytesToString(isoHeaderLength,
+                var string0 = buf.BytesToString(isoHeaderLength,
                     4,
                     _encoding);
                 type = Convert.ToInt32(string0,
@@ -309,6 +316,7 @@ namespace NetCore8583
                        | ((buf[isoHeaderLength + 2] - 48) << 4)
                        | (buf[isoHeaderLength + 3] - 48);
             }
+
             m.Type = type;
             //Parse the bitmap (primary first)
             var bs = new BitArray(64);
@@ -326,6 +334,7 @@ namespace NetCore8583
                         bit >>= 1;
                     }
                 }
+
                 //Check for secondary bitmap and parse if necessary
                 if (bs.Get(0))
                 {
@@ -343,6 +352,7 @@ namespace NetCore8583
                             bit >>= 1;
                         }
                     }
+
                     pos = minlength + 8;
                 }
                 else
@@ -358,9 +368,9 @@ namespace NetCore8583
                     sbyte[] bitmapBuffer;
                     if (ForceStringEncoding)
                     {
-                        var bb = buf.SignedBytesToString(isoHeaderLength + 4,
+                        var bb = buf.BytesToString(isoHeaderLength + 4,
                             16,
-                            _encoding).GetSignedbytes();
+                            _encoding).GetSignedBytes();
 
                         bitmapBuffer = new sbyte[36 + isoHeaderLength];
                         Array.Copy(bb,
@@ -373,6 +383,7 @@ namespace NetCore8583
                     {
                         bitmapBuffer = buf;
                     }
+
                     for (var i = isoHeaderLength + 4; i < isoHeaderLength + 20; i++)
                         if (bitmapBuffer[i] >= '0' && bitmapBuffer[i] <= '9')
                         {
@@ -416,15 +427,16 @@ namespace NetCore8583
                             throw new ParseException($"Insufficient length for secondary bitmap :{minlength}");
                         if (ForceStringEncoding)
                         {
-                            var bb = buf.SignedBytesToString(isoHeaderLength + 20,
+                            var bb = buf.BytesToString(isoHeaderLength + 20,
                                 16,
-                                _encoding).GetSignedbytes();
+                                _encoding).GetSignedBytes();
                             Array.Copy(bb,
                                 0,
                                 bitmapBuffer,
                                 20 + isoHeaderLength,
                                 16);
                         }
+
                         for (var i = isoHeaderLength + 20; i < isoHeaderLength + 36; i++)
                             if (bitmapBuffer[i] >= '0' && bitmapBuffer[i] <= '9')
                             {
@@ -459,6 +471,7 @@ namespace NetCore8583
                                 bs.Set(pos++,
                                     ((bitmapBuffer[i] - 87) & 1) > 0);
                             }
+
                         pos = 16 + minlength;
                     }
                     else
@@ -479,10 +492,11 @@ namespace NetCore8583
             if (index == null)
             {
                 _logger.Error(
-                    $"ISO8583 MessageFactory has no parsing guide for message type {type:X} [{buf.SignedBytesToString(0, buf.Length, _encoding)}]");
+                    $"ISO8583 MessageFactory has no parsing guide for message type {type:X} [{buf.BytesToString(0, buf.Length, _encoding)}]");
                 throw new Exception(
-                    $"ISO8583 MessageFactory has no parsing guide for message type {type:X} [{buf.SignedBytesToString(0, buf.Length, _encoding)}]");
+                    $"ISO8583 MessageFactory has no parsing guide for message type {type:X} [{buf.BytesToString(0, buf.Length, _encoding)}]");
             }
+
             //First we check if the message contains fields not specified in the parsing template
             var abandon = false;
             for (var i = 1; i < bs.Length; i++)
@@ -525,9 +539,7 @@ namespace NetCore8583
                         if (val.Type == IsoType.NUMERIC || val.Type == IsoType.DATE10 || val.Type == IsoType.DATE4 ||
                             val.Type == IsoType.DATE12 || val.Type == IsoType.DATE14 || val.Type == IsoType.DATE_EXP ||
                             val.Type == IsoType.AMOUNT || val.Type == IsoType.TIME)
-                        {
                             pos += val.Length / 2 + val.Length % 2;
-                        }
                         else pos += val.Length;
                         switch (val.Type)
                         {
@@ -567,7 +579,7 @@ namespace NetCore8583
                             m.SetField(i,
                                 val);
                             //To get the correct next position, we need to get the number of bytes, not chars
-                            pos += val.ToString().GetSignedbytes(fpi.Encoding).Length;
+                            pos += val.ToString().GetSignedBytes(fpi.Encoding).Length;
                             switch (val.Type)
                             {
                                 case IsoType.LLVAR:
@@ -585,6 +597,7 @@ namespace NetCore8583
                             }
                         }
                 }
+
             m.Binary = UseBinaryMessages;
             m.BinBitmap = UseBinaryBitmap;
             return m;
@@ -597,10 +610,7 @@ namespace NetCore8583
         public void SetIsoHeaders(Dictionary<int, string> val)
         {
             _isoHeaders.Clear();
-            foreach (var kv in val)
-            {
-                _isoHeaders.Add(kv.Key, kv.Value);
-            }
+            foreach (var kv in val) _isoHeaders.Add(kv.Key, kv.Value);
         }
 
         /// <summary>

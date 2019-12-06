@@ -14,7 +14,7 @@ namespace NetCore8583.Util
 
         public static long CurrentTimeMillis()
         {
-            return (long)(DateTime.UtcNow - Jan1st1970).TotalMilliseconds;
+            return (long) (DateTime.UtcNow - Jan1st1970).TotalMilliseconds;
         }
     }
 }

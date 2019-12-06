@@ -35,7 +35,7 @@ namespace NetCore8583.Test
             Assert.Equal("19730126033456", IsoType.DATE14.Format(date));
 
             //Now with GMT+1
-            TimeZoneInfo timeZoneInfo = TZConvert.GetTimeZoneInfo("W. Europe Standard Time");
+            var timeZoneInfo = TZConvert.GetTimeZoneInfo("W. Europe Standard Time");
             date = TimeZoneInfo.ConvertTime(date,
                 timeZoneInfo);
 

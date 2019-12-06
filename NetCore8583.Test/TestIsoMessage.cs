@@ -175,36 +175,36 @@ namespace NetCore8583.Test
         }
 
         [Fact]
-        public void TestTemplating()
-        {
-            IsoMessage iso1 = mf.NewMessage(0x200);
-            IsoMessage iso2 = mf.NewMessage(0x200);
-            Assert.NotSame(iso1, iso2);
-            Assert.Equal(iso1.GetObjectValue(3), iso2.GetObjectValue(3));
-            Assert.NotSame(iso1.GetField(3), iso2.GetField(3));
-            Assert.NotSame(iso1.GetField(48), iso2.GetField(48));
-            CustomField48 cf48_1 = (CustomField48) iso1.GetObjectValue(48);
-            int origv = cf48_1.V2;
-            cf48_1.V2 = (origv + 1000);
-            CustomField48 cf48_2 = (CustomField48) iso2.GetObjectValue(48);
-            Assert.Same(cf48_1, cf48_2);
-            Assert.Equal(cf48_2.V2, origv + 1000);
-        }
-
-        [Fact]
         public void TestSimpleFieldSetter()
         {
-            IsoMessage iso = mf.NewMessage(0x200);
-            IsoValue f3 = iso.GetField(3);
+            var iso = mf.NewMessage(0x200);
+            var f3 = iso.GetField(3);
             iso.UpdateValue(3, "999999");
             Assert.Equal("999999", iso.GetObjectValue(3));
-            IsoValue nf3 = iso.GetField(3);
+            var nf3 = iso.GetField(3);
             Assert.NotSame(f3, nf3);
             Assert.Equal(f3.Type, nf3.Type);
             Assert.Equal(f3.Length, nf3.Length);
             Assert.Same(f3.Encoder, nf3.Encoder);
             Assert.Throws<ArgumentException>(() => iso.UpdateValue(4, "INVALID!"))
                 ;
+        }
+
+        [Fact]
+        public void TestTemplating()
+        {
+            var iso1 = mf.NewMessage(0x200);
+            var iso2 = mf.NewMessage(0x200);
+            Assert.NotSame(iso1, iso2);
+            Assert.Equal(iso1.GetObjectValue(3), iso2.GetObjectValue(3));
+            Assert.NotSame(iso1.GetField(3), iso2.GetField(3));
+            Assert.NotSame(iso1.GetField(48), iso2.GetField(48));
+            var cf48_1 = (CustomField48) iso1.GetObjectValue(48);
+            var origv = cf48_1.V2;
+            cf48_1.V2 = origv + 1000;
+            var cf48_2 = (CustomField48) iso2.GetObjectValue(48);
+            Assert.Same(cf48_1, cf48_2);
+            Assert.Equal(cf48_2.V2, origv + 1000);
         }
     }
 }

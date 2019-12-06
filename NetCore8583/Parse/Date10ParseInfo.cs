@@ -1,5 +1,5 @@
-﻿using NetCore8583.Util;
-using System;
+﻿using System;
+using NetCore8583.Util;
 
 namespace NetCore8583.Parse
 {
@@ -22,23 +22,23 @@ namespace NetCore8583.Parse
             DateTime calendar;
             if (ForceStringDecoding)
             {
-                var month = Convert.ToInt32(buf.SignedBytesToString(pos,
+                var month = Convert.ToInt32(buf.BytesToString(pos,
                         2,
                         Encoding),
                     10);
-                var day = Convert.ToInt32(buf.SignedBytesToString(pos + 2,
+                var day = Convert.ToInt32(buf.BytesToString(pos + 2,
                         2,
                         Encoding),
                     10);
-                var hour = Convert.ToInt32(buf.SignedBytesToString(pos + 4,
+                var hour = Convert.ToInt32(buf.BytesToString(pos + 4,
                         2,
                         Encoding),
                     10);
-                var min = Convert.ToInt32(buf.SignedBytesToString(pos + 6,
+                var min = Convert.ToInt32(buf.BytesToString(pos + 6,
                         2,
                         Encoding),
                     10);
-                var sec = Convert.ToInt32(buf.SignedBytesToString(pos + 8,
+                var sec = Convert.ToInt32(buf.BytesToString(pos + 8,
                         2,
                         Encoding),
                     10);
@@ -60,13 +60,13 @@ namespace NetCore8583.Parse
             }
 
             calendar = calendar.AddMilliseconds(0);
+            
             if (TimeZoneInfo != null)
                 calendar = TimeZoneInfo.ConvertTime(calendar,
                     TimeZoneInfo);
 
-            var ajusted = AdjustWithFutureTolerance(new DateTimeOffset(calendar));
             return new IsoValue(IsoType,
-                ajusted.DateTime);
+                AdjustWithFutureTolerance(new DateTimeOffset(calendar)).DateTime);
         }
 
         public override IsoValue ParseBinary(int field,
@@ -87,13 +87,13 @@ namespace NetCore8583.Parse
                 tens[2],
                 tens[3],
                 tens[4]).AddMilliseconds(0);
+            
             if (TimeZoneInfo != null)
                 calendar = TimeZoneInfo.ConvertTime(calendar,
                     TimeZoneInfo);
 
-            var ajusted = AdjustWithFutureTolerance(new DateTimeOffset(calendar));
             return new IsoValue(IsoType,
-                ajusted.DateTime);
+                AdjustWithFutureTolerance(new DateTimeOffset(calendar)).DateTime);
         }
     }
 }

@@ -23,6 +23,7 @@ namespace NetCore8583.Impl
                 value++;
                 if (value > 999999) value = 1;
             }
+
             return value;
         }
     }

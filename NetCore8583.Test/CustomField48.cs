@@ -28,6 +28,7 @@ namespace NetCore8583.Test
                         V2 = int.Parse(value.Substring(idx + 1))
                     };
                 }
+
             return cf;
         }
 

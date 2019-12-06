@@ -1,6 +1,6 @@
-﻿using NetCore8583.Util;
-using System;
+﻿using System;
 using System.Text;
+using NetCore8583.Util;
 
 namespace NetCore8583.Parse
 {
@@ -25,11 +25,11 @@ namespace NetCore8583.Parse
 
             if (len + pos + 2 > buf.Length)
                 throw new ParseException(
-                    $"Insufficient data for LLBIN field {field}, pos {pos} (LEN states '{buf.SignedBytesToString(pos, 2, Encoding.Default)}')");
+                    $"Insufficient data for LLBIN field {field}, pos {pos} (LEN states '{buf.BytesToString(pos, 2, Encoding.Default)}')");
 
             var binval = len == 0
                 ? new sbyte[0]
-                : HexCodec.HexDecode(buf.SignedBytesToString(pos + 2,
+                : HexCodec.HexDecode(buf.BytesToString(pos + 2,
                     len,
                     Encoding.Default));
 
@@ -37,17 +37,19 @@ namespace NetCore8583.Parse
                 return new IsoValue(IsoType,
                     binval,
                     binval.Length);
-            var binaryField = custom as ICustomBinaryField;
-            if (binaryField != null)
+
+            if (custom is ICustomBinaryField binaryField)
                 try
                 {
                     var dec = binaryField.DecodeBinaryField(buf,
                         pos + 2,
                         len);
+                    
                     if (dec == null)
                         return new IsoValue(IsoType,
                             binval,
                             binval.Length);
+                    
                     return new IsoValue(IsoType,
                         dec,
                         0,
@@ -56,13 +58,15 @@ namespace NetCore8583.Parse
                 catch (Exception)
                 {
                     throw new ParseException(
-                        $"Insufficient data for LLBIN field {field}, pos {pos} (LEN states '{buf.SignedBytesToString(pos, 2, Encoding.Default)}')");
+                        $"Insufficient data for LLBIN field {field}, pos {pos} (LEN states '{buf.BytesToString(pos, 2, Encoding.Default)}')");
                 }
+
             try
             {
-                var dec = custom.DecodeField(buf.SignedBytesToString(pos + 2,
+                var dec = custom.DecodeField(buf.BytesToString(pos + 2,
                     len,
                     Encoding.Default));
+                
                 return dec == null
                     ? new IsoValue(IsoType,
                         binval,
@@ -75,7 +79,7 @@ namespace NetCore8583.Parse
             catch (Exception)
             {
                 throw new ParseException(
-                    $"Insufficient data for LLBIN field {field}, pos {pos} (LEN states '{buf.SignedBytesToString(pos, 2, Encoding.Default)}')");
+                    $"Insufficient data for LLBIN field {field}, pos {pos} (LEN states '{buf.BytesToString(pos, 2, Encoding.Default)}')");
             }
         }
 
@@ -94,19 +98,23 @@ namespace NetCore8583.Parse
             if (l + pos + 1 > buf.Length)
                 throw new ParseException(
                     $"Insufficient data for bin LLBIN field {field}, pos {pos}: need {l}, only {buf.Length} available");
+            
             var v = new sbyte[l];
             Array.Copy(sbytes,
                 pos + 1,
                 v,
                 0,
                 l);
+            
             if (custom == null)
                 return new IsoValue(IsoType,
                     v);
-            if (custom is ICustomBinaryField)
+            
+            
+            if (custom is ICustomBinaryField binaryField)
                 try
                 {
-                    var dec = ((ICustomBinaryField)custom).DecodeBinaryField(sbytes,
+                    var dec = binaryField.DecodeBinaryField(sbytes,
                         pos + 1,
                         l);
                     return dec == null
@@ -116,12 +124,13 @@ namespace NetCore8583.Parse
                         : new IsoValue(IsoType,
                             dec,
                             l,
-                            custom);
+                            binaryField);
                 }
                 catch (Exception)
                 {
                     throw new ParseException($"Insufficient data for LLBIN field {field}, pos {pos} length {l}");
                 }
+
             {
                 var dec = custom.DecodeField(HexCodec.HexEncode(v,
                     0,

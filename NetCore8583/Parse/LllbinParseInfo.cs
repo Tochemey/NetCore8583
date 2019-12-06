@@ -1,6 +1,6 @@
-﻿using NetCore8583.Util;
-using System;
+﻿using System;
 using System.Text;
+using NetCore8583.Util;
 
 namespace NetCore8583.Parse
 {
@@ -28,15 +28,17 @@ namespace NetCore8583.Parse
 
             var binval = l == 0
                 ? new sbyte[0]
-                : HexCodec.HexDecode(buf.SignedBytesToString(pos + 3,
+                : HexCodec.HexDecode(buf.BytesToString(pos + 3,
                     l,
                     Encoding.Default));
+            
             if (custom == null)
                 return new IsoValue(IsoType,
                     binval,
                     binval.Length);
-            var customBinaryField = custom as ICustomBinaryField;
-            if (customBinaryField != null)
+
+
+            if (custom is ICustomBinaryField customBinaryField)
                 try
                 {
                     var dec = customBinaryField.DecodeBinaryField(buf,
@@ -55,11 +57,12 @@ namespace NetCore8583.Parse
                 {
                     throw new ParseException($"Insufficient data for LLLBIN field {field}, pos {pos}");
                 }
+
             try
             {
                 var dec = custom.DecodeField(l == 0
                     ? ""
-                    : buf.SignedBytesToString(pos + 3,
+                    : buf.BytesToString(pos + 3,
                         l,
                         Encoding.Default));
                 return dec == null
@@ -97,11 +100,12 @@ namespace NetCore8583.Parse
                 v,
                 0,
                 l);
+            
             if (custom == null)
                 return new IsoValue(IsoType,
                     v);
-            var binaryField = custom as ICustomBinaryField;
-            if (binaryField != null)
+            
+            if (custom is ICustomBinaryField binaryField)
                 try
                 {
                     var dec = binaryField.DecodeBinaryField(sbytes,
@@ -120,6 +124,7 @@ namespace NetCore8583.Parse
                 {
                     throw new ParseException($"Insufficient data for LLLBIN field {field}, pos {pos}");
                 }
+
             {
                 var dec = custom.DecodeField(HexCodec.HexEncode(v,
                     0,
