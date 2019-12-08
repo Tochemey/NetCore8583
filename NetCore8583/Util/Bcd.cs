@@ -66,14 +66,17 @@ namespace NetCore8583.Util
 
             return BigInteger.Parse(new string(digits));
         }
-        
-        
+
+
         /// <summary>
-        /// Convert two bytes of BCD length to an int,
-        /// e.g. 0x4521 into 4521, starting at the specified offset.
+        ///     Convert two bytes of BCD length to an int,
+        ///     e.g. 0x4521 into 4521, starting at the specified offset.
         /// </summary>
         /// <param name="b"></param>
         /// <returns></returns>
-        public static int ParseBcdLength(sbyte b) => ((b & 0xf0) >> 4) * 10 + (b & 0xf);
+        public static int ParseBcdLength(sbyte b)
+        {
+            return ((b & 0xf0) >> 4) * 10 + (b & 0xf);
+        }
     }
 }
