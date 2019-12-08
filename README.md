@@ -1,6 +1,6 @@
 NetCore8583
 =============
-
+[![Build status](https://ci.appveyor.com/api/projects/status/4v20289lcyqd345p?svg=true)](https://ci.appveyor.com/project/Tochemey/netcore8583)
 ## Introduction
 
 NetCore8583 is a NetCore 2.1 implementation of the ISO 8583 protocol. 
