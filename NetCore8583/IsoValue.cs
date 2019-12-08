@@ -157,8 +157,8 @@ namespace NetCore8583
                 case IsoType.NUMERIC:
                 case IsoType.AMOUNT:
                     if (Type == IsoType.AMOUNT)
-                        if (Value is decimal)
-                            return Type.Format((decimal) Value,
+                        if (Value is decimal value)
+                            return Type.Format(value,
                                 12);
                         else
                             return Type.Format(Convert.ToDecimal(Value),
@@ -166,8 +166,8 @@ namespace NetCore8583
                     else if (Value is BigInteger)
                         return Type.Format(Encoder == null ? Value.ToString() : Encoder.EncodeField(Value),
                             Length);
-                    else if (Value is long)
-                        return Type.Format((long) Value,
+                    else if (Value is long l)
+                        return Type.Format(l,
                             Length);
                     else
                         return Type.Format(Encoder == null ? Value.ToString() : Encoder.EncodeField(Value),
@@ -180,18 +180,18 @@ namespace NetCore8583
                 case IsoType.LLLLVAR: return Encoder == null ? Value.ToString() : Encoder.EncodeField(Value);
             }
 
-            if (Value is DateTime) return Type.Format((DateTime) Value);
+            if (Value is DateTime dateTime) return Type.Format(dateTime);
+
             switch (Type)
             {
                 case IsoType.BINARY:
-                    if (Value is sbyte[])
+                    if (Value is sbyte[] v1)
                     {
-                        var v = (sbyte[]) Value;
                         return Type.Format(Encoder == null
-                                ? HexCodec.HexEncode(v,
+                                ? HexCodec.HexEncode(v1,
                                     0,
-                                    v.Length)
-                                : Encoder.EncodeField(Value),
+                                    v1.Length)
+                                : Encoder.EncodeField(v1),
                             Length * 2);
                     }
                     else
@@ -202,14 +202,13 @@ namespace NetCore8583
                 case IsoType.LLBIN:
                 case IsoType.LLLBIN:
                 case IsoType.LLLLBIN:
-                    if (Value is sbyte[])
+                    if (Value is sbyte[] v)
                     {
-                        var v = (sbyte[]) Value;
                         return Encoder == null
                             ? HexCodec.HexEncode(v,
                                 0,
                                 v.Length)
-                            : Encoder.EncodeField(Value);
+                            : Encoder.EncodeField(v);
                     }
                     else
                     {
@@ -370,19 +369,17 @@ namespace NetCore8583
                            Type == IsoType.LLLLBIN))
             {
                 var missing = 0;
-                if (Value is sbyte[])
+                if (Value is sbyte[] bytes)
                 {
-                    var bytes = (sbyte[]) Value;
-
                     outs.Write(bytes.ToUnsignedBytes(),
                         0,
                         bytes.Length);
 
                     missing = Length - bytes.Length;
                 }
-                else if (Encoder is ICustomBinaryField)
+                else if (Encoder is ICustomBinaryField customBinaryField)
                 {
-                    var binval = ((ICustomBinaryField) Encoder).EncodeBinaryField(Value);
+                    var binval = customBinaryField.EncodeBinaryField(Value);
                     outs.Write(binval.ToUnsignedBytes(),
                         0,
                         binval.Length);
@@ -417,9 +414,6 @@ namespace NetCore8583
             return comp.GetType() == GetType() && comp.Value.Equals(Value) && comp.Length == Length;
         }
 
-        public override int GetHashCode()
-        {
-            return Value == null ? 0 : ToString().GetHashCode();
-        }
+        public override int GetHashCode() => Value == null ? 0 : ToString().GetHashCode();
     }
 }

@@ -1,4 +1,7 @@
-﻿using NetCore8583.Codecs;
+﻿using System;
+using System.Text;
+using NetCore8583.Codecs;
+using NetCore8583.Parse;
 using NetCore8583.Util;
 using Xunit;
 
@@ -247,6 +250,16 @@ namespace NetCore8583.Test
             Assert.Equal("12345", f.GetObjectValue(2));
             Assert.Equal("X", f.GetObjectValue(3));
             Assert.False(m.HasField(4));
+        }
+
+        [Fact]
+        public void TestAllTypesHaveParseInfo()
+        {
+            foreach (var isoType in (IsoType[])Enum.GetValues(typeof(IsoType)))
+            {
+                FieldParseInfo fpi = FieldParseInfo.GetInstance(isoType, isoType.Length(), Encoding.UTF8);
+                Assert.NotNull(fpi);
+            }
         }
     }
 }

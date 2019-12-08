@@ -26,8 +26,8 @@ namespace NetCore8583.Test
 
         private void TestParsed(IsoMessage m)
         {
-            Assert.Equal(m.Type,
-                0x600);
+            Assert.Equal(0x600,
+                m.Type);
             Assert.Equal(decimal.Parse("1234.00"),
                 m.GetObjectValue(4));
             Assert.True(m.HasField(7),

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using NetCore8583.Parse;
 using NetCore8583.Util;
@@ -103,8 +104,7 @@ namespace NetCore8583
                 if (_encoding == null) throw new ArgumentException("Cannot set null encoding.");
 
                 if (ParseMap.Count > 0)
-                    foreach (var mapValue in ParseMap.Values)
-                    foreach (var fpi in mapValue.Values)
+                    foreach (var fpi in ParseMap.Values.SelectMany(mapValue => mapValue.Values))
                         fpi.Encoding = value;
 
                 if (_typeTemplates.Count == 0) return;
@@ -133,15 +133,9 @@ namespace NetCore8583
             return _customFields.ContainsKey(index) ? _customFields[index] : null;
         }
 
-        protected T CreateIsoMessageWithBinaryHeader(sbyte[] binHeader)
-        {
-            return (T) new IsoMessage(binHeader);
-        }
+        protected T CreateIsoMessageWithBinaryHeader(sbyte[] binHeader) => (T) new IsoMessage(binHeader);
 
-        protected T CreateIsoMessage(string isoHeader)
-        {
-            return (T) new IsoMessage(isoHeader);
-        }
+        protected T CreateIsoMessage(string isoHeader) => (T) new IsoMessage(isoHeader);
 
         /// <summary>
         ///     Creates a new message of the specified type, with optional trace and date values as well
@@ -537,7 +531,8 @@ namespace NetCore8583
 
                         if (val == null) continue;
                         if (val.Type == IsoType.NUMERIC || val.Type == IsoType.DATE10 || val.Type == IsoType.DATE4 ||
-                            val.Type == IsoType.DATE12 || val.Type == IsoType.DATE14 || val.Type == IsoType.DATE_EXP ||
+                            val.Type == IsoType.DATE12 || val.Type == IsoType.DATE14 || val.Type == IsoType.DATE6 || 
+                            val.Type == IsoType.DATE_EXP ||
                             val.Type == IsoType.AMOUNT || val.Type == IsoType.TIME)
                             pos += val.Length / 2 + val.Length % 2;
                         else pos += val.Length;
@@ -641,10 +636,7 @@ namespace NetCore8583
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public string GetIsoHeader(int type)
-        {
-            return _isoHeaders[type];
-        }
+        public string GetIsoHeader(int type) => _isoHeaders[type];
 
         /// <summary>
         ///     Sets the ISO header for a specific message type, in binary format.
@@ -674,10 +666,7 @@ namespace NetCore8583
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public sbyte[] GetBinaryIsoHeader(int type)
-        {
-            return _binIsoHeaders[type];
-        }
+        public sbyte[] GetBinaryIsoHeader(int type) => _binIsoHeaders[type];
 
         /// <summary>
         ///     Adds a message template to the factory. If there was a template for the same
@@ -686,11 +675,11 @@ namespace NetCore8583
         /// <param name="templ"></param>
         public void AddMessageTemplate(T templ)
         {
-            if (templ != null)
-                if (_typeTemplates.ContainsKey(templ.Type)) _typeTemplates[templ.Type] = templ;
-                else
-                    _typeTemplates.Add(templ.Type,
-                        templ);
+            if (templ == null) return;
+            if (_typeTemplates.ContainsKey(templ.Type)) _typeTemplates[templ.Type] = templ;
+            else
+                _typeTemplates.Add(templ.Type,
+                    templ);
         }
 
         /// <summary>
@@ -708,10 +697,7 @@ namespace NetCore8583
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public T GetMessageTemplate(int type)
-        {
-            return _typeTemplates[type];
-        }
+        public T GetMessageTemplate(int type) => _typeTemplates[type];
 
         public void SetParseMap(int type,
             Dictionary<int, FieldParseInfo> map)

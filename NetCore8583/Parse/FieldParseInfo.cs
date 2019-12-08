@@ -124,6 +124,10 @@ namespace NetCore8583.Parse
                     fpi = new DateExpParseInfo();
                     break;
 
+                case IsoType.DATE6:
+                    fpi = new Date6ParseInfo();
+                    break;
+                
                 case IsoType.LLBIN:
                     fpi = new LlbinParseInfo();
                     break;

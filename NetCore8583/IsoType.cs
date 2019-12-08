@@ -85,7 +85,12 @@ namespace NetCore8583
         /// <summary>
         ///     Date in format yyMMddHHmmss.
         /// </summary>
-        DATE12
+        DATE12,
+        
+        /// <summary>
+        /// Date in format yyMMdd
+        /// </summary>
+        DATE6
     }
 
     /// <summary>
@@ -128,6 +133,7 @@ namespace NetCore8583
                 case IsoType.LLLBIN: return 0;
                 case IsoType.LLLLVAR: return 0;
                 case IsoType.LLLLBIN: return 0;
+                case IsoType.DATE6: return 6;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(isoType),
                         isoType,
@@ -152,6 +158,7 @@ namespace NetCore8583
                 case IsoType.DATE14: return dateTime.ToString("yyyyMMddHHmmss");
                 case IsoType.DATE_EXP: return dateTime.ToString("yyMM");
                 case IsoType.TIME: return dateTime.ToString("HHmmss");
+                case IsoType.DATE6: return dateTime.ToString("yyMMdd");
                 default: throw new ArgumentException("IsoType must be DATE10, DATE12, DATE4, DATE14, DATE_EXP or TIME");
             }
         }
