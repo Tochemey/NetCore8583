@@ -345,6 +345,7 @@ namespace NetCore8583
                             case IsoType.TIME:
                             case IsoType.DATE12:
                             case IsoType.DATE14:
+                            case IsoType.DATE6:
                                 buf = new sbyte[Length / 2];
                                 break;
                         }
