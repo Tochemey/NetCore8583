@@ -102,7 +102,10 @@ namespace NetCore8583
         /// </summary>
         /// <param name="field">The field index (2 to 128).</param>
         /// <returns>The IsoValue for the specified field.</returns>
-        public IsoValue GetField(int field) => _fields[field];
+        public IsoValue GetField(int field)
+        {
+            return _fields[field];
+        }
 
         /// <summary>
         ///     Stored the field in the specified index. The first field is the secondary bitmap and has index 1,
@@ -181,12 +184,14 @@ namespace NetCore8583
         public IsoMessage SetValue(int index,
             object value,
             IsoType t,
-            int length) =>
-            SetValue(index,
+            int length)
+        {
+            return SetValue(index,
                 value,
                 null,
                 t,
                 length);
+        }
 
         /// <summary>
         ///     A convenience method to set new values in fields that already contain values.
@@ -217,7 +222,10 @@ namespace NetCore8583
         /// </summary>
         /// <param name="idx">The field number.</param>
         /// <returns></returns>
-        public bool HasField(int idx) => _fields[idx] != null;
+        public bool HasField(int idx)
+        {
+            return _fields[idx] != null;
+        }
 
         /// <summary>
         ///     Writes a message to a stream, after writing the specified number of bytes indicating
@@ -515,6 +523,7 @@ namespace NetCore8583
                         sb.Append(desc.Length.ToString("D4"));
                         break;
                 }
+
                 sb.Append(desc);
             }
 
@@ -527,7 +536,10 @@ namespace NetCore8583
         /// </summary>
         /// <param name="idx"></param>
         /// <returns></returns>
-        public bool HasEveryField(params int[] idx) => idx.All(HasField);
+        public bool HasEveryField(params int[] idx)
+        {
+            return idx.All(HasField);
+        }
 
         /// <summary>
         ///     Returns true is the message contains at least one of the specified fields.
@@ -535,6 +547,9 @@ namespace NetCore8583
         /// </summary>
         /// <param name="idx"></param>
         /// <returns></returns>
-        public bool HasAnyField(params int[] idx) => idx.Any(HasField);
+        public bool HasAnyField(params int[] idx)
+        {
+            return idx.Any(HasField);
+        }
     }
 }
