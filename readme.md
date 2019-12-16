@@ -60,16 +60,16 @@ A message does not need to contain all the fields specified in a parsing templat
 
 * ITraceNumberGenerator: When creating new messages, they usually need to have a unique trace number, contained in field 11. Also, they usually need to have the date they were created (or the date the transaction was originated) in field 7. The MessageFactory can automatically set the current date on all new messages, you just need to set the assignDate property to true. And it can also assign a new trace number to each message it creates, but for this it needs a TraceNumberGenerator.
 The ITraceNumberGenerator interface defines a nextTrace() method, which must return a new trace number between 1 and 999999. It needs to be cyclic, so it returns 1 again after returning 999999. And usually, it needs to be thread-safe.
-Iso85834Net only defines the interface; in production environments you will usually need to implement your own TraceNumberGenerator, getting the new trace number from a sequence in a database or some similar mechanism. As an example, the library includes the SimpleTraceGenerator, which simply increments an in-memory value.
+NetCore8583 only defines the interface; in production environments you will usually need to implement your own TraceNumberGenerator, getting the new trace number from a sequence in a database or some similar mechanism. As an example, the library includes the SimpleTraceGenerator, which simply increments an in-memory value.
 
 * Custom fields encoders: Certain implementations of ISO8583 specify fields which contain many subfields. If you only handle strings in those fields, you'll have to encode all those values before storing them in an IsoMessage, and decode them when you get them from an IsoMessage.
 In these cases you can implement a CustomField, which is an interface that defines two methods, one for encoding an object into a String and another for decoding an object from a String. You can pass the MessageFactory a CustomField for every field where you want to store custom values, so that parsed messages will return the objects decoded by the CustomFields instead of just strings; and when you set a value in an IsoMessage, you can specify the CustomField to be used to encode the value as a String
 
 #### Custom Field encoders
 
-Sometimes there are fields that contain several sub-fields or separate pieces of data. Iso85834Net will only parse the field for you, but you still have to parse those pieces of data from the field when you parse a message, and/or encode several pieces of data into a field when creating a message.
+Sometimes there are fields that contain several sub-fields or separate pieces of data. NetCore8583 will only parse the field for you, but you still have to parse those pieces of data from the field when you parse a message, and/or encode several pieces of data into a field when creating a message.
 
-Iso85834Net can help with this process, by means of the custom field encoders. To use this feature, first you need to implement the ICustomField interface. You can see how it is done in the following test classes **_TestParsing.cs_** and **_TestIsoMessage.cs_** using the **_CustomField48.cs_** class.
+NetCore8583 can help with this process, by means of the custom field encoders. To use this feature, first you need to implement the ICustomField interface. You can see how it is done in the following test classes **_TestParsing.cs_** and **_TestIsoMessage.cs_** using the **_CustomField48.cs_** class.
 
 ### Easy way to configure ISO 8583 messages templates
 
@@ -198,7 +198,7 @@ This means that you can do this via code:
 You can also create a CompositeField, store several subfields inside it, and store it in any field inside an IsoMessage, specifying the same instance as the CustomField:
 
 ```c#
-    CompositeField f = new CompositeField().AddValue(new IsoValueß(IsoType.ALPHA, "one", 5))
+    CompositeField f = new CompositeField().AddValue(new IsoValue(IsoType.ALPHA, "one", 5))
     .AddValue(new IsoValue(IsoType.LLVAR, "two"))
     .AddValue(new IsoValue(IsoType.NUMERIC, 123l, 6))
     .AddValue(new IsoValue(IsoType.ALPHA, "OK", 2));
