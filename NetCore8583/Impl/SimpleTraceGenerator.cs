@@ -4,7 +4,7 @@ namespace NetCore8583.Impl
 {
     public class SimpleTraceGenerator : ITraceNumberGenerator
     {
-        private readonly object synclock = new object();
+        private readonly object mutex = new object();
         private volatile int value;
 
         public SimpleTraceGenerator(int initialValue)
@@ -18,7 +18,7 @@ namespace NetCore8583.Impl
 
         public int NextTrace()
         {
-            lock (synclock)
+            lock (mutex)
             {
                 value++;
                 if (value > 999999) value = 1;
