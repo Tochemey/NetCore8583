@@ -21,7 +21,7 @@ namespace NetCore8583.Parse
             if (pos < 0) throw new ParseException($"Invalid DATE4 field {field} position {pos}");
             if (pos + 4 > buf.Length) throw new ParseException($"Insufficient data for DATE4 field {field}, pos {pos}");
 
-            int year, month, day, minute, seconds, milliseconds;
+            int month, day, minute, seconds, milliseconds;
 
             //Set the month and the day in the date
             if (ForceStringDecoding)
@@ -44,7 +44,7 @@ namespace NetCore8583.Parse
                 day = (buf[pos + 2] - 48) * 10 + buf[pos + 3] - 48;
             }
 
-            year = DateTime.Today.Year;
+            var year = DateTime.Today.Year;
             var hour = minute = seconds = milliseconds = 0;
 
             var dt = new DateTime(year,

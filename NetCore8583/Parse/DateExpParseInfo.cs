@@ -20,8 +20,8 @@ namespace NetCore8583.Parse
                 throw new ParseException($"Insufficient data for DATE_EXP field {field}, pos {pos}");
 
             int year, month;
-            int hour, minute, seconds;
-            hour = minute = seconds = 0;
+            int minute, seconds;
+            var hour = minute = seconds = 0;
             var day = 1;
 
             if (ForceStringDecoding)

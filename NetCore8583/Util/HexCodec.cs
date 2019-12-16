@@ -11,12 +11,11 @@ namespace NetCore8583.Util
             int length)
         {
             if (buffer.Length == 0) return string.Empty;
-            int holder;
             var chars = new char[length * 2];
             var pos = -1;
             for (var i = start; i < start + length; i++)
             {
-                holder = (buffer[i] & 0xf0) >> 4;
+                var holder = (buffer[i] & 0xf0) >> 4;
                 chars[++pos * 2] = Hex[holder];
                 holder = buffer[i] & 0x0f;
                 chars[pos * 2 + 1] = Hex[holder];
@@ -45,13 +44,12 @@ namespace NetCore8583.Util
             }
 
             var buf = new sbyte[count / 2];
-            int c;
             var holder = 0;
             var pos = 0;
             for (var i = 0; i < buf.Length; i++)
             for (var z = 0; z < 2 && pos < hex.Length; z++)
             {
-                c = hex[pos++];
+                int c = hex[pos++];
                 if (c >= 'A' && c <= 'F') c -= 55;
                 else if (c >= '0' && c <= '9') c -= 48;
                 else if (c >= 'a' && c <= 'f') c -= 87;

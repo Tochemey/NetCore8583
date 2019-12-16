@@ -89,8 +89,7 @@ namespace NetCore8583
             set
             {
                 _forceStringEncoding = value;
-                foreach (var mapValue in ParseMap.Values)
-                foreach (var parser in mapValue.Values)
+                foreach (var parser in ParseMap.Values.SelectMany(mapValue => mapValue.Values))
                     parser.ForceStringDecoding = value;
             }
         }
@@ -133,9 +132,15 @@ namespace NetCore8583
             return _customFields.ContainsKey(index) ? _customFields[index] : null;
         }
 
-        protected T CreateIsoMessageWithBinaryHeader(sbyte[] binHeader) => (T) new IsoMessage(binHeader);
+        protected T CreateIsoMessageWithBinaryHeader(sbyte[] binHeader)
+        {
+            return (T) new IsoMessage(binHeader);
+        }
 
-        protected T CreateIsoMessage(string isoHeader) => (T) new IsoMessage(isoHeader);
+        protected T CreateIsoMessage(string isoHeader)
+        {
+            return (T) new IsoMessage(isoHeader);
+        }
 
         /// <summary>
         ///     Creates a new message of the specified type, with optional trace and date values as well
@@ -258,7 +263,7 @@ namespace NetCore8583
         /// </param>
         /// <param name="isoHeaderLength">
         ///     Specifies the position at which the message
-        ///     type is located, which is algo the length of the ISO header.
+        ///     type is located, which is also the length of the ISO header.
         /// </param>
         /// <param name="binaryIsoHeader"></param>
         /// <returns>The parsed message.</returns>
@@ -509,7 +514,7 @@ namespace NetCore8583
                 {
                     var fpi = parseGuide[i];
                     if (!bs.Get(i - 1)) continue;
-                    if (IgnoreLast && pos >= buf.Length && i == index[index.Count - 1])
+                    if (IgnoreLast && pos >= buf.Length && i == index[^1])
                     {
                         _logger.Warning("Field {@Index} is not really in the message even though it's in the bitmap",
                             i);
@@ -531,7 +536,7 @@ namespace NetCore8583
 
                         if (val == null) continue;
                         if (val.Type == IsoType.NUMERIC || val.Type == IsoType.DATE10 || val.Type == IsoType.DATE4 ||
-                            val.Type == IsoType.DATE12 || val.Type == IsoType.DATE14 || val.Type == IsoType.DATE6 || 
+                            val.Type == IsoType.DATE12 || val.Type == IsoType.DATE14 || val.Type == IsoType.DATE6 ||
                             val.Type == IsoType.DATE_EXP ||
                             val.Type == IsoType.AMOUNT || val.Type == IsoType.TIME)
                             pos += val.Length / 2 + val.Length % 2;
@@ -556,7 +561,7 @@ namespace NetCore8583
                 {
                     var fpi = parseGuide[i];
                     if (bs.Get(i - 1))
-                        if (IgnoreLast && pos >= buf.Length && i == index[index.Count - 1])
+                        if (IgnoreLast && pos >= buf.Length && i == index[^1])
                         {
                             _logger.Warning(
                                 "Field {@FieldId} is not really in the message even though it's in the bitmap",
@@ -605,7 +610,7 @@ namespace NetCore8583
         public void SetIsoHeaders(Dictionary<int, string> val)
         {
             _isoHeaders.Clear();
-            foreach (var kv in val) _isoHeaders.Add(kv.Key, kv.Value);
+            foreach (var (key, value) in val) _isoHeaders.Add(key, value);
         }
 
         /// <summary>
@@ -636,7 +641,10 @@ namespace NetCore8583
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public string GetIsoHeader(int type) => _isoHeaders[type];
+        public string GetIsoHeader(int type)
+        {
+            return _isoHeaders[type];
+        }
 
         /// <summary>
         ///     Sets the ISO header for a specific message type, in binary format.
@@ -666,7 +674,10 @@ namespace NetCore8583
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public sbyte[] GetBinaryIsoHeader(int type) => _binIsoHeaders[type];
+        public sbyte[] GetBinaryIsoHeader(int type)
+        {
+            return _binIsoHeaders[type];
+        }
 
         /// <summary>
         ///     Adds a message template to the factory. If there was a template for the same
@@ -697,7 +708,10 @@ namespace NetCore8583
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public T GetMessageTemplate(int type) => _typeTemplates[type];
+        public T GetMessageTemplate(int type)
+        {
+            return _typeTemplates[type];
+        }
 
         public void SetParseMap(int type,
             Dictionary<int, FieldParseInfo> map)

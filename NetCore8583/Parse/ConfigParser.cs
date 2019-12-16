@@ -57,44 +57,42 @@ namespace NetCore8583.Parse
             for (var i = 0; i < nodes.Count; i++)
             {
                 var elem = (XmlElement) nodes.Item(i);
-                if (elem != null)
+                if (elem == null) continue;
+                var type = ParseType(elem.GetAttribute("type"));
+                if (type == -1)
+                    throw new IOException($"Invalid type {elem.GetAttribute("type")} for ISO8583 header: ");
+                if (elem.ChildNodes == null || elem.ChildNodes.Count == 0)
                 {
-                    var type = ParseType(elem.GetAttribute("type"));
-                    if (type == -1)
-                        throw new IOException($"Invalid type {elem.GetAttribute("type")} for ISO8583 header: ");
-                    if (elem.ChildNodes == null || elem.ChildNodes.Count == 0)
+                    if (elem.GetAttribute("ref") != null && !string.IsNullOrEmpty(elem.GetAttribute("ref")))
                     {
-                        if (elem.GetAttribute("ref") != null && !string.IsNullOrEmpty(elem.GetAttribute("ref")))
-                        {
-                            if (refs == null) refs = new List<XmlElement>(nodes.Count - i);
-                            refs.Add(elem);
-                        }
-                        else
-                        {
-                            throw new IOException("Invalid ISO8583 header element");
-                        }
+                        if (refs == null) refs = new List<XmlElement>(nodes.Count - i);
+                        refs.Add(elem);
                     }
                     else
                     {
-                        var header = elem.ChildNodes.Item(0).Value;
-                        var binHeader = "true".Equals(elem.GetAttribute("binary"));
-                        if (Logger.IsEnabled(LogEventLevel.Debug))
-                        {
-                            var binary = binHeader ? "binary" : string.Empty;
-
-                            Logger.Debug(
-                                $"Adding {binary} ISO8583 header for type {elem.GetAttribute("type")} : {header}");
-                        }
-
-                        if (binHeader)
-                            mfact.SetBinaryIsoHeader(
-                                type,
-                                HexCodec.HexDecode(header).ToUnsignedBytes());
-                        else
-                            mfact.SetIsoHeader(
-                                type,
-                                header);
+                        throw new IOException("Invalid ISO8583 header element");
                     }
+                }
+                else
+                {
+                    var header = elem.ChildNodes.Item(0).Value;
+                    var binHeader = "true".Equals(elem.GetAttribute("binary"));
+                    if (Logger.IsEnabled(LogEventLevel.Debug))
+                    {
+                        var binary = binHeader ? "binary" : string.Empty;
+
+                        Logger.Debug(
+                            $"Adding {binary} ISO8583 header for type {elem.GetAttribute("type")} : {header}");
+                    }
+
+                    if (binHeader)
+                        mfact.SetBinaryIsoHeader(
+                            type,
+                            HexCodec.HexDecode(header).ToUnsignedBytes());
+                    else
+                        mfact.SetIsoHeader(
+                            type,
+                            header);
                 }
             }
 
@@ -275,10 +273,8 @@ namespace NetCore8583.Parse
                     sv.Encoding = mfact.Encoding;
                     cf.AddValue(sv);
                 }
-
-                Debug.Assert(
-                    itype != null,
-                    "itype != null");
+                
+                Debug.Assert(itype != null, nameof(itype) + " != null");
                 return itype.Value.NeedsLength()
                     ? new IsoValue(
                         itype.Value,
@@ -346,7 +342,7 @@ namespace NetCore8583.Parse
 
             if (subs == null || subs.Count <= 0) return fpi;
             
-            var combo = new CompositeField();
+            var compo = new CompositeField();
             for (var i = 0; i < subs.Count; i++)
             {
                 var sf = (XmlElement) subs.Item(i);
@@ -356,13 +352,13 @@ namespace NetCore8583.Parse
                     "sf != null");
                 
                 if (sf.ParentNode == f)
-                    combo.AddParser(
+                    compo.AddParser(
                         GetParser(
                             sf,
                             mfact));
             }
 
-            fpi.Decoder = combo;
+            fpi.Decoder = compo;
 
             return fpi;
         }
@@ -529,18 +525,16 @@ namespace NetCore8583.Parse
             try
             {
                 var f = AppDomain.CurrentDomain.BaseDirectory + path;
-                using (var fsSource = new FileStream(
+                using var fsSource = new FileStream(
                     f,
                     FileMode.Open,
-                    FileAccess.Read))
-                {
-                    Logger.Debug(
-                        "ISO8583 Parsing config from classpath file {Path}",
-                        path);
-                    Parse(
-                        mfact,
-                        fsSource);
-                }
+                    FileAccess.Read);
+                Logger.Debug(
+                    "ISO8583 Parsing config from classpath file {Path}",
+                    path);
+                Parse(
+                    mfact,
+                    fsSource);
             }
             catch (FileNotFoundException)
             {
@@ -605,18 +599,16 @@ namespace NetCore8583.Parse
 
             try
             {
-                using (var fsSource = new FileStream(
+                using var fsSource = new FileStream(
                     configFile,
                     FileMode.Open,
-                    FileAccess.Read))
-                {
-                    Logger.Debug(
-                        "ISO8583 Parsing config from classpath file {Path}",
-                        configFile);
-                    Parse(
-                        mfact,
-                        fsSource);
-                }
+                    FileAccess.Read);
+                Logger.Debug(
+                    "ISO8583 Parsing config from classpath file {Path}",
+                    configFile);
+                Parse(
+                    mfact,
+                    fsSource);
             }
             catch (Exception e)
             {

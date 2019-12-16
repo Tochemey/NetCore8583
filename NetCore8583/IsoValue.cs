@@ -35,44 +35,52 @@ namespace NetCore8583
                         Length = enc.Length;
                     }
 
-                    if (t == IsoType.LLVAR && Length > 99)
-                        throw new ArgumentException("LLVAR can only hold values up to 99 chars");
-                    if (t == IsoType.LLLVAR && Length > 999)
-                        throw new ArgumentException("LLLVAR can only hold values up to 999 chars");
-                    if (t == IsoType.LLLLVAR && Length > 9999)
-                        throw new ArgumentException("LLLLVAR can only hold values up to 9999 chars");
+                    switch (t)
+                    {
+                        case IsoType.LLVAR when Length > 99:
+                            throw new ArgumentException("LLVAR can only hold values up to 99 chars");
+                        case IsoType.LLLVAR when Length > 999:
+                            throw new ArgumentException("LLLVAR can only hold values up to 999 chars");
+                        case IsoType.LLLLVAR when Length > 9999:
+                            throw new ArgumentException("LLLLVAR can only hold values up to 9999 chars");
+                    }
+
                     break;
                 case IsoType.LLBIN:
                 case IsoType.LLLBIN:
                 case IsoType.LLLLBIN:
-                    if (Encoder == null)
+                    switch (Encoder)
                     {
-                        if (value.GetType() == typeof(sbyte[]))
+                        case null when value.GetType() == typeof(sbyte[]):
                         {
                             var obj = value;
                             Length = ((sbyte[]) obj).Length;
+                            break;
                         }
-                        else
-                        {
+                        case null:
                             Length = value.ToString().Length / 2 + value.ToString().Length % 2;
+                            break;
+                        case ICustomBinaryField binaryField:
+                            Length = binaryField.EncodeBinaryField(value).Length;
+                            break;
+                        default:
+                        {
+                            var enc = Encoder.EncodeField(value) ?? (value?.ToString() ?? string.Empty);
+                            Length = enc.Length;
+                            break;
                         }
-                    }
-                    else if (Encoder is ICustomBinaryField)
-                    {
-                        Length = ((ICustomBinaryField) Encoder).EncodeBinaryField(value).Length;
-                    }
-                    else
-                    {
-                        var enc = Encoder.EncodeField(value) ?? (value?.ToString() ?? string.Empty);
-                        Length = enc.Length;
                     }
 
-                    if (t == IsoType.LLBIN && Length > 99)
-                        throw new ArgumentException("LLBIN can only hold values up to 99 chars");
-                    if (t == IsoType.LLLBIN && Length > 999)
-                        throw new ArgumentException("LLLBIN can only hold values up to 999 chars");
-                    if (t == IsoType.LLLLBIN && Length > 9999)
-                        throw new ArgumentException("LLLLBIN can only hold values up to 9999 chars");
+                    switch (t)
+                    {
+                        case IsoType.LLBIN when Length > 99:
+                            throw new ArgumentException("LLBIN can only hold values up to 99 chars");
+                        case IsoType.LLLBIN when Length > 999:
+                            throw new ArgumentException("LLLBIN can only hold values up to 999 chars");
+                        case IsoType.LLLLBIN when Length > 9999:
+                            throw new ArgumentException("LLLLBIN can only hold values up to 9999 chars");
+                    }
+
                     break;
                 default:
                     Length = Type.Length();
@@ -98,42 +106,54 @@ namespace NetCore8583
                 case IsoType.LLLVAR:
                 case IsoType.LLLLVAR:
                     if (len == 0) Length = Encoder?.EncodeField(val).Length ?? val.ToString().Length;
-                    if (t == IsoType.LLVAR && Length > 99)
-                        throw new ArgumentException("LLVAR can only hold values up to 99 chars");
-                    if (t == IsoType.LLLVAR && Length > 999)
-                        throw new ArgumentException("LLLVAR can only hold values up to 999 chars");
-                    if (t == IsoType.LLLLVAR && Length > 9999)
-                        throw new ArgumentException("LLLLVAR can only hold values up to 9999 chars");
+                    switch (t)
+                    {
+                        case IsoType.LLVAR when Length > 99:
+                            throw new ArgumentException("LLVAR can only hold values up to 99 chars");
+                        case IsoType.LLLVAR when Length > 999:
+                            throw new ArgumentException("LLLVAR can only hold values up to 999 chars");
+                        case IsoType.LLLLVAR when Length > 9999:
+                            throw new ArgumentException("LLLLVAR can only hold values up to 9999 chars");
+                    }
+
                     break;
                 case IsoType.LLBIN:
                 case IsoType.LLLBIN:
                 case IsoType.LLLLBIN:
                     if (len == 0)
                     {
-                        if (Encoder == null)
+                        switch (Encoder)
                         {
-                            var obj = val;
-                            Length = ((byte[]) obj).Length;
-                        }
-                        else if (Encoder is ICustomBinaryField)
-                        {
-                            var customBinaryField = (ICustomBinaryField) custom;
-                            if (customBinaryField != null) Length = customBinaryField.EncodeBinaryField(Value).Length;
-                        }
-                        else
-                        {
-                            Length = Encoder.EncodeField(Value).Length;
+                            case null:
+                            {
+                                var obj = val;
+                                Length = ((byte[]) obj).Length;
+                                break;
+                            }
+                            case ICustomBinaryField _:
+                            {
+                                var customBinaryField = (ICustomBinaryField) custom;
+                                if (customBinaryField != null) Length = customBinaryField.EncodeBinaryField(Value).Length;
+                                break;
+                            }
+                            default:
+                                Length = Encoder.EncodeField(Value).Length;
+                                break;
                         }
 
                         Length = Encoder?.EncodeField(Value).Length ?? ((sbyte[]) val).Length;
                     }
 
-                    if (t == IsoType.LLBIN && Length > 99)
-                        throw new ArgumentException("LLBIN can only hold values up to 99 chars");
-                    if (t == IsoType.LLLBIN && Length > 999)
-                        throw new ArgumentException("LLLBIN can only hold values up to 999 chars");
-                    if (t == IsoType.LLLLBIN && Length > 9999)
-                        throw new ArgumentException("LLLLBIN can only hold values up to 9999 chars");
+                    switch (t)
+                    {
+                        case IsoType.LLBIN when Length > 99:
+                            throw new ArgumentException("LLBIN can only hold values up to 99 chars");
+                        case IsoType.LLLBIN when Length > 999:
+                            throw new ArgumentException("LLLBIN can only hold values up to 999 chars");
+                        case IsoType.LLLLBIN when Length > 9999:
+                            throw new ArgumentException("LLLLBIN can only hold values up to 9999 chars");
+                    }
+
                     break;
             }
         }
@@ -163,15 +183,14 @@ namespace NetCore8583
                         else
                             return Type.Format(Convert.ToDecimal(Value),
                                 12);
-                    else if (Value is BigInteger)
-                        return Type.Format(Encoder == null ? Value.ToString() : Encoder.EncodeField(Value),
-                            Length);
-                    else if (Value is long l)
-                        return Type.Format(l,
-                            Length);
                     else
-                        return Type.Format(Encoder == null ? Value.ToString() : Encoder.EncodeField(Value),
-                            Length);
+                        return Value switch
+                        {
+                            BigInteger _ => Type.Format(Encoder == null ? Value.ToString() : Encoder.EncodeField(Value),
+                                Length),
+                            long l => Type.Format(l, Length),
+                            _ => Type.Format(Encoder == null ? Value.ToString() : Encoder.EncodeField(Value), Length)
+                        };
                 case IsoType.ALPHA:
                     return Type.Format(Encoder == null ? Value.ToString() : Encoder.EncodeField(Value),
                         Length);
@@ -227,21 +246,14 @@ namespace NetCore8583
             bool forceStringEncoding)
         {
             var sbytes = new List<sbyte>();
-            int digits;
-            switch (type)
+            var digits = type switch
             {
-                case IsoType.LLLLBIN:
-                case IsoType.LLLLVAR:
-                    digits = 4;
-                    break;
-                case IsoType.LLLBIN:
-                case IsoType.LLLVAR:
-                    digits = 3;
-                    break;
-                default:
-                    digits = 2;
-                    break;
-            }
+                IsoType.LLLLBIN => 4,
+                IsoType.LLLLVAR => 4,
+                IsoType.LLLBIN => 3,
+                IsoType.LLLVAR => 3,
+                _ => 2
+            };
 
             if (binary)
             {
@@ -262,21 +274,16 @@ namespace NetCore8583
             {
                 var lhead = Convert.ToString(l);
                 var ldiff = digits - lhead.Length;
-                switch (ldiff)
+                lhead = ldiff switch
                 {
-                    case 1:
-                        lhead = '0' + lhead;
-                        break;
-                    case 2:
-                        lhead = "00" + lhead;
-                        break;
-                    case 3:
-                        lhead = "000" + lhead;
-                        break;
-                }
+                    1 => ('0' + lhead),
+                    2 => ("00" + lhead),
+                    3 => ("000" + lhead),
+                    _ => lhead
+                };
 
                 var bytes = lhead.GetSignedBytes(Encoding);
-                foreach (var @sbyte in bytes) sbytes.Add(@sbyte);
+                sbytes.AddRange(bytes);
             }
             else
             {
@@ -330,25 +337,19 @@ namespace NetCore8583
                     if (binary)
                     {
                         //numeric types in binary are coded like this
-                        sbyte[] buf = null;
-                        switch (Type)
+                        var buf = Type switch
                         {
-                            case IsoType.NUMERIC:
-                                buf = new sbyte[Length / 2 + Length % 2];
-                                break;
-                            case IsoType.AMOUNT:
-                                buf = new sbyte[6];
-                                break;
-                            case IsoType.DATE10:
-                            case IsoType.DATE4:
-                            case IsoType.DATE_EXP:
-                            case IsoType.TIME:
-                            case IsoType.DATE12:
-                            case IsoType.DATE14:
-                            case IsoType.DATE6:
-                                buf = new sbyte[Length / 2];
-                                break;
-                        }
+                            IsoType.NUMERIC => new sbyte[Length / 2 + Length % 2],
+                            IsoType.AMOUNT => new sbyte[6],
+                            IsoType.DATE10 => new sbyte[Length / 2],
+                            IsoType.DATE4 => new sbyte[Length / 2],
+                            IsoType.DATE_EXP => new sbyte[Length / 2],
+                            IsoType.TIME => new sbyte[Length / 2],
+                            IsoType.DATE12 => new sbyte[Length / 2],
+                            IsoType.DATE14 => new sbyte[Length / 2],
+                            IsoType.DATE6 => new sbyte[Length / 2],
+                            _ => null
+                        };
 
                         //Encode in BCD if it's one of these types
                         if (buf != null)
@@ -378,22 +379,27 @@ namespace NetCore8583
 
                     missing = Length - bytes.Length;
                 }
-                else if (Encoder is ICustomBinaryField customBinaryField)
+                else switch (Encoder)
                 {
-                    var binval = customBinaryField.EncodeBinaryField(Value);
-                    outs.Write(binval.ToUnsignedBytes(),
-                        0,
-                        binval.Length);
-                    missing = Length - binval.Length;
-                }
-                else
-                {
-                    var binval = HexCodec.HexDecode(Value.ToString());
-                    outs.Write(binval.ToUnsignedBytes(),
-                        0,
-                        binval.Length);
+                    case ICustomBinaryField customBinaryField:
+                    {
+                        var binval = customBinaryField.EncodeBinaryField(Value);
+                        outs.Write(binval.ToUnsignedBytes(),
+                            0,
+                            binval.Length);
+                        missing = Length - binval.Length;
+                        break;
+                    }
+                    default:
+                    {
+                        var binval = HexCodec.HexDecode(Value.ToString());
+                        outs.Write(binval.ToUnsignedBytes(),
+                            0,
+                            binval.Length);
 
-                    missing = Length - binval.Length;
+                        missing = Length - binval.Length;
+                        break;
+                    }
                 }
 
                 if (Type != IsoType.BINARY || missing <= 0) return;

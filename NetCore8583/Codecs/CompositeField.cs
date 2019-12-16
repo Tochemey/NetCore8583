@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using NetCore8583.Parse;
 using NetCore8583.Util;
@@ -81,8 +82,7 @@ namespace NetCore8583.Codecs
                 }
 
                 var buf = bout.ToArray();
-                if (encoding == null) return Encoding.UTF8.GetString(buf);
-                return encoding.GetString(buf);
+                return encoding == null ? Encoding.UTF8.GetString(buf) : encoding.GetString(buf);
             }
             catch (IOException)
             {
@@ -98,14 +98,12 @@ namespace NetCore8583.Codecs
             var pos = offset;
             try
             {
-                foreach (var fpi in parsers)
+                foreach (var v in parsers.Select(fpi => fpi.ParseBinary(
+                    0,
+                    buf,
+                    pos,
+                    fpi.Decoder)).Where(v => v != null))
                 {
-                    var v = fpi.ParseBinary(
-                        0,
-                        buf,
-                        pos,
-                        fpi.Decoder);
-                    if (v == null) continue;
                     if (v.Type == IsoType.NUMERIC || v.Type == IsoType.DATE10 || v.Type == IsoType.DATE4 ||
                         v.Type == IsoType.DATE_EXP || v.Type == IsoType.AMOUNT || v.Type == IsoType.TIME ||
                         v.Type == IsoType.DATE12 || v.Type == IsoType.DATE14) pos += v.Length / 2 + v.Length % 2;
@@ -212,15 +210,14 @@ namespace NetCore8583.Codecs
         public override string ToString()
         {
             var sb = new StringBuilder("CompositeField[");
-            if (Values != null)
+            if (Values == null) return sb.Append(']').ToString();
+            
+            var first = true;
+            foreach (var v in Values)
             {
-                var first = true;
-                foreach (var v in Values)
-                {
-                    if (first) first = false;
-                    else sb.Append(',');
-                    sb.Append(v.Type);
-                }
+                if (first) first = false;
+                else sb.Append(',');
+                sb.Append(v.Type);
             }
 
             return sb.Append(']').ToString();

@@ -22,7 +22,7 @@ namespace NetCore8583.Util
         /// <returns>bool</returns>
         public static bool IsAlphanumeric(this string string0)
         {
-            var pattern = "^[a-zA-Z0-9-\\s+]*$";
+            const string pattern = "^[a-zA-Z0-9-\\s+]*$";
             return Regex.IsMatch(string0,
                 pattern);
         }
@@ -35,13 +35,13 @@ namespace NetCore8583.Util
         /// <returns>bool</returns>
         public static bool IsWord(this string string0)
         {
-            var pattern = "^[a-zA-Z]$";
+            const string pattern = "^[a-zA-Z]$";
             return Regex.IsMatch(string0,
                 pattern);
         }
 
         /// <summary>
-        ///     This function sanitze string against SQL Injections
+        ///     This function sanitise string against SQL Injections
         /// </summary>
         /// <param name="string0">The String to sanitize</param>
         /// <returns></returns>
@@ -69,8 +69,7 @@ namespace NetCore8583.Util
         /// <returns>true when valid and false on the contrary</returns>
         public static bool IsValidUrl(this string url)
         {
-            var pattern =
-                "^(?:(?:(ht|f)tps?|file|news|gopher)://)?(([\\w!~*'()\\.&=+$%-]+: )?[\\w!~*'()\\.&=+$%-]+@)?(([0-9]{1,3}\\.){3}[0-9]{1,3}|([\\w!~*'()-]+\\.)*([\\w^-][\\w-]{0,61})?[\\w]\\.[a-z]{2,6})(:[0-9]{1,4})?((/*)|(/+[\\w!~*'()\\.;?:@&=+$,%#-]+)+/*)$";
+            const string pattern = "^(?:(?:(ht|f)tps?|file|news|gopher)://)?(([\\w!~*'()\\.&=+$%-]+: )?[\\w!~*'()\\.&=+$%-]+@)?(([0-9]{1,3}\\.){3}[0-9]{1,3}|([\\w!~*'()-]+\\.)*([\\w^-][\\w-]{0,61})?[\\w]\\.[a-z]{2,6})(:[0-9]{1,4})?((/*)|(/+[\\w!~*'()\\.;?:@&=+$,%#-]+)+/*)$";
             return Regex.IsMatch(url,
                 pattern);
         }
@@ -86,7 +85,7 @@ namespace NetCore8583.Util
         }
 
         /// <summary>
-        ///     Thos function check whether a filename is a valid filename.
+        ///     This function check whether a filename is a valid filename.
         /// </summary>
         /// <param name="filename">The file name</param>
         /// <param name="platformIndependent"></param>
@@ -225,7 +224,7 @@ namespace NetCore8583.Util
         ///     Check valid email.True when it is a valid email address and false on the contrary
         /// </summary>
         /// <param name="string0">String to check</param>
-        /// <returns>bool. True when it is avlid email address and false on the contrary</returns>
+        /// <returns>bool. True when it is valid email address and false on the contrary</returns>
         public static bool IsValidEmail(this string string0)
         {
             var pattern =
@@ -245,9 +244,8 @@ namespace NetCore8583.Util
             PopulateIpPatterns();
 
             // Get the IPv4 pattern regex
-            string pattern;
             if (IpPatterns.TryGetValue("IPv4",
-                out pattern))
+                out var pattern))
                 return Regex.IsMatch(string0,
                     pattern);
             return false;
@@ -264,9 +262,8 @@ namespace NetCore8583.Util
             PopulateIpPatterns();
 
             // Get the IPv4 pattern regex
-            string pattern;
             if (IpPatterns.TryGetValue("IPv6",
-                out pattern))
+                out var pattern))
                 return Regex.IsMatch(string0,
                     pattern);
             return false;
@@ -323,8 +320,7 @@ namespace NetCore8583.Util
         /// <returns>bool</returns>
         public static bool IsValidTime(this string string0)
         {
-            var pattern =
-                "^((([0]?[1-9]|1[0-2])(:|\\.)[0-5][0-9]((:|\\.)[0-5][0-9])?( )?(AM|am|aM|Am|PM|pm|pM|Pm))|(([0]?[0-9]|1[0-9]|2[0-3])(:|\\.)[0-5][0-9]((:|\\.)[0-5][0-9])?))$";
+            const string pattern = "^((([0]?[1-9]|1[0-2])(:|\\.)[0-5][0-9]((:|\\.)[0-5][0-9])?( )?(AM|am|aM|Am|PM|pm|pM|Pm))|(([0]?[0-9]|1[0-9]|2[0-3])(:|\\.)[0-5][0-9]((:|\\.)[0-5][0-9])?))$";
             return Regex.IsMatch(string0,
                 pattern);
         }
@@ -345,15 +341,14 @@ namespace NetCore8583.Util
         {
             const string standardFormat = "^\\+(?:[0-9] ?){6,14}[0-9]$";
             //ITU-T E.164 standard
-            if (!IsEmpty(standard) && standard.Equals("EPP"))
-            {
-                var regex = "^\\+[0-9]{1,3}\\.[0-9]{4,14}(?:x\\.+)?$";
+            if (IsEmpty(standard) || !standard.Equals("EPP"))
                 return Regex.IsMatch(string0,
-                    regex);
-            }
-
+                    standardFormat);
+            
+            const string regex = "^\\+[0-9]{1,3}\\.[0-9]{4,14}(?:x\\.+)?$";
             return Regex.IsMatch(string0,
-                standardFormat);
+                regex);
+
         }
 
         /// <summary>
@@ -446,42 +441,40 @@ namespace NetCore8583.Util
             }
             else
             {
-                if (!string0.IsEmpty())
-                {
-                    // Based upon the format given the check will be done accordingly
-                    var regex = "";
-                    if (string.Equals(format.Trim(),
-                        "dmy"))
-                        regex =
-                            "^(?:(?:31(\\/|-|\\.|\\x20)(?:0?[13578]|1[02]))\\1|(?:(?:29|30)(\\/|-|\\.|\\x20)(?:0?[1,3-9]|1[0-2])\\2))(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$|^(?:29(\\/|-|\\.|\\x20)0?2\\3(?:(?:(?:1[6-9]|[2-9]\\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\\d|2[0-8])(\\/|-|\\.|\\x20)(?:(?:0?[1-9])|(?:1[0-2]))\\4(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$";
-                    if (string.Equals(format.Trim(),
-                        "mdy"))
-                        regex =
-                            "^(?:(?:(?:0?[13578]|1[02])(\\/|-|\\.|\\x20)31)\\1|(?:(?:0?[13-9]|1[0-2])(\\/|-|\\.|\\x20)(?:29|30)\\2))(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$|^(?:0?2(\\/|-|\\.|\\x20)29\\3(?:(?:(?:1[6-9]|[2-9]\\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:(?:0?[1-9])|(?:1[0-2]))(\\/|-|\\.|\\x20)(?:0?[1-9]|1\\d|2[0-8])\\4(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$";
-                    if (string.Equals(format.Trim(),
-                        "ymd"))
-                        regex =
-                            "^(?:(?:(?:(?:(?:1[6-9]|[2-9]\\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00)))(\\/|-|\\.|\\x20)(?:0?2\\1(?:29)))|(?:(?:(?:1[6-9]|[2-9]\\d)?\\d{2})(\\/|-|\\.|\\x20)(?:(?:(?:0?[13578]|1[02])\\2(?:31))|(?:(?:0?[1,3-9]|1[0-2])\\2(29|30))|(?:(?:0?[1-9])|(?:1[0-2]))\\2(?:0?[1-9]|1\\d|2[0-8]))))$";
-                    if (string.Equals(format.Trim(),
-                        "dMy"))
-                        regex =
-                            "^((31(?!\\ (Feb(ruary)?|Apr(il)?|June?|(Sep(?=\\b|t)t?|Nov)(ember)?)))|((30|29)(?!\\ Feb(ruary)?))|(29(?=\\ Feb(ruary)?\\ (((1[6-9]|[2-9]\\d)(0[48]|[2468][048]|[13579][26])|((16|[2468][048]|[3579][26])00)))))|(0?[1-9])|1\\d|2[0-8])\\ (Jan(uary)?|Feb(ruary)?|Ma(r(ch)?|y)|Apr(il)?|Ju((ly?)|(ne?))|Aug(ust)?|Oct(ober)?|(Sep(?=\\b|t)t?|Nov|Dec)(ember)?)\\ ((1[6-9]|[2-9]\\d)\\d{2})$";
-                    if (string.Equals(format.Trim(),
-                        "Mdy"))
-                        regex =
-                            "^(?:(((Jan(uary)?|Ma(r(ch)?|y)|Jul(y)?|Aug(ust)?|Oct(ober)?|Dec(ember)?)\\ 31)|((Jan(uary)?|Ma(r(ch)?|y)|Apr(il)?|Ju((ly?)|(ne?))|Aug(ust)?|Oct(ober)?|(Sep)(tember)?|(Nov|Dec)(ember)?)\\ (0?[1-9]|([12]\\d)|30))|(Feb(ruary)?\\ (0?[1-9]|1\\d|2[0-8]|(29(?=,?\\ ((1[6-9]|[2-9]\\d)(0[48]|[2468][048]|[13579][26])|((16|[2468][048]|[3579][26])00)))))))\\,?\\ ((1[6-9]|[2-9]\\d)\\d{2}))$";
-                    if (string.Equals(format.Trim(),
-                        "My"))
-                        regex =
-                            "^(Jan(uary)?|Feb(ruary)?|Ma(r(ch)?|y)|Apr(il)?|Ju((ly?)|(ne?))|Aug(ust)?|Oct(ober)?|(Sep(?=\\b|t)t?|Nov|Dec)(ember)?)[ /]((1[6-9]|[2-9]\\d)\\d{2})$";
-                    if (string.Equals(format.Trim(),
-                        "my"))
-                        regex = "^(((0[123456789]|10|11|12)([- /\\.])(([1][9][0-9][0-9])|([2][0-9][0-9][0-9]))))$";
+                if (string0.IsEmpty()) return false;
+                // Based upon the format given the check will be done accordingly
+                var regex = "";
+                if (string.Equals(format.Trim(),
+                    "dmy"))
+                    regex =
+                        "^(?:(?:31(\\/|-|\\.|\\x20)(?:0?[13578]|1[02]))\\1|(?:(?:29|30)(\\/|-|\\.|\\x20)(?:0?[1,3-9]|1[0-2])\\2))(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$|^(?:29(\\/|-|\\.|\\x20)0?2\\3(?:(?:(?:1[6-9]|[2-9]\\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\\d|2[0-8])(\\/|-|\\.|\\x20)(?:(?:0?[1-9])|(?:1[0-2]))\\4(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$";
+                if (string.Equals(format.Trim(),
+                    "mdy"))
+                    regex =
+                        "^(?:(?:(?:0?[13578]|1[02])(\\/|-|\\.|\\x20)31)\\1|(?:(?:0?[13-9]|1[0-2])(\\/|-|\\.|\\x20)(?:29|30)\\2))(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$|^(?:0?2(\\/|-|\\.|\\x20)29\\3(?:(?:(?:1[6-9]|[2-9]\\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:(?:0?[1-9])|(?:1[0-2]))(\\/|-|\\.|\\x20)(?:0?[1-9]|1\\d|2[0-8])\\4(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$";
+                if (string.Equals(format.Trim(),
+                    "ymd"))
+                    regex =
+                        "^(?:(?:(?:(?:(?:1[6-9]|[2-9]\\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00)))(\\/|-|\\.|\\x20)(?:0?2\\1(?:29)))|(?:(?:(?:1[6-9]|[2-9]\\d)?\\d{2})(\\/|-|\\.|\\x20)(?:(?:(?:0?[13578]|1[02])\\2(?:31))|(?:(?:0?[1,3-9]|1[0-2])\\2(29|30))|(?:(?:0?[1-9])|(?:1[0-2]))\\2(?:0?[1-9]|1\\d|2[0-8]))))$";
+                if (string.Equals(format.Trim(),
+                    "dMy"))
+                    regex =
+                        "^((31(?!\\ (Feb(ruary)?|Apr(il)?|June?|(Sep(?=\\b|t)t?|Nov)(ember)?)))|((30|29)(?!\\ Feb(ruary)?))|(29(?=\\ Feb(ruary)?\\ (((1[6-9]|[2-9]\\d)(0[48]|[2468][048]|[13579][26])|((16|[2468][048]|[3579][26])00)))))|(0?[1-9])|1\\d|2[0-8])\\ (Jan(uary)?|Feb(ruary)?|Ma(r(ch)?|y)|Apr(il)?|Ju((ly?)|(ne?))|Aug(ust)?|Oct(ober)?|(Sep(?=\\b|t)t?|Nov|Dec)(ember)?)\\ ((1[6-9]|[2-9]\\d)\\d{2})$";
+                if (string.Equals(format.Trim(),
+                    "Mdy"))
+                    regex =
+                        "^(?:(((Jan(uary)?|Ma(r(ch)?|y)|Jul(y)?|Aug(ust)?|Oct(ober)?|Dec(ember)?)\\ 31)|((Jan(uary)?|Ma(r(ch)?|y)|Apr(il)?|Ju((ly?)|(ne?))|Aug(ust)?|Oct(ober)?|(Sep)(tember)?|(Nov|Dec)(ember)?)\\ (0?[1-9]|([12]\\d)|30))|(Feb(ruary)?\\ (0?[1-9]|1\\d|2[0-8]|(29(?=,?\\ ((1[6-9]|[2-9]\\d)(0[48]|[2468][048]|[13579][26])|((16|[2468][048]|[3579][26])00)))))))\\,?\\ ((1[6-9]|[2-9]\\d)\\d{2}))$";
+                if (string.Equals(format.Trim(),
+                    "My"))
+                    regex =
+                        "^(Jan(uary)?|Feb(ruary)?|Ma(r(ch)?|y)|Apr(il)?|Ju((ly?)|(ne?))|Aug(ust)?|Oct(ober)?|(Sep(?=\\b|t)t?|Nov|Dec)(ember)?)[ /]((1[6-9]|[2-9]\\d)\\d{2})$";
+                if (string.Equals(format.Trim(),
+                    "my"))
+                    regex = "^(((0[123456789]|10|11|12)([- /\\.])(([1][9][0-9][0-9])|([2][0-9][0-9][0-9]))))$";
 
-                    // Perform the check and return the output
-                    return Regex.IsMatch(string0.Trim(),
-                        regex);
-                }
+                // Perform the check and return the output
+                return Regex.IsMatch(string0.Trim(),
+                    regex);
             }
 
             return false;
@@ -525,18 +518,16 @@ namespace NetCore8583.Util
             var parts = string0.Split(' ');
 
             // check the parts
-            if (parts.Length > 1)
-            {
-                // Get the time part
-                var time = parts[parts.Length - 1];
+            if (parts.Length <= 1) return valid;
+            // Get the time part
+            var time = parts[^1];
 
-                // Reconstruct the date part
-                var date = parts[0];
-                for (var i = 1; i < parts.Length - 2; i++) date += " " + parts[i];
+            // Reconstruct the date part
+            var date = parts[0];
+            for (var i = 1; i < parts.Length - 2; i++) date += " " + parts[i];
 
-                // Perform the validation check
-                valid = date.IsValidDate(format) && time.IsValidTime();
-            }
+            // Perform the validation check
+            valid = date.IsValidDate(format) && time.IsValidTime();
 
             return valid;
         }
@@ -644,17 +635,15 @@ namespace NetCore8583.Util
         public static string Capitalize(this string string0)
         {
             // When the string is not null
-            if (!string0.IsEmpty())
-            {
-                if (string0.Length == 1) return string0.ToUpper();
-                var sb = new StringBuilder(string0.Length);
-                sb.Append(string0.Substring(0,
-                    1).ToUpper());
-                sb.Append(string0.Substring(1));
-                return sb.ToString();
-            }
+            if (string0.IsEmpty()) return string0;
+            
+            if (string0.Length == 1) return string0.ToUpper();
+            var sb = new StringBuilder(string0.Length);
+            sb.Append(string0.Substring(0,
+                1).ToUpper());
+            sb.Append(string0.Substring(1));
+            return sb.ToString();
 
-            return string0;
         }
 
         /// <summary>
@@ -698,7 +687,7 @@ namespace NetCore8583.Util
         }
 
         /// <summary>
-        ///     Cheks whether a string is a valid UUID or GUID
+        ///     Checks whether a string is a valid UUID or GUID
         /// </summary>
         /// <param name="check"></param>
         /// <returns></returns>
@@ -761,7 +750,7 @@ namespace NetCore8583.Util
             // variable holding the pattern
             var pattern = "";
 
-            // check whether the dictionnary contains the key IPv6
+            // check whether the dictionary contains the key IPv6
             if (!IpPatterns.ContainsKey("IPv6"))
             {
                 pattern = "((([0-9A-Fa-f]{1,4}:){7}(([0-9A-Fa-f]{1,4})|:))|(([0-9A-Fa-f]{1,4}:){6}";
@@ -788,13 +777,11 @@ namespace NetCore8583.Util
             }
 
             // check whether the dictionary contains the key IPv4
-            if (!IpPatterns.ContainsKey("IPv4"))
-            {
-                pattern =
-                    "(?:(?:25[0-5]|2[0-4][0-9]|(?:(?:1[0-9])?|[1-9]?)[0-9])\\.){3}(?:25[0-5]|2[0-4][0-9]|(?:(?:1[0-9])?|[1-9]?)[0-9])";
-                IpPatterns.Add("IPv4",
-                    pattern);
-            }
+            if (IpPatterns.ContainsKey("IPv4")) return;
+            pattern =
+                "(?:(?:25[0-5]|2[0-4][0-9]|(?:(?:1[0-9])?|[1-9]?)[0-9])\\.){3}(?:25[0-5]|2[0-4][0-9]|(?:(?:1[0-9])?|[1-9]?)[0-9])";
+            IpPatterns.Add("IPv4",
+                pattern);
         }
 
         #endregion Private Routines

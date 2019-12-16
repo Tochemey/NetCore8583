@@ -9,7 +9,7 @@ namespace NetCore8583.Util
         public static void AddAll<TK, TV>(this Dictionary<TK, TV> dic,
             Dictionary<TK, TV> val)
         {
-            foreach (var kv in val) dic.Add(kv.Key, kv.Value);
+            foreach (var (key, value) in val) dic.Add(key, value);
         }
     }
-}
+}   
