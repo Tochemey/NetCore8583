@@ -74,7 +74,7 @@ NetCore8583 can help with this process, by means of the custom field encoders. T
 
 ### Easy way to configure ISO 8583 messages templates
 
-he easiest way to configure the message templates and parsing templates is by using a XML config file and pass it to the MessageFactory.
+The easiest way to configure the message templates and parsing templates is by using a XML config file and pass it to the MessageFactory.
 
 ### XML configuration
 
