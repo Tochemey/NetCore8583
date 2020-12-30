@@ -61,11 +61,11 @@ namespace NetCore8583.Parse
                 var type = ParseType(elem.GetAttribute("type"));
                 if (type == -1)
                     throw new IOException($"Invalid type {elem.GetAttribute("type")} for ISO8583 header: ");
-                if (elem.ChildNodes == null || elem.ChildNodes.Count == 0)
+                if (elem.ChildNodes.Count == 0)
                 {
                     if (elem.GetAttribute("ref") != null && !string.IsNullOrEmpty(elem.GetAttribute("ref")))
                     {
-                        if (refs == null) refs = new List<XmlElement>(nodes.Count - i);
+                        refs ??= new List<XmlElement>(nodes.Count - i);
                         refs.Add(elem);
                     }
                     else
@@ -75,7 +75,7 @@ namespace NetCore8583.Parse
                 }
                 else
                 {
-                    var header = elem.ChildNodes.Item(0).Value;
+                    var header = elem.ChildNodes.Item(0)?.Value;
                     var binHeader = "true".Equals(elem.GetAttribute("binary"));
                     if (Logger.IsEnabled(LogEventLevel.Debug))
                     {
@@ -137,9 +137,9 @@ namespace NetCore8583.Parse
                 var type = ParseType(elem.GetAttribute("type"));
                 if (type == -1)
                     throw new IOException("Invalid ISO8583 type for template: " + elem.GetAttribute("type"));
-                if (elem.GetAttribute("extends") != null && !elem.GetAttribute("extends").IsEmpty())
+                if (!elem.GetAttribute("extends").IsEmpty())
                 {
-                    if (subs == null) subs = new List<XmlElement>(nodes.Count - i);
+                    subs ??= new List<XmlElement>(nodes.Count - i);
                     subs.Add(elem);
                     continue;
                 }
@@ -152,7 +152,7 @@ namespace NetCore8583.Parse
                 for (var j = 0; j < fields.Count; j++)
                 {
                     var f = (XmlElement) fields.Item(j);
-                    if (f.ParentNode != elem) continue;
+                    if (f?.ParentNode != elem) continue;
                     var num = int.Parse(f.GetAttribute("num"));
                     
                     var v = GetTemplateField(
@@ -194,7 +194,7 @@ namespace NetCore8583.Parse
                 m.Type = type;
                 m.Encoding = mfact.Encoding;
                 
-                for (var i = 2; i < 128; i++)
+                for (var i = 2; i <= 128; i++)
                     if (tref.HasField(i))
                         m.SetField(
                             i,
@@ -205,9 +205,9 @@ namespace NetCore8583.Parse
                 for (var j = 0; j < fields.Count; j++)
                 {
                     var f = (XmlElement) fields.Item(j);
-                    var num = int.Parse(f.GetAttribute("num"));
+                    var num = int.Parse(f?.GetAttribute("num") ?? string.Empty);
                     
-                    if (f.ParentNode != elem) continue;
+                    if (f?.ParentNode != elem) continue;
                     
                     var v = GetTemplateField(
                         f,
@@ -258,7 +258,7 @@ namespace NetCore8583.Parse
             var itype = Enumm.Parse<IsoType>(typedef);
             var subs = f.GetElementsByTagName("field");
             
-            if (subs != null && subs.Count > 0)
+            if (subs.Count > 0)
             {
                 var cf = new CompositeField();
                 for (var j = 0; j < subs.Count; j++)
@@ -287,7 +287,7 @@ namespace NetCore8583.Parse
                         cf);
             }
 
-            var v = f.ChildNodes.Count == 0 ? string.Empty : f.ChildNodes.Item(0).Value;
+            var v = f.ChildNodes.Count == 0 ? string.Empty : f.ChildNodes.Item(0)?.Value;
             var customField = toplevel ? mfact.GetCustomField(num) : null;
             
             if (customField != null)
@@ -340,7 +340,7 @@ namespace NetCore8583.Parse
             
             var subs = f.GetElementsByTagName("field");
 
-            if (subs == null || subs.Count <= 0) return fpi;
+            if (subs.Count <= 0) return fpi;
             
             var compo = new CompositeField();
             for (var i = 0; i < subs.Count; i++)
@@ -379,7 +379,7 @@ namespace NetCore8583.Parse
                 
                 if (elem.GetAttribute("extends") != null && !elem.GetAttribute("extends").IsEmpty())
                 {
-                    if (subs == null) subs = new List<XmlElement>(nodes.Count - i);
+                    subs ??= new List<XmlElement>(nodes.Count - i);
                     subs.Add(elem);
                     continue;
                 }
@@ -468,6 +468,7 @@ namespace NetCore8583.Parse
                 if (childNodes.Item(i).NodeType == XmlNodeType.Element)
                 {
                     var childElem = (XmlElement) childNodes.Item(i);
+                    Debug.Assert(childElem != null, nameof(childElem) + " != null");
                     if (childElem.Name.Equals(tagName)) childElementsByTagName.Add(childElem);
                 }
 
@@ -587,6 +588,7 @@ namespace NetCore8583.Parse
         /// <typeparam name="T"></typeparam>
         public static void ConfigureFromDefault<T>(MessageFactory<T> mfact) where T : IsoMessage
         {
+            Debug.Assert(AppDomain.CurrentDomain.BaseDirectory != null, "AppDomain.CurrentDomain.BaseDirectory != null");
             var configFile = Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
                 "n8583.xml");
@@ -613,7 +615,7 @@ namespace NetCore8583.Parse
             catch (Exception e)
             {
                 Logger.Error("Error while parsing the config file" + e);
-                throw e;
+                throw;
             }
         }
     }
