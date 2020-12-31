@@ -172,6 +172,7 @@ namespace NetCore8583
                 val = _binIsoHeaders[type];
             else if (_isoHeaders.ContainsKey(type))
                 valStr = _isoHeaders[type];
+
             var m = keyPresent ? CreateIsoMessageWithBinaryHeader(val) : CreateIsoMessage(valStr);
             m.Type = type;
             m.Etx = Etx;
@@ -207,8 +208,13 @@ namespace NetCore8583
         ///     overwriting fields from the template if they overlap.
         /// </summary>
         /// <param name="request">An ISO8583 message with a request type (ending in 00).</param>
+        /// <param name="copyAllFields">
+        ///     If true, copies all fields from the request to the response, overwriting any values already
+        ///     set from the template; otherwise it only overwrites values for existing fields from the template. If the template
+        ///     for a response does not exist, then all fields from
+        /// </param>
         /// <returns></returns>
-        public T CreateResponse(T request)
+        public T CreateResponse(T request, bool copyAllFields = true)
         {
             var resp = CreateIsoMessage(_isoHeaders[request.Type + 16]);
             resp.Encoding = request.Encoding;
@@ -225,7 +231,7 @@ namespace NetCore8583
                         resp.SetField(i,
                             request.GetField(i).Clone() as IsoValue);
             }
-            else
+            else if (copyAllFields)
             {
                 for (var i = 2; i < 128; i++)
                     if (request.HasField(i))
@@ -234,6 +240,15 @@ namespace NetCore8583
                     else if (templ.HasField(i))
                         resp.SetField(i,
                             templ.GetField(i).Clone() as IsoValue);
+            }
+            else
+            {
+                for (var i = 2; i < 128; i++)
+                    if (templ.HasField(i))
+                    {
+                        var src = request.HasField(i) ? request : templ;
+                        resp.SetField(i, src.GetField(i).Clone() as IsoValue);
+                    }
             }
 
             return resp;
@@ -250,14 +265,11 @@ namespace NetCore8583
             TimeZoneInfo tz)
         {
             var guide = ParseMap[messageType];
-            if (guide != null)
+            var fpi = guide?[field];
+            if (fpi is DateTimeParseInfo dateTimeParseInfo)
             {
-                var fpi = guide[field];
-                if (fpi is DateTimeParseInfo dateTimeParseInfo)
-                {
-                    dateTimeParseInfo.TimeZoneInfo = tz;
-                    return;
-                }
+                dateTimeParseInfo.TimeZoneInfo = tz;
+                return;
             }
 
             _logger.Warning("Field {@Field} for message type {@MessageType} is not for dates, cannot set timezone",
