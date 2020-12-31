@@ -1,0 +1,7 @@
+<n8583-config>
+    <parse type="0100">
+        <field num="2" type="LLVAR"/>
+        <field num="3" type="LLBIN"/>
+        <field num="4" type="ALPHA" length="8"/>
+    </parse>
+</n8583-config>

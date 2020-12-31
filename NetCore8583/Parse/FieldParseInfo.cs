@@ -20,6 +20,7 @@ namespace NetCore8583.Parse
         protected IsoType IsoType { get; }
         protected int Length { get; }
         public bool ForceStringDecoding { get; set; }
+        public int Radix { get; set; } = 10;
         public ICustomField Decoder { get; set; }
         public Encoding Encoding { get; set; } = Encoding.Default;
 
@@ -65,7 +66,7 @@ namespace NetCore8583.Parse
                 var string0 = buf.BytesToString(pos,
                     digits,
                     Encoding);
-                return Convert.ToInt32(string0, 10);
+                return Convert.ToInt32(string0, Radix);
             }
 
             switch (digits)

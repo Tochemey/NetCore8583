@@ -50,6 +50,7 @@ namespace NetCore8583
 
         private Encoding _encoding = Encoding.Default;
         private bool _forceStringEncoding;
+        private int _radix = 10;
 
         /// <summary>
         ///     Stores the information needed to parse messages sorted by type
@@ -93,6 +94,18 @@ namespace NetCore8583
                     parser.ForceStringDecoding = value;
             }
         }
+
+        public int Radix
+        {
+            get => _radix;
+            set
+            {
+                _radix = value;
+                foreach (var parser in ParseMap.Values.SelectMany(mapValue => mapValue.Values))
+                    parser.Radix = value;
+            }
+        }
+
 
         public Encoding Encoding
         {
