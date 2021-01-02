@@ -34,10 +34,9 @@ namespace NetCore8583.Util
         {
             unsafe
             {
-                string s;
                 fixed (sbyte* pAsciiUpper = sbytes)
                 {
-                    s = new string(pAsciiUpper,
+                    var s = new string(pAsciiUpper,
                         pos,
                         len,
                         encoding);
@@ -51,10 +50,9 @@ namespace NetCore8583.Util
         {
             unsafe
             {
-                string s;
                 fixed (sbyte* pAsciiUpper = sbytes)
                 {
-                    s = new string(pAsciiUpper,
+                    var s = new string(pAsciiUpper,
                         0,
                         sbytes.Length,
                         encoding);
