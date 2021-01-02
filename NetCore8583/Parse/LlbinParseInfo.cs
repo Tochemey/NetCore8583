@@ -44,12 +44,12 @@ namespace NetCore8583.Parse
                     var dec = binaryField.DecodeBinaryField(buf,
                         pos + 2,
                         len);
-                    
+
                     if (dec == null)
                         return new IsoValue(IsoType,
                             binval,
                             binval.Length);
-                    
+
                     return new IsoValue(IsoType,
                         dec,
                         0,
@@ -66,7 +66,7 @@ namespace NetCore8583.Parse
                 var dec = custom.DecodeField(buf.BytesToString(pos + 2,
                     len,
                     Encoding.Default));
-                
+
                 return dec == null
                     ? new IsoValue(IsoType,
                         binval,
@@ -98,19 +98,19 @@ namespace NetCore8583.Parse
             if (l + pos + 1 > buf.Length)
                 throw new ParseException(
                     $"Insufficient data for bin LLBIN field {field}, pos {pos}: need {l}, only {buf.Length} available");
-            
+
             var v = new sbyte[l];
             Array.Copy(sbytes,
                 pos + 1,
                 v,
                 0,
                 l);
-            
+
             if (custom == null)
                 return new IsoValue(IsoType,
                     v);
-            
-            
+
+
             if (custom is ICustomBinaryField binaryField)
                 try
                 {

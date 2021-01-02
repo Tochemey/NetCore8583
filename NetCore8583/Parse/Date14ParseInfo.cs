@@ -66,7 +66,7 @@ namespace NetCore8583.Parse
             }
 
             calendar = calendar.AddMilliseconds(0);
-            
+
             if (TimeZoneInfo != null)
                 calendar = TimeZoneInfo.ConvertTime(calendar,
                     TimeZoneInfo);
@@ -93,11 +93,11 @@ namespace NetCore8583.Parse
                 tens[4],
                 tens[5],
                 tens[6]).AddMilliseconds(0);
-            
+
             if (TimeZoneInfo != null)
                 calendar = TimeZoneInfo.ConvertTime(calendar,
                     TimeZoneInfo);
-            
+
             return new IsoValue(IsoType,
                 AdjustWithFutureTolerance(new DateTimeOffset(calendar)).DateTime);
         }

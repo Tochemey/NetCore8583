@@ -32,7 +32,7 @@ namespace NetCore8583.Util
                 return new[]
                 {
                     (sbyte) (Convert.ToInt32(hex,
-                                 16) & 0xff)
+                        16) & 0xff)
                 };
             //Adjust accordingly for odd-length strings
             var count = hex.Length;

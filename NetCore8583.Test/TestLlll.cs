@@ -49,6 +49,25 @@ namespace NetCore8583.Test
         }
 
         [Fact]
+        public void TestL4bin()
+        {
+            sbyte[] fieldData = new sbyte[1000];
+            mfact.UseBinaryMessages = true;
+            IsoMessage m = mfact.NewMessage(0x100);
+            m.SetValue(3, fieldData, IsoType.LLLLBIN, 0);
+            fieldData = m.WriteData();
+            //2 for message header
+            //8 bitmap
+            //3 for field 2 (from template)
+            //1002 for field 3
+            Assert.Equal(1015, fieldData.Length);
+            m = mfact.ParseMessage(fieldData, 0);
+            Assert.True(m.HasField(3));
+            fieldData = m.GetObjectValue(3) as sbyte[];
+            Assert.Equal(1000, fieldData.Length);
+        }
+        
+        [Fact]
         public void TestTemplate()
         {
             var m = mfact.NewMessage(0x100);

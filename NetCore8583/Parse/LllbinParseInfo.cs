@@ -31,7 +31,7 @@ namespace NetCore8583.Parse
                 : HexCodec.HexDecode(buf.BytesToString(pos + 3,
                     l,
                     Encoding.Default));
-            
+
             if (custom == null)
                 return new IsoValue(IsoType,
                     binval,
@@ -100,11 +100,11 @@ namespace NetCore8583.Parse
                 v,
                 0,
                 l);
-            
+
             if (custom == null)
                 return new IsoValue(IsoType,
                     v);
-            
+
             if (custom is ICustomBinaryField binaryField)
                 try
                 {

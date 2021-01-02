@@ -16,7 +16,7 @@ namespace NetCore8583.Parse
             ICustomField custom)
         {
             if (pos < 0) throw new ParseException($"Invalid DATE12 field {field} position {pos}");
-            
+
             if (pos + 12 > buf.Length)
                 throw new ParseException($"Insufficient data for DATE12 field {field}, pos {pos}");
 
@@ -51,7 +51,7 @@ namespace NetCore8583.Parse
                         2,
                         Encoding),
                     10);
-                
+
                 calendar = new DateTime(year,
                     month,
                     day,
@@ -62,10 +62,10 @@ namespace NetCore8583.Parse
             else
             {
                 year = (buf[pos] - 48) * 10 + buf[pos + 1] - 48;
-                
+
                 if (year > 50) year = 1900 + year;
                 else year = 2000 + year;
-                
+
                 calendar = new DateTime(year,
                     (buf[pos + 2] - 48) * 10 + buf[pos + 3] - 48,
                     (buf[pos + 4] - 48) * 10 + buf[pos + 5] - 48,
@@ -100,7 +100,7 @@ namespace NetCore8583.Parse
             int year;
             if (tens[0] > 50) year = 1900 + tens[0];
             else year = 2000 + tens[0];
-            
+
             var calendar = new DateTime(year,
                 tens[1],
                 tens[2],
@@ -111,7 +111,7 @@ namespace NetCore8583.Parse
             if (TimeZoneInfo != null)
                 calendar = TimeZoneInfo.ConvertTime(calendar,
                     TimeZoneInfo);
-            
+
             return new IsoValue(IsoType,
                 AdjustWithFutureTolerance(new DateTimeOffset(calendar)).DateTime);
         }

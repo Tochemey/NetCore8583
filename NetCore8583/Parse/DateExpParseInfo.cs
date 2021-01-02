@@ -27,8 +27,8 @@ namespace NetCore8583.Parse
             if (ForceStringDecoding)
             {
                 year = DateTime.Today.Year - DateTime.Today.Year % 100 + Convert.ToInt32(buf.BytesToString(pos,
-                           2,
-                           Encoding), 10);
+                    2,
+                    Encoding), 10);
 
                 month = Convert.ToInt32(buf.BytesToString(pos + 2,
                     2,

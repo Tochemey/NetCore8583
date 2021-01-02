@@ -64,7 +64,7 @@ namespace NetCore8583.Parse
                     : buf.BytesToString(pos + 4,
                         l,
                         Encoding.Default));
-                
+
                 return dec == null
                     ? new IsoValue(IsoType,
                         binval,
@@ -88,8 +88,8 @@ namespace NetCore8583.Parse
             if (pos < 0) throw new ParseException($"Invalid bin LLLLBIN field {field} pos {pos}");
             if (pos + 2 > buf.Length) throw new ParseException($"Insufficient LLLLBIN header field {field}");
 
-            var l = (buf[pos] & 0xf0) * 1000 + (buf[pos] & 0x0f) * 100
-                                             + ((buf[pos + 1] & 0xf0) >> 4) * 10 + (buf[pos + 1] & 0x0f);
+            var l = ((buf[pos] & 0xf0) >> 4) * 1000 + (buf[pos] & 0x0f) * 100
+                                                    + ((buf[pos + 1] & 0xf0) >> 4) * 10 + (buf[pos + 1] & 0x0f);
 
             if (l < 0) throw new ParseException($"Invalid LLLLBIN length {l} field {field} pos {pos}");
             if (l + pos + 2 > buf.Length)
@@ -102,11 +102,11 @@ namespace NetCore8583.Parse
                 v,
                 0,
                 l);
-            
+
             if (custom == null)
                 return new IsoValue(IsoType,
                     v);
-            
+
             if (custom is ICustomBinaryField customBinaryField)
                 try
                 {

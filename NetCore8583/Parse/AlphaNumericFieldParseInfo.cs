@@ -34,12 +34,12 @@ namespace NetCore8583.Parse
                         buf.Length - pos,
                         Encoding).Substring(0,
                         Length);
-                
+
                 if (custom == null)
                     return new IsoValue(IsoType,
                         v,
                         Length);
-                
+
                 var decoded = custom.DecodeField(v);
                 return decoded == null
                     ? new IsoValue(IsoType,

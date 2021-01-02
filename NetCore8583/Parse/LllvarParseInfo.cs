@@ -53,12 +53,12 @@ namespace NetCore8583.Parse
                     buf.Length - pos - 3,
                     Encoding).Substring(0,
                     len);
-            
+
             if (custom == null)
                 return new IsoValue(IsoType,
                     v,
                     len);
-            
+
             var decoded = custom.DecodeField(v);
             //If decode fails, return string; otherwise use the decoded object and its codec
             return decoded == null
@@ -94,13 +94,13 @@ namespace NetCore8583.Parse
                     buf.BytesToString(pos + 2,
                         len,
                         Encoding));
-            
+
             var v = new IsoValue(IsoType,
                 custom.DecodeField(buf.BytesToString(pos + 2,
                     len,
                     Encoding)),
                 custom);
-            
+
             if (v.Value == null)
                 return new IsoValue(IsoType,
                     buf.BytesToString(pos + 2,

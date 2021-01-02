@@ -51,9 +51,9 @@ namespace NetCore8583.Parse
                 return new IsoValue(IsoType,
                     v,
                     len);
-            
+
             var dec = custom.DecodeField(v);
-            
+
             return dec == null
                 ? new IsoValue(IsoType,
                     v,
@@ -82,17 +82,17 @@ namespace NetCore8583.Parse
 
             if (len + pos + 2 > sbytes.Length)
                 throw new ParseException($"Insufficient data for bin LLLLVAR field {field}, pos {pos}");
-            
+
             if (custom == null)
                 return new IsoValue(IsoType,
                     buf.BytesToString(pos + 2,
                         len,
                         Encoding));
-            
+
             var dec = custom.DecodeField(buf.BytesToString(pos + 2,
                 len,
                 Encoding));
-            
+
             return dec == null
                 ? new IsoValue(IsoType,
                     buf.BytesToString(pos + 2,

@@ -20,9 +20,9 @@ namespace NetCore8583.Parse
             var len = DecodeLength(buf,
                 pos,
                 2);
-            
+
             if (len < 0) throw new ParseException($"Invalid LLVAR length {len}, field {field} pos {pos}");
-            
+
             if (len + pos + 2 > buf.Length)
                 throw new ParseException($"Insufficient data for LLVAR field {field}, pos {pos}");
 

@@ -69,7 +69,8 @@ namespace NetCore8583.Util
         /// <returns>true when valid and false on the contrary</returns>
         public static bool IsValidUrl(this string url)
         {
-            const string pattern = "^(?:(?:(ht|f)tps?|file|news|gopher)://)?(([\\w!~*'()\\.&=+$%-]+: )?[\\w!~*'()\\.&=+$%-]+@)?(([0-9]{1,3}\\.){3}[0-9]{1,3}|([\\w!~*'()-]+\\.)*([\\w^-][\\w-]{0,61})?[\\w]\\.[a-z]{2,6})(:[0-9]{1,4})?((/*)|(/+[\\w!~*'()\\.;?:@&=+$,%#-]+)+/*)$";
+            const string pattern =
+                "^(?:(?:(ht|f)tps?|file|news|gopher)://)?(([\\w!~*'()\\.&=+$%-]+: )?[\\w!~*'()\\.&=+$%-]+@)?(([0-9]{1,3}\\.){3}[0-9]{1,3}|([\\w!~*'()-]+\\.)*([\\w^-][\\w-]{0,61})?[\\w]\\.[a-z]{2,6})(:[0-9]{1,4})?((/*)|(/+[\\w!~*'()\\.;?:@&=+$,%#-]+)+/*)$";
             return Regex.IsMatch(url,
                 pattern);
         }
@@ -320,7 +321,8 @@ namespace NetCore8583.Util
         /// <returns>bool</returns>
         public static bool IsValidTime(this string string0)
         {
-            const string pattern = "^((([0]?[1-9]|1[0-2])(:|\\.)[0-5][0-9]((:|\\.)[0-5][0-9])?( )?(AM|am|aM|Am|PM|pm|pM|Pm))|(([0]?[0-9]|1[0-9]|2[0-3])(:|\\.)[0-5][0-9]((:|\\.)[0-5][0-9])?))$";
+            const string pattern =
+                "^((([0]?[1-9]|1[0-2])(:|\\.)[0-5][0-9]((:|\\.)[0-5][0-9])?( )?(AM|am|aM|Am|PM|pm|pM|Pm))|(([0]?[0-9]|1[0-9]|2[0-3])(:|\\.)[0-5][0-9]((:|\\.)[0-5][0-9])?))$";
             return Regex.IsMatch(string0,
                 pattern);
         }
@@ -344,11 +346,10 @@ namespace NetCore8583.Util
             if (IsEmpty(standard) || !standard.Equals("EPP"))
                 return Regex.IsMatch(string0,
                     standardFormat);
-            
+
             const string regex = "^\\+[0-9]{1,3}\\.[0-9]{4,14}(?:x\\.+)?$";
             return Regex.IsMatch(string0,
                 regex);
-
         }
 
         /// <summary>
@@ -636,14 +637,13 @@ namespace NetCore8583.Util
         {
             // When the string is not null
             if (string0.IsEmpty()) return string0;
-            
+
             if (string0.Length == 1) return string0.ToUpper();
             var sb = new StringBuilder(string0.Length);
             sb.Append(string0.Substring(0,
                 1).ToUpper());
             sb.Append(string0.Substring(1));
             return sb.ToString();
-
         }
 
         /// <summary>

@@ -58,7 +58,7 @@ namespace NetCore8583.Parse
             if (TimeZoneInfo != null)
                 dt = TimeZoneInfo.ConvertTime(dt,
                     TimeZoneInfo);
-            
+
             return new IsoValue(IsoType,
                 AdjustWithFutureTolerance(new DateTimeOffset(dt)).DateTime);
         }
@@ -71,10 +71,10 @@ namespace NetCore8583.Parse
             var tens = new int[2];
             var sbytes = buf;
             var start = 0;
-            
+
             if (buf.Length - pos < 2)
                 throw new ParseException($"Insufficient data to parse binary DATE4 field {field} pos {pos}");
-            
+
             for (var i = pos; i < pos + tens.Length; i++)
                 tens[start++] = ((sbytes[i] & 0xf0) >> 4) * 10 + (sbytes[i] & 0x0f);
 
@@ -84,7 +84,7 @@ namespace NetCore8583.Parse
                 0,
                 0,
                 0).AddMilliseconds(0);
-            
+
             if (TimeZoneInfo != null)
                 calendar = TimeZoneInfo.ConvertTime(calendar,
                     TimeZoneInfo);

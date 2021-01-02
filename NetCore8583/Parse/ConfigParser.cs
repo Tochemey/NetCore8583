@@ -148,20 +148,20 @@ namespace NetCore8583.Parse
                 m.Type = type;
                 m.Encoding = mfact.Encoding;
                 var fields = elem.GetElementsByTagName("field");
-                
+
                 for (var j = 0; j < fields.Count; j++)
                 {
                     var f = (XmlElement) fields.Item(j);
                     if (f?.ParentNode != elem) continue;
                     var num = int.Parse(f.GetAttribute("num"));
-                    
+
                     var v = GetTemplateField(
                         f,
                         mfact,
                         true);
-                    
+
                     if (v != null) v.Encoding = mfact.Encoding;
-                    
+
                     m.SetField(
                         num,
                         v);
@@ -171,51 +171,51 @@ namespace NetCore8583.Parse
             }
 
             if (subs == null) return;
-            
+
             foreach (var elem in subs)
             {
                 var type = ParseType(elem.GetAttribute("type"));
                 var @ref = ParseType(elem.GetAttribute("extends"));
-                
+
                 if (@ref == -1)
                     throw new ArgumentException(
                         "Message template " + elem.GetAttribute("type") +
                         " extends invalid template " + elem.GetAttribute("extends"));
-                
+
                 IsoMessage tref = mfact.GetMessageTemplate(@ref);
-                
+
                 if (tref == null)
                     throw new ArgumentException(
                         "Message template " + elem.GetAttribute("type") +
                         " extends nonexistent template " + elem.GetAttribute("extends"));
-                
+
                 var m = (T) new IsoMessage();
-                
+
                 m.Type = type;
                 m.Encoding = mfact.Encoding;
-                
+
                 for (var i = 2; i <= 128; i++)
                     if (tref.HasField(i))
                         m.SetField(
                             i,
                             (IsoValue) tref.GetField(i).Clone());
-                
+
                 var fields = elem.GetElementsByTagName("field");
-                
+
                 for (var j = 0; j < fields.Count; j++)
                 {
                     var f = (XmlElement) fields.Item(j);
                     var num = int.Parse(f?.GetAttribute("num") ?? string.Empty);
-                    
+
                     if (f?.ParentNode != elem) continue;
-                    
+
                     var v = GetTemplateField(
                         f,
                         mfact,
                         true);
-                    
+
                     if (v != null) v.Encoding = mfact.Encoding;
-                    
+
                     m.SetField(
                         num,
                         v);
@@ -250,14 +250,14 @@ namespace NetCore8583.Parse
             var num = int.Parse(f.GetAttribute("num"));
             var typedef = f.GetAttribute("type");
             if ("exclude".Equals(typedef)) return null;
-            
+
             var length = 0;
-            
+
             if (f.GetAttribute("length").Length > 0) length = int.Parse(f.GetAttribute("length"));
-            
+
             var itype = Enumm.Parse<IsoType>(typedef);
             var subs = f.GetElementsByTagName("field");
-            
+
             if (subs.Count > 0)
             {
                 var cf = new CompositeField();
@@ -273,7 +273,7 @@ namespace NetCore8583.Parse
                     sv.Encoding = mfact.Encoding;
                     cf.AddValue(sv);
                 }
-                
+
                 Debug.Assert(itype != null, nameof(itype) + " != null");
                 return itype.Value.NeedsLength()
                     ? new IsoValue(
@@ -289,13 +289,13 @@ namespace NetCore8583.Parse
 
             var v = f.ChildNodes.Count == 0 ? string.Empty : f.ChildNodes.Item(0)?.Value;
             var customField = toplevel ? mfact.GetCustomField(num) : null;
-            
+
             if (customField != null)
             {
                 Debug.Assert(
                     itype != null,
                     "itype != null");
-                
+
                 return itype.Value.NeedsLength()
                     ? new IsoValue(
                         itype.Value,
@@ -311,7 +311,7 @@ namespace NetCore8583.Parse
             Debug.Assert(
                 itype != null,
                 "itype != null");
-            
+
             return itype.Value.NeedsLength()
                 ? new IsoValue(
                     itype.Value,
@@ -328,29 +328,29 @@ namespace NetCore8583.Parse
             var itype = Enumm.Parse<IsoType>(f.GetAttribute("type"));
             var length = 0;
             if (f.GetAttribute("length").Length > 0) length = int.Parse(f.GetAttribute("length"));
-            
+
             Debug.Assert(
                 itype != null,
                 "itype != null");
-            
+
             var fpi = FieldParseInfo.GetInstance(
                 itype.Value,
                 length,
                 mfact.Encoding);
-            
+
             var subs = f.GetElementsByTagName("field");
 
             if (subs.Count <= 0) return fpi;
-            
+
             var compo = new CompositeField();
             for (var i = 0; i < subs.Count; i++)
             {
                 var sf = (XmlElement) subs.Item(i);
-                
+
                 Debug.Assert(
                     sf != null,
                     "sf != null");
-                
+
                 if (sf.ParentNode == f)
                     compo.AddParser(
                         GetParser(
@@ -372,11 +372,11 @@ namespace NetCore8583.Parse
             {
                 var elem = (XmlElement) nodes.Item(i);
                 if (elem == null) continue;
-                
+
                 var type = ParseType(elem.GetAttribute("type"));
                 if (type == -1)
                     throw new IOException("Invalid ISO8583 type for parse guide: " + elem.GetAttribute("type"));
-                
+
                 if (elem.GetAttribute("extends") != null && !elem.GetAttribute("extends").IsEmpty())
                 {
                     subs ??= new List<XmlElement>(nodes.Count - i);
@@ -386,12 +386,12 @@ namespace NetCore8583.Parse
 
                 var parseMap = new Dictionary<int, FieldParseInfo>();
                 var fields = elem.GetElementsByTagName("field");
-                
+
                 for (var j = 0; j < fields.Count; j++)
                 {
                     var f = (XmlElement) fields.Item(j);
                     if (f == null || f.ParentNode != elem) continue;
-                    
+
                     var num = int.Parse(f.GetAttribute("num"));
                     parseMap.Add(
                         num,
@@ -425,14 +425,14 @@ namespace NetCore8583.Parse
                     throw new ArgumentException(
                         "Parsing guide " + elem.GetAttribute("type") +
                         " extends nonexistent guide " + elem.GetAttribute("extends"));
-                
+
                 var child = new Dictionary<int, FieldParseInfo>();
                 child.AddAll(parent);
-                
+
                 var fields = GetDirectChildrenByTagName(
                     elem,
                     "field");
-                
+
                 foreach (var f in fields)
                 {
                     var num = int.Parse(f.GetAttribute("num"));
@@ -449,7 +449,7 @@ namespace NetCore8583.Parse
                 mfact.SetParseMap(
                     type,
                     child);
-                
+
                 if (guides.ContainsKey(type)) guides[type] = child;
                 else
                     guides.Add(
@@ -463,7 +463,7 @@ namespace NetCore8583.Parse
         {
             var childElementsByTagName = new List<XmlElement>();
             var childNodes = elem.ChildNodes;
-            
+
             for (var i = 0; i < childNodes.Count; i++)
                 if (childNodes.Item(i).NodeType == XmlNodeType.Element)
                 {
@@ -497,11 +497,11 @@ namespace NetCore8583.Parse
                 ParseHeaders(
                     root.GetElementsByTagName("header"),
                     mfact);
-                
+
                 ParseTemplates(
                     root.GetElementsByTagName("template"),
                     mfact);
-                
+
                 //Read the parsing guides
                 ParseGuides(
                     root.GetElementsByTagName("parse"),
@@ -561,11 +561,11 @@ namespace NetCore8583.Parse
                 using (client)
                 {
                     var stream = await client.GetStreamAsync(url);
-                    
+
                     Logger.Debug(
                         "ISO8583 Parsing config from classpath file {Path}",
                         url.ToString());
-                    
+
                     Parse(
                         mfact,
                         stream);
@@ -588,11 +588,12 @@ namespace NetCore8583.Parse
         /// <typeparam name="T"></typeparam>
         public static void ConfigureFromDefault<T>(MessageFactory<T> mfact) where T : IsoMessage
         {
-            Debug.Assert(AppDomain.CurrentDomain.BaseDirectory != null, "AppDomain.CurrentDomain.BaseDirectory != null");
+            Debug.Assert(AppDomain.CurrentDomain.BaseDirectory != null,
+                "AppDomain.CurrentDomain.BaseDirectory != null");
             var configFile = Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
                 "n8583.xml");
-            
+
             if (!File.Exists(configFile))
             {
                 Logger.Warning("ISO8583 config file n8583.xml not found!");

@@ -1,7 +1,5 @@
 using System;
-using System.ComponentModel.DataAnnotations;
 using NetCore8583.Util;
-using Serilog.Sinks.SystemConsole.Themes;
 
 namespace NetCore8583.Parse
 {
@@ -28,8 +26,8 @@ namespace NetCore8583.Parse
                     2,
                     Encoding), 10);
                 month = Convert.ToInt32(buf.BytesToString(pos + 2,
-                            2,
-                            Encoding), 10) - 1;
+                    2,
+                    Encoding), 10) - 1;
                 day = Convert.ToInt32(buf.BytesToString(pos + 4,
                     2,
                     Encoding), 10);

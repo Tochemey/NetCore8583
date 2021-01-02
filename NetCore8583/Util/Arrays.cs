@@ -5,7 +5,7 @@ namespace NetCore8583.Util
     public static class Arrays
     {
         /// <summary>
-        /// Fill fills an array with value from a starting position to a given ending position
+        ///     Fill fills an array with value from a starting position to a given ending position
         /// </summary>
         /// <param name="array">The array to fill</param>
         /// <param name="start">The starting position</param>

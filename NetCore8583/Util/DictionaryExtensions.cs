@@ -12,4 +12,4 @@ namespace NetCore8583.Util
             foreach (var (key, value) in val) dic.Add(key, value);
         }
     }
-}   
+}
