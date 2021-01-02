@@ -2,6 +2,7 @@ NetCore8583
 =============
 ![build](https://github.com/Tochemey/NetCore8583/workflows/build/badge.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![NuGet Badge](https://buildstats.info/nuget/NetCore8583)](https://www.nuget.org/packages/NetCore8583/)
 ## Introduction
 
 NetCore8583 is a dotnet core implementation of the ISO 8583 protocol. 
