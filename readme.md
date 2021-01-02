@@ -1,6 +1,6 @@
 NetCore8583
 =============
-[![Build status](https://ci.appveyor.com/api/projects/status/4v20289lcyqd345p?svg=true)](https://ci.appveyor.com/project/Tochemey/netcore8583)
+![build](https://github.com/Tochemey/NetCore8583/workflows/build/badge.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 ## Introduction
 
