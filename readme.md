@@ -26,7 +26,7 @@ The bitmap is 64 bits long and it is encoded as 16 hex characters or as 8 bytes 
 
 The fields in the message are numbered from 1 to 64. Field 1 is the secondary bitmap, if present. The secondary bitmap allows for the message to have fields from 65 to 128.
 
-You can for more information; Wikipedia has [a very good article](http://en.wikipedia.org/wiki/ISO_8583) on the whole specification.
+Wikipedia has [a very good article](http://en.wikipedia.org/wiki/ISO_8583) on the whole specification.
 
 ## Usage
 
