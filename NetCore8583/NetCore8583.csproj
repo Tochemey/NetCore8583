@@ -11,7 +11,7 @@
     <PackageTags>Iso8583 NetCore Banking C#</PackageTags>
     <Copyright>Tochemey 2018</Copyright>
     <PackageVersion>1.0.1</PackageVersion>
-    <TargetFrameworks>net5.0;netcoreapp3.1</TargetFrameworks>
+    <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
