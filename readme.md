@@ -1,6 +1,7 @@
 NetCore8583
 =============
 ![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/Tochemey/NetCore8583/build/master?style=for-the-badge)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 [![Nuget](https://img.shields.io/nuget/v/NetCore8583?style=for-the-badge)](https://www.nuget.org/packages/NetCore8583/)
 
 ## Introduction
