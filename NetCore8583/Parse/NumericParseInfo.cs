@@ -5,15 +5,11 @@ namespace NetCore8583.Parse
 {
     public class NumericParseInfo : AlphaNumericFieldParseInfo
     {
-        public NumericParseInfo(int len) : base(IsoType.NUMERIC,
-            len)
+        public NumericParseInfo(int len) : base(IsoType.NUMERIC, len)
         {
         }
 
-        public override IsoValue ParseBinary(int field,
-            sbyte[] buf,
-            int pos,
-            ICustomField custom)
+        public override IsoValue ParseBinary(int field, sbyte[] buf, int pos, ICustomField custom)
         {
             if (pos < 0) throw new ParseException($"Invalid bin NUMERIC field {field} pos {pos}");
             if (pos + Length / 2 > buf.Length)

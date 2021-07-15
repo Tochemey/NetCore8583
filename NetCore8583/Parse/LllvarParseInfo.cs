@@ -26,7 +26,7 @@ namespace NetCore8583.Parse
 
             if (len < 0)
                 throw new ParseException(
-                    $"Invalid LLLVAR length {len}({buf.BytesToString(pos, 3, Encoding.Default)}) field {field} pos {pos}");
+                    $"Invalid LLLVAR length {len}({buf.ToString(pos, 3, Encoding.Default)}) field {field} pos {pos}");
 
             if (len + pos + 3 > buf.Length)
                 throw new ParseException($"Insufficient data for LLLVAR field {field}, pos {pos}");
@@ -36,7 +36,7 @@ namespace NetCore8583.Parse
             {
                 v = len == 0
                     ? string.Empty
-                    : buf.BytesToString(pos + 3,
+                    : buf.ToString(pos + 3,
                         len,
                         Encoding);
             }
@@ -49,7 +49,7 @@ namespace NetCore8583.Parse
             //buffer, there are probably some extended characters. So we create a String from
             //the rest of the buffer, and then cut it to the specified length.
             if (v.Length != len)
-                v = buf.BytesToString(pos + 3,
+                v = buf.ToString(pos + 3,
                     buf.Length - pos - 3,
                     Encoding).Substring(0,
                     len);
@@ -91,19 +91,19 @@ namespace NetCore8583.Parse
 
             if (custom == null)
                 return new IsoValue(IsoType,
-                    buf.BytesToString(pos + 2,
+                    buf.ToString(pos + 2,
                         len,
                         Encoding));
 
             var v = new IsoValue(IsoType,
-                custom.DecodeField(buf.BytesToString(pos + 2,
+                custom.DecodeField(buf.ToString(pos + 2,
                     len,
                     Encoding)),
                 custom);
 
             if (v.Value == null)
                 return new IsoValue(IsoType,
-                    buf.BytesToString(pos + 2,
+                    buf.ToString(pos + 2,
                         len,
                         Encoding.Default));
             return v;

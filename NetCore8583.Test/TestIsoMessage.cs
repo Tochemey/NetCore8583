@@ -118,7 +118,7 @@ namespace NetCore8583.Test
         public void TestParsing()
         {
             var read = File.ReadAllBytes(AppDomain.CurrentDomain.BaseDirectory + @"/Resources/parse1.txt");
-            var buf = read.ToSignedBytes();
+            var buf = read.ToInt8();
             var len = mf.GetIsoHeader(0x210).Length;
             var iso = mf.ParseMessage(buf,
                 len);

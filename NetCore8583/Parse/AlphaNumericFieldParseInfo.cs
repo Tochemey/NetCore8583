@@ -25,12 +25,12 @@ namespace NetCore8583.Parse
                     $"Insufficient data for {IsoType} field {field} of length {Length}, pos {pos}");
             try
             {
-                var v = buf.BytesToString(pos,
+                var v = buf.ToString(pos,
                     Length,
                     Encoding);
 
                 if (v.Length != Length)
-                    v = buf.BytesToString(pos,
+                    v = buf.ToString(pos,
                         buf.Length - pos,
                         Encoding).Substring(0,
                         Length);

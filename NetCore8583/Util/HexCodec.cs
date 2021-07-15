@@ -50,9 +50,18 @@ namespace NetCore8583.Util
             for (var z = 0; z < 2 && pos < hex.Length; z++)
             {
                 int c = hex[pos++];
-                if (c >= 'A' && c <= 'F') c -= 55;
-                else if (c >= '0' && c <= '9') c -= 48;
-                else if (c >= 'a' && c <= 'f') c -= 87;
+                switch (c)
+                {
+                    case >= 'A' and <= 'F':
+                        c -= 55;
+                        break;
+                    case >= '0' and <= '9':
+                        c -= 48;
+                        break;
+                    case >= 'a' and <= 'f':
+                        c -= 87;
+                        break;
+                }
                 if (nibble == 0)
                 {
                     holder = c << 4;

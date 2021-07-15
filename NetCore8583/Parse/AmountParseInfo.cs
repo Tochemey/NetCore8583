@@ -22,7 +22,7 @@ namespace NetCore8583.Parse
             if (pos + 12 > buf.Length)
                 throw new ParseException($"Insufficient data for AMOUNT field {field}, pos {pos}");
 
-            var v = buf.BytesToString(pos,
+            var v = buf.ToString(pos,
                 12,
                 Encoding);
 

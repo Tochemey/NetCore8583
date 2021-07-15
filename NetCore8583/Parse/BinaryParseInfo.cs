@@ -24,7 +24,7 @@ namespace NetCore8583.Parse
             if (pos + Length * 2 > buf.Length)
                 throw new ParseException($"Insufficient data for BINARY field {field} of length {Length}, pos {pos}");
 
-            var s = buf.BytesToString(pos,
+            var s = buf.ToString(pos,
                 Length * 2,
                 Encoding.Default);
             //var binval = HexCodec.HexDecode(Encoding.ASCII.GetString(buf,
@@ -38,7 +38,7 @@ namespace NetCore8583.Parse
                     binval,
                     binval.Length);
 
-            s = buf.BytesToString(pos,
+            s = buf.ToString(pos,
                 Length * 2,
                 Encoding);
             //var dec = custom.DecodeField(Encoding.GetString(buf,

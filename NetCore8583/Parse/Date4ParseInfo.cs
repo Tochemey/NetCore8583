@@ -26,12 +26,12 @@ namespace NetCore8583.Parse
             //Set the month and the day in the date
             if (ForceStringDecoding)
             {
-                var c = buf.BytesToString(pos,
+                var c = buf.ToString(pos,
                     2,
                     Encoding);
                 month = Convert.ToInt32(c,
                     10);
-                c = buf.BytesToString(pos + 2,
+                c = buf.ToString(pos + 2,
                     2,
                     Encoding);
                 day = Convert.ToInt32(c,

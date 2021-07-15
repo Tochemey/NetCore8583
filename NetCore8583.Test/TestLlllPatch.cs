@@ -80,12 +80,12 @@ namespace NetCore8583.Test
             var binReader = new BinaryReader(memStream);
             memStream.Position = 0;
 
-            var buf = binReader.ReadBytes(2).ToSignedBytes();
+            var buf = binReader.ReadBytes(2).ToInt8();
             Assert.NotEqual(buf,
                 new sbyte[2]);
 
             var len = ((buf[0] & 0xff) << 8) | (buf[1] & 0xff);
-            buf = binReader.ReadBytes(len).ToSignedBytes();
+            buf = binReader.ReadBytes(len).ToInt8();
 
             // parse
             mfact.UseBinaryMessages = true;

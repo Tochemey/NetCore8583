@@ -22,27 +22,27 @@ namespace NetCore8583.Parse
             DateTime calendar;
             if (ForceStringDecoding)
             {
-                var year = Convert.ToInt32(buf.BytesToString(pos,
+                var year = Convert.ToInt32(buf.ToString(pos,
                         4,
                         Encoding),
                     10);
-                var month = Convert.ToInt32(buf.BytesToString(pos,
+                var month = Convert.ToInt32(buf.ToString(pos,
                         2,
                         Encoding),
                     10);
-                var day = Convert.ToInt32(buf.BytesToString(pos + 2,
+                var day = Convert.ToInt32(buf.ToString(pos + 2,
                         2,
                         Encoding),
                     10);
-                var hour = Convert.ToInt32(buf.BytesToString(pos + 4,
+                var hour = Convert.ToInt32(buf.ToString(pos + 4,
                         2,
                         Encoding),
                     10);
-                var min = Convert.ToInt32(buf.BytesToString(pos + 6,
+                var min = Convert.ToInt32(buf.ToString(pos + 6,
                         2,
                         Encoding),
                     10);
-                var sec = Convert.ToInt32(buf.BytesToString(pos + 8,
+                var sec = Convert.ToInt32(buf.ToString(pos + 8,
                         2,
                         Encoding),
                     10);

@@ -25,11 +25,11 @@ namespace NetCore8583.Parse
 
             if (len + pos + 2 > buf.Length)
                 throw new ParseException(
-                    $"Insufficient data for LLBIN field {field}, pos {pos} (LEN states '{buf.BytesToString(pos, 2, Encoding.Default)}')");
+                    $"Insufficient data for LLBIN field {field}, pos {pos} (LEN states '{buf.ToString(pos, 2, Encoding.Default)}')");
 
             var binval = len == 0
                 ? new sbyte[0]
-                : HexCodec.HexDecode(buf.BytesToString(pos + 2,
+                : HexCodec.HexDecode(buf.ToString(pos + 2,
                     len,
                     Encoding.Default));
 
@@ -58,12 +58,12 @@ namespace NetCore8583.Parse
                 catch (Exception)
                 {
                     throw new ParseException(
-                        $"Insufficient data for LLBIN field {field}, pos {pos} (LEN states '{buf.BytesToString(pos, 2, Encoding.Default)}')");
+                        $"Insufficient data for LLBIN field {field}, pos {pos} (LEN states '{buf.ToString(pos, 2, Encoding.Default)}')");
                 }
 
             try
             {
-                var dec = custom.DecodeField(buf.BytesToString(pos + 2,
+                var dec = custom.DecodeField(buf.ToString(pos + 2,
                     len,
                     Encoding.Default));
 
@@ -79,7 +79,7 @@ namespace NetCore8583.Parse
             catch (Exception)
             {
                 throw new ParseException(
-                    $"Insufficient data for LLBIN field {field}, pos {pos} (LEN states '{buf.BytesToString(pos, 2, Encoding.Default)}')");
+                    $"Insufficient data for LLBIN field {field}, pos {pos} (LEN states '{buf.ToString(pos, 2, Encoding.Default)}')");
             }
         }
 

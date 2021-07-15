@@ -9,33 +9,19 @@ namespace NetCore8583.Codecs
     /// </summary>
     public class LongBcdCodec : ICustomBinaryField
     {
-        public object DecodeField(string val)
-        {
-            return long.Parse(val);
-        }
+        public object DecodeField(string val) => long.Parse(val);
 
-        public string EncodeField(object obj)
-        {
-            return Convert.ToString(obj);
-        }
+        public string EncodeField(object obj) => Convert.ToString(obj);
 
-        public object DecodeBinaryField(sbyte[] bytes,
-            int offset,
-            int length)
-        {
-            return Bcd.DecodeToLong(
-                bytes,
-                offset,
-                length * 2);
-        }
+        public object DecodeBinaryField(sbyte[] bytes, int offset, int length) =>
+            Bcd.DecodeToLong(bytes, offset, length * 2);
 
         public sbyte[] EncodeBinaryField(object obj)
         {
             var s = Convert.ToString(obj);
+            if (s == null) return null;
             var buf = new sbyte[s.Length / 2 + s.Length % 2];
-            Bcd.Encode(
-                s,
-                buf);
+            Bcd.Encode(s, buf);
             return buf;
         }
     }

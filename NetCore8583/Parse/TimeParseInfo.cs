@@ -20,15 +20,15 @@ namespace NetCore8583.Parse
             DateTime calendar;
             if (ForceStringDecoding)
             {
-                var hour = Convert.ToInt32(buf.BytesToString(pos,
+                var hour = Convert.ToInt32(buf.ToString(pos,
                         2,
                         Encoding),
                     10);
-                var minute = Convert.ToInt32(buf.BytesToString(pos + 2,
+                var minute = Convert.ToInt32(buf.ToString(pos + 2,
                         2,
                         Encoding),
                     10);
-                var seconds = Convert.ToInt32(buf.BytesToString(pos + 4,
+                var seconds = Convert.ToInt32(buf.ToString(pos + 4,
                     2,
                     Encoding), 10);
                 calendar = new DateTime(DateTime.Today.Year,

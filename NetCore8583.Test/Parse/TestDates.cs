@@ -20,7 +20,7 @@ namespace NetCore8583.Test.Parse
             Assert.True(v.CompareTo(DateTime.Now) > 0);
             var stream = new MemoryStream();
             comp.Write(stream, true, false);
-            var bin = new Date10ParseInfo().ParseBinary(0, stream.ToArray().ToSignedBytes(), 0, null);
+            var bin = new Date10ParseInfo().ParseBinary(0, stream.ToArray().ToInt8(), 0, null);
             var dt = (DateTime) comp.Value;
             var bindt = (DateTime) bin.Value;
             Assert.Equal(dt.ToBinary(), bindt.ToBinary());
@@ -36,7 +36,7 @@ namespace NetCore8583.Test.Parse
             Assert.True(v.CompareTo(DateTime.UtcNow) > 0);
             var stream = new MemoryStream();
             comp.Write(stream, true, false);
-            var bin = new Date12ParseInfo().ParseBinary(0, stream.ToArray().ToSignedBytes(), 0, null);
+            var bin = new Date12ParseInfo().ParseBinary(0, stream.ToArray().ToInt8(), 0, null);
             var dt = (DateTime) comp.Value;
             var bindt = (DateTime) bin.Value;
             Assert.Equal(dt.ToBinary(), bindt.ToBinary());
@@ -52,7 +52,7 @@ namespace NetCore8583.Test.Parse
             Assert.True(v.CompareTo(DateTime.UtcNow) > 0);
             var stream = new MemoryStream();
             comp.Write(stream, true, false);
-            var bin = new Date14ParseInfo().ParseBinary(0, stream.ToArray().ToSignedBytes(), 0, null);
+            var bin = new Date14ParseInfo().ParseBinary(0, stream.ToArray().ToInt8(), 0, null);
             var dt = (DateTime) comp.Value;
             var bindt = (DateTime) bin.Value;
             Assert.Equal(dt.ToBinary(), bindt.ToBinary());
@@ -76,7 +76,7 @@ namespace NetCore8583.Test.Parse
                 today.Date);
             var stream = new MemoryStream();
             comp.Write(stream, true, false);
-            var bin = new Date4ParseInfo().ParseBinary(0, stream.ToArray().ToSignedBytes(), 0, null);
+            var bin = new Date4ParseInfo().ParseBinary(0, stream.ToArray().ToInt8(), 0, null);
             var dt = (DateTime) comp.Value;
             var bindt = (DateTime) bin.Value;
             Assert.Equal(dt.ToBinary(), bindt.ToBinary());

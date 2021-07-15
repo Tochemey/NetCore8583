@@ -7,11 +7,11 @@ namespace NetCore8583.Util
         /// <summary>
         ///     check the version of OS at runtime
         /// </summary>
-        /// <returns><c>true</c>, if linux was ised, <c>false</c> otherwise.</returns>
+        /// <returns><c>true</c>, if linux was used, <c>false</c> otherwise.</returns>
         public static bool IsLinux()
         {
             var p = (int) Environment.OSVersion.Platform;
-            return p == 4 || p == 6 || p == 128;
+            return p is 4 or 6 or 128;
         }
     }
 }

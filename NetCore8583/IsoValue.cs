@@ -304,7 +304,7 @@ namespace NetCore8583
                 sbytes.Add((sbyte) (l % 10 + 48));
             }
 
-            outs.Write(sbytes.ToArray().ToUnsignedBytes(),
+            outs.Write(sbytes.ToArray().ToUint8(),
                 0,
                 sbytes.Count);
         }
@@ -356,7 +356,7 @@ namespace NetCore8583
                         {
                             Bcd.Encode(ToString(),
                                 buf);
-                            outs.Write(buf.ToUnsignedBytes(),
+                            outs.Write(buf.ToUint8(),
                                 0,
                                 buf.Length);
 
@@ -373,7 +373,7 @@ namespace NetCore8583
                 var missing = 0;
                 if (Value is sbyte[] bytes)
                 {
-                    outs.Write(bytes.ToUnsignedBytes(),
+                    outs.Write(bytes.ToUint8(),
                         0,
                         bytes.Length);
 
@@ -384,7 +384,7 @@ namespace NetCore8583
                     case ICustomBinaryField customBinaryField:
                     {
                         var binval = customBinaryField.EncodeBinaryField(Value);
-                        outs.Write(binval.ToUnsignedBytes(),
+                        outs.Write(binval.ToUint8(),
                             0,
                             binval.Length);
                         missing = Length - binval.Length;
@@ -393,7 +393,7 @@ namespace NetCore8583
                     default:
                     {
                         var binval = HexCodec.HexDecode(Value.ToString());
-                        outs.Write(binval.ToUnsignedBytes(),
+                        outs.Write(binval.ToUint8(),
                             0,
                             binval.Length);
 
@@ -408,7 +408,7 @@ namespace NetCore8583
             else
             {
                 var bytes = ToString().GetSignedBytes(Encoding);
-                outs.Write(bytes.ToUnsignedBytes(),
+                outs.Write(bytes.ToUint8(),
                     0,
                     bytes.Length);
             }

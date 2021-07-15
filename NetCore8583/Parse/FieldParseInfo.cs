@@ -63,7 +63,7 @@ namespace NetCore8583.Parse
         {
             if (ForceStringDecoding)
             {
-                var string0 = buf.BytesToString(pos,
+                var string0 = buf.ToString(pos,
                     digits,
                     Encoding);
                 return Convert.ToInt32(string0, Radix);

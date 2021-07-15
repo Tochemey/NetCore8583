@@ -60,7 +60,7 @@ namespace NetCore8583.Test.Util
         [Fact]
         public void TestPartial()
         {
-            Assert.Equal("FF01", HexCodec.HexEncode(new byte[] {0, 0xff, 1, 2, 3, 4}.ToSignedBytes(),
+            Assert.Equal("FF01", HexCodec.HexEncode(new byte[] {0, 0xff, 1, 2, 3, 4}.ToInt8(),
                 1, 2));
         }
     }

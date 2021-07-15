@@ -9,9 +9,7 @@
         /// <param name="offset"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        object DecodeBinaryField(sbyte[] bytes,
-            int offset,
-            int length);
+        object DecodeBinaryField(sbyte[] bytes, int offset, int length);
 
         /// <summary>
         ///     Encode a custom binary field

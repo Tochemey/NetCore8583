@@ -155,7 +155,7 @@ namespace NetCore8583.Codecs
                 //shouldn't happen
             }
 
-            return stream.ToArray().ToSignedBytes();
+            return stream.ToArray().ToInt8();
         }
 
         public CompositeField AddValue(IsoValue value)

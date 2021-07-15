@@ -42,7 +42,7 @@ namespace NetCore8583.Test
             {
                 1, 0, 0x60, 0, 0, 0, 0, 0, 0, 0,
                 0, 2, (byte) 'X', (byte) 'X', 0, 1, 0xff
-            }.ToSignedBytes(), 0);
+            }.ToInt8(), 0);
             Assert.NotNull(m);
             Assert.Equal("XX", m.GetObjectValue(2));
             Assert.Equal(new[] {unchecked((sbyte) 0xff)}, (sbyte[]) m.GetObjectValue(3));

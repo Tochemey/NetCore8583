@@ -313,7 +313,7 @@ namespace NetCore8583
             }
             else
             {
-                var string0 = buf.BytesToString(0,
+                var string0 = buf.ToString(0,
                     isoHeaderLength,
                     _encoding);
                 m = CreateIsoMessage(isoHeaderLength > 0 ? string0 : null);
@@ -327,7 +327,7 @@ namespace NetCore8583
             }
             else if (ForceStringEncoding)
             {
-                var string0 = buf.BytesToString(isoHeaderLength,
+                var string0 = buf.ToString(isoHeaderLength,
                     4,
                     _encoding);
                 type = Convert.ToInt32(string0,
@@ -392,7 +392,7 @@ namespace NetCore8583
                     sbyte[] bitmapBuffer;
                     if (ForceStringEncoding)
                     {
-                        var bb = buf.BytesToString(isoHeaderLength + 4,
+                        var bb = buf.ToString(isoHeaderLength + 4,
                             16,
                             _encoding).GetSignedBytes();
 
@@ -451,7 +451,7 @@ namespace NetCore8583
                             throw new ParseException($"Insufficient length for secondary bitmap :{minlength}");
                         if (ForceStringEncoding)
                         {
-                            var bb = buf.BytesToString(isoHeaderLength + 20,
+                            var bb = buf.ToString(isoHeaderLength + 20,
                                 16,
                                 _encoding).GetSignedBytes();
                             Array.Copy(bb,
@@ -516,9 +516,9 @@ namespace NetCore8583
             if (index == null)
             {
                 _logger.Error(
-                    $"ISO8583 MessageFactory has no parsing guide for message type {type:X} [{buf.BytesToString(0, buf.Length, _encoding)}]");
+                    $"ISO8583 MessageFactory has no parsing guide for message type {type:X} [{buf.ToString(0, buf.Length, _encoding)}]");
                 throw new Exception(
-                    $"ISO8583 MessageFactory has no parsing guide for message type {type:X} [{buf.BytesToString(0, buf.Length, _encoding)}]");
+                    $"ISO8583 MessageFactory has no parsing guide for message type {type:X} [{buf.ToString(0, buf.Length, _encoding)}]");
             }
 
             //First we check if the message contains fields not specified in the parsing template
@@ -685,10 +685,10 @@ namespace NetCore8583
             }
             else
             {
-                if (_binIsoHeaders.ContainsKey(type)) _binIsoHeaders[type] = val.ToSignedBytes();
+                if (_binIsoHeaders.ContainsKey(type)) _binIsoHeaders[type] = val.ToInt8();
                 else
                     _binIsoHeaders.Add(type,
-                        val.ToSignedBytes());
+                        val.ToInt8());
 
                 _isoHeaders.Remove(type);
             }

@@ -36,19 +36,19 @@ namespace NetCore8583.Test.Util
             buf[0] = 1;
             buf[1] = 1;
             Bcd.Encode("00", buf);
-            Assert.Equal(new byte[] {0, 1}.ToSignedBytes(), buf);
+            Assert.Equal(new byte[] {0, 1}.ToInt8(), buf);
             Bcd.Encode("79", buf);
-            Assert.Equal(new byte[] {0x79, 1}.ToSignedBytes(), buf);
+            Assert.Equal(new byte[] {0x79, 1}.ToInt8(), buf);
             Bcd.Encode("80", buf);
-            Assert.Equal(new byte[] {0x80, 1}.ToSignedBytes(), buf);
+            Assert.Equal(new byte[] {0x80, 1}.ToInt8(), buf);
             Bcd.Encode("99", buf);
-            Assert.Equal(new byte[] {0x99, 1}.ToSignedBytes(), buf);
+            Assert.Equal(new byte[] {0x99, 1}.ToInt8(), buf);
             Bcd.Encode("100", buf);
-            Assert.Equal(new byte[] {1, 0}.ToSignedBytes(), buf);
+            Assert.Equal(new byte[] {1, 0}.ToInt8(), buf);
             Bcd.Encode("779", buf);
-            Assert.Equal(new byte[] {7, 0x79}.ToSignedBytes(), buf);
+            Assert.Equal(new byte[] {7, 0x79}.ToInt8(), buf);
             Bcd.Encode("999", buf);
-            Assert.Equal(new byte[] {9, 0x99}.ToSignedBytes(), buf);
+            Assert.Equal(new byte[] {9, 0x99}.ToInt8(), buf);
         }
     }
 }

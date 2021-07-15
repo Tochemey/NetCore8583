@@ -44,9 +44,7 @@ namespace NetCore8583.Parse
         public static async Task<MessageFactory<IsoMessage>> CreateFromUrlAsync(Uri url)
         {
             var mfact = new MessageFactory<IsoMessage>();
-            await ConfigureFromUrlAsync(
-                mfact,
-                url);
+            await ConfigureFromUrlAsync(mfact, url);
             return mfact;
         }
 
@@ -63,7 +61,7 @@ namespace NetCore8583.Parse
                     throw new IOException($"Invalid type {elem.GetAttribute("type")} for ISO8583 header: ");
                 if (elem.ChildNodes.Count == 0)
                 {
-                    if (elem.GetAttribute("ref") != null && !string.IsNullOrEmpty(elem.GetAttribute("ref")))
+                    if (!string.IsNullOrEmpty(elem.GetAttribute("ref")))
                     {
                         refs ??= new List<XmlElement>(nodes.Count - i);
                         refs.Add(elem);
@@ -86,13 +84,9 @@ namespace NetCore8583.Parse
                     }
 
                     if (binHeader)
-                        mfact.SetBinaryIsoHeader(
-                            type,
-                            HexCodec.HexDecode(header).ToUnsignedBytes());
+                        mfact.SetBinaryIsoHeader(type, HexCodec.HexDecode(header).ToUint8());
                     else
-                        mfact.SetIsoHeader(
-                            type,
-                            header);
+                        mfact.SetIsoHeader(type, header);
                 }
             }
 
@@ -104,7 +98,7 @@ namespace NetCore8583.Parse
                     var type = ParseType(elem.GetAttribute("type"));
                     if (type == -1)
                         throw new IOException("Invalid type for ISO8583 header: " + elem.GetAttribute("type"));
-                    if (elem.GetAttribute("ref") == null || elem.GetAttribute("ref").IsEmpty()) continue;
+                    if (elem.GetAttribute("ref").IsEmpty()) continue;
                     var t2 = ParseType(elem.GetAttribute("ref"));
                     if (t2 == -1)
                         throw new IOException(
@@ -119,9 +113,7 @@ namespace NetCore8583.Parse
                             elem.GetAttribute("type"),
                             h,
                             elem.GetAttribute("ref"));
-                    mfact.SetIsoHeader(
-                        type,
-                        h);
+                    mfact.SetIsoHeader(type, h);
                 }
             }
         }
@@ -155,16 +147,11 @@ namespace NetCore8583.Parse
                     if (f?.ParentNode != elem) continue;
                     var num = int.Parse(f.GetAttribute("num"));
 
-                    var v = GetTemplateField(
-                        f,
-                        mfact,
-                        true);
+                    var v = GetTemplateField(f, mfact, true);
 
                     if (v != null) v.Encoding = mfact.Encoding;
 
-                    m.SetField(
-                        num,
-                        v);
+                    m.SetField(num, v);
                 }
 
                 mfact.AddMessageTemplate(m);
@@ -196,9 +183,7 @@ namespace NetCore8583.Parse
 
                 for (var i = 2; i <= 128; i++)
                     if (tref.HasField(i))
-                        m.SetField(
-                            i,
-                            (IsoValue) tref.GetField(i).Clone());
+                        m.SetField(i, (IsoValue) tref.GetField(i).Clone());
 
                 var fields = elem.GetElementsByTagName("field");
 
@@ -209,16 +194,11 @@ namespace NetCore8583.Parse
 
                     if (f?.ParentNode != elem) continue;
 
-                    var v = GetTemplateField(
-                        f,
-                        mfact,
-                        true);
+                    var v = GetTemplateField(f, mfact, true);
 
                     if (v != null) v.Encoding = mfact.Encoding;
 
-                    m.SetField(
-                        num,
-                        v);
+                    m.SetField(num, v);
                 }
 
                 mfact.AddMessageTemplate(m);
@@ -265,26 +245,19 @@ namespace NetCore8583.Parse
                 {
                     var sub = (XmlElement) subs.Item(j);
                     if (sub != null && sub.ParentNode != f) continue;
-                    var sv = GetTemplateField(
-                        sub,
-                        mfact,
-                        false);
+                    var sv = GetTemplateField(sub, mfact, false);
+                    
                     if (sv == null) continue;
+                    
                     sv.Encoding = mfact.Encoding;
                     cf.AddValue(sv);
                 }
 
                 Debug.Assert(itype != null, nameof(itype) + " != null");
+                
                 return itype.Value.NeedsLength()
-                    ? new IsoValue(
-                        itype.Value,
-                        cf,
-                        length,
-                        cf)
-                    : new IsoValue(
-                        itype.Value,
-                        cf,
-                        cf);
+                    ? new IsoValue(itype.Value, cf, length, cf)
+                    : new IsoValue(itype.Value, cf, cf);
             }
 
             var v = f.ChildNodes.Count == 0 ? string.Empty : f.ChildNodes.Item(0)?.Value;
@@ -297,15 +270,8 @@ namespace NetCore8583.Parse
                     "itype != null");
 
                 return itype.Value.NeedsLength()
-                    ? new IsoValue(
-                        itype.Value,
-                        customField.DecodeField(v),
-                        length,
-                        customField)
-                    : new IsoValue(
-                        itype.Value,
-                        customField.DecodeField(v),
-                        customField);
+                    ? new IsoValue(itype.Value, customField.DecodeField(v), length, customField)
+                    : new IsoValue(itype.Value, customField.DecodeField(v), customField);
             }
 
             Debug.Assert(
@@ -313,13 +279,8 @@ namespace NetCore8583.Parse
                 "itype != null");
 
             return itype.Value.NeedsLength()
-                ? new IsoValue(
-                    itype.Value,
-                    v,
-                    length)
-                : new IsoValue(
-                    itype.Value,
-                    v);
+                ? new IsoValue(itype.Value, v, length)
+                : new IsoValue(itype.Value, v);
         }
 
         private static FieldParseInfo GetParser<T>(XmlElement f,
@@ -333,10 +294,7 @@ namespace NetCore8583.Parse
                 itype != null,
                 "itype != null");
 
-            var fpi = FieldParseInfo.GetInstance(
-                itype.Value,
-                length,
-                mfact.Encoding);
+            var fpi = FieldParseInfo.GetInstance(itype.Value, length, mfact.Encoding);
 
             var subs = f.GetElementsByTagName("field");
 
@@ -352,10 +310,7 @@ namespace NetCore8583.Parse
                     "sf != null");
 
                 if (sf.ParentNode == f)
-                    compo.AddParser(
-                        GetParser(
-                            sf,
-                            mfact));
+                    compo.AddParser(GetParser(sf, mfact));
             }
 
             fpi.Decoder = compo;
@@ -377,7 +332,7 @@ namespace NetCore8583.Parse
                 if (type == -1)
                     throw new IOException("Invalid ISO8583 type for parse guide: " + elem.GetAttribute("type"));
 
-                if (elem.GetAttribute("extends") != null && !elem.GetAttribute("extends").IsEmpty())
+                if (!elem.GetAttribute("extends").IsEmpty())
                 {
                     subs ??= new List<XmlElement>(nodes.Count - i);
                     subs.Add(elem);
@@ -393,21 +348,14 @@ namespace NetCore8583.Parse
                     if (f == null || f.ParentNode != elem) continue;
 
                     var num = int.Parse(f.GetAttribute("num"));
-                    parseMap.Add(
-                        num,
-                        GetParser(
-                            f,
-                            mfact));
+                    parseMap.Add(num, GetParser(f, mfact));
                 }
 
-                mfact.SetParseMap(
-                    type,
-                    parseMap);
+                mfact.SetParseMap(type, parseMap);
+                
                 if (guides.ContainsKey(type)) guides[type] = parseMap;
                 else
-                    guides.Add(
-                        type,
-                        parseMap);
+                    guides.Add(type, parseMap);
             }
 
             if (subs == null) return;
@@ -439,27 +387,18 @@ namespace NetCore8583.Parse
                     var typedef = f.GetAttribute("type");
                     if ("exclude".Equals(typedef)) child.Remove(num);
                     else
-                        child.Add(
-                            num,
-                            GetParser(
-                                f,
-                                mfact));
+                        child.Add(num, GetParser(f, mfact));
                 }
 
-                mfact.SetParseMap(
-                    type,
-                    child);
+                mfact.SetParseMap(type, child);
 
                 if (guides.ContainsKey(type)) guides[type] = child;
                 else
-                    guides.Add(
-                        type,
-                        child);
+                    guides.Add(type, child);
             }
         }
 
-        private static List<XmlElement> GetDirectChildrenByTagName(XmlElement elem,
-            string tagName)
+        private static List<XmlElement> GetDirectChildrenByTagName(XmlElement elem, string tagName)
         {
             var childElementsByTagName = new List<XmlElement>();
             var childNodes = elem.ChildNodes;
@@ -482,8 +421,7 @@ namespace NetCore8583.Parse
         /// <param name="mfact">The message factory to be configured with the values read from the XML.</param>
         /// <param name="source">The InputSource containing the XML configuration</param>
         /// <typeparam name="T"></typeparam>
-        private static void Parse<T>(MessageFactory<T> mfact,
-            Stream source) where T : IsoMessage
+        private static void Parse<T>(MessageFactory<T> mfact, Stream source) where T : IsoMessage
         {
             try
             {
@@ -491,21 +429,17 @@ namespace NetCore8583.Parse
                 xmlDoc.Load(source);
                 var root = xmlDoc.DocumentElement;
 
-                if (root == null || !root.Name.Equals("n8583-config"))
+                if (root is not {Name: "n8583-config"})
                     throw new Exception("Invalid ISO8583 config file. XML file does not contain any root element.");
 
-                ParseHeaders(
-                    root.GetElementsByTagName("header"),
-                    mfact);
+                // Parse headers
+                ParseHeaders(root.GetElementsByTagName("header"), mfact);
 
-                ParseTemplates(
-                    root.GetElementsByTagName("template"),
-                    mfact);
+                // Parse templates
+                ParseTemplates(root.GetElementsByTagName("template"), mfact);
 
-                //Read the parsing guides
-                ParseGuides(
-                    root.GetElementsByTagName("parse"),
-                    mfact);
+                // Read the parsing guides
+                ParseGuides(root.GetElementsByTagName("parse"), mfact);
             }
             catch (Exception e)
             {
@@ -520,22 +454,16 @@ namespace NetCore8583.Parse
         /// <param name="mfact">The message factory to be configured with the values read from the XML.</param>
         /// <param name="path">Path.</param>
         /// <typeparam name="T"></typeparam>
-        public static void ConfigureFromClasspathConfig<T>(MessageFactory<T> mfact,
-            string path) where T : IsoMessage
+        public static void ConfigureFromClasspathConfig<T>(MessageFactory<T> mfact, string path) where T : IsoMessage
         {
             try
             {
                 var f = AppDomain.CurrentDomain.BaseDirectory + path;
-                using var fsSource = new FileStream(
-                    f,
-                    FileMode.Open,
-                    FileAccess.Read);
+                using var fsSource = new FileStream(f, FileMode.Open, FileAccess.Read);
                 Logger.Debug(
                     "ISO8583 Parsing config from classpath file {Path}",
                     path);
-                Parse(
-                    mfact,
-                    fsSource);
+                Parse(mfact, fsSource);
             }
             catch (FileNotFoundException)
             {
@@ -552,8 +480,7 @@ namespace NetCore8583.Parse
         /// <param name="mfact">The message factory to be configured with the values read from the XML.</param>
         /// <param name="url">The URL of the config file</param>
         /// <typeparam name="T"></typeparam>
-        public static async Task ConfigureFromUrlAsync<T>(MessageFactory<T> mfact,
-            Uri url) where T : IsoMessage
+        public static async Task ConfigureFromUrlAsync<T>(MessageFactory<T> mfact, Uri url) where T : IsoMessage
         {
             try
             {
@@ -571,12 +498,12 @@ namespace NetCore8583.Parse
                         stream);
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 Logger.Warning(
                     "ISO8583 File not found in classpath: {Path}",
                     url.ToString());
-                throw e;
+                throw;
             }
         }
 
@@ -588,11 +515,10 @@ namespace NetCore8583.Parse
         /// <typeparam name="T"></typeparam>
         public static void ConfigureFromDefault<T>(MessageFactory<T> mfact) where T : IsoMessage
         {
-            Debug.Assert(AppDomain.CurrentDomain.BaseDirectory != null,
+            Debug.Assert(true,
                 "AppDomain.CurrentDomain.BaseDirectory != null");
-            var configFile = Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory,
-                "n8583.xml");
+            
+            var configFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "n8583.xml");
 
             if (!File.Exists(configFile))
             {
@@ -602,16 +528,11 @@ namespace NetCore8583.Parse
 
             try
             {
-                using var fsSource = new FileStream(
-                    configFile,
-                    FileMode.Open,
-                    FileAccess.Read);
+                using var fsSource = new FileStream(configFile, FileMode.Open, FileAccess.Read);
                 Logger.Debug(
                     "ISO8583 Parsing config from classpath file {Path}",
                     configFile);
-                Parse(
-                    mfact,
-                    fsSource);
+                Parse(mfact, fsSource);
             }
             catch (Exception e)
             {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace NetCore8583
 {
@@ -105,7 +106,7 @@ namespace NetCore8583
         /// <returns></returns>
         public static bool NeedsLength(this IsoType isoType)
         {
-            return isoType == IsoType.ALPHA || isoType == IsoType.NUMERIC || isoType == IsoType.BINARY;
+            return isoType is IsoType.ALPHA or IsoType.NUMERIC or IsoType.BINARY;
         }
 
         /// <summary>
@@ -169,14 +170,17 @@ namespace NetCore8583
                 case IsoType.ALPHA:
                 {
                     var c = new char[length];
-                    if (value == null) value = string.Empty;
+                    value ??= string.Empty;
+                    
                     if (value.Length > length)
-                        return value.Substring(0,
-                            length);
+                        return value[..length];
+                    
                     if (value.Length == length) return value;
+                    
                     Array.Copy(value.ToCharArray(),
                         c,
                         value.Length);
+                    
                     for (var i = value.Length; i < length; i++) c[i] = ' ';
                     return new string(c);
                 }
@@ -217,10 +221,11 @@ namespace NetCore8583
                 }
                 case IsoType.BINARY:
                 {
-                    if (value == null) value = string.Empty;
+                    value ??= string.Empty;
+                    
                     if (value.Length > length)
-                        return value.Substring(0,
-                            length);
+                        return value[..length];
+                    
                     var c = new char[length];
                     var end = value.Length;
                     if (value.Length % 2 == 1)
@@ -317,7 +322,7 @@ namespace NetCore8583
                 case IsoType.LLVAR:
                 case IsoType.LLLVAR:
                 case IsoType.LLLLVAR:
-                    return isoType.Format(Convert.ToString(value),
+                    return isoType.Format(Convert.ToString(value, CultureInfo.InvariantCulture),
                         length);
                 case IsoType.BINARY:
                 case IsoType.LLBIN:

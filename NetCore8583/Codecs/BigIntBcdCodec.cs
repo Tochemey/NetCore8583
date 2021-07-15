@@ -11,28 +11,12 @@ namespace NetCore8583.Codecs
     /// </summary>
     public class BigIntBcdCodec : ICustomBinaryField
     {
-        public object DecodeField(string val)
-        {
-            return new BigInteger(
-                Convert.ToInt32(
-                    val,
-                    10));
-        }
+        public object DecodeField(string val) => new BigInteger(Convert.ToInt32(val, 10));
 
-        public string EncodeField(object obj)
-        {
-            return obj.ToString();
-        }
+        public string EncodeField(object obj) => obj.ToString();
 
-        public object DecodeBinaryField(sbyte[] bytes,
-            int offset,
-            int length)
-        {
-            return Bcd.DecodeToBigInteger(
-                bytes,
-                offset,
-                length * 2);
-        }
+        public object DecodeBinaryField(sbyte[] bytes, int offset, int length) =>
+            Bcd.DecodeToBigInteger(bytes, offset, length * 2);
 
         public sbyte[] EncodeBinaryField(object val)
         {

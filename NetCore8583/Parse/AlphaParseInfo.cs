@@ -27,7 +27,7 @@ namespace NetCore8583.Parse
                 string v;
                 if (custom == null)
                 {
-                    v = buf.BytesToString(pos,
+                    v = buf.ToString(pos,
                         Length,
                         Encoding);
                     return new IsoValue(IsoType,
@@ -35,7 +35,7 @@ namespace NetCore8583.Parse
                         Length);
                 }
 
-                v = buf.BytesToString(pos,
+                v = buf.ToString(pos,
                     Length,
                     Encoding);
 

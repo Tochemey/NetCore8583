@@ -33,7 +33,7 @@ namespace NetCore8583.Test
             ConfigParser.ConfigureFromClasspathConfig(mfp, @"/Resources/issue4.xml");
 
             var buf2 = binReader.ReadBytes((int) (memStream.Length - memStream.Position));
-            bm = mfp.ParseMessage(buf2.ToSignedBytes(), 0);
+            bm = mfp.ParseMessage(buf2.ToInt8(), 0);
             Assert.True(bm.BinBitmap, "Parsed message should have binary bitmap flag set");
             Assert.False(bm.Binary);
             var bbp = bm.WriteToBuffer(2);
@@ -70,7 +70,7 @@ namespace NetCore8583.Test
                 @"/Resources/issue4.xml");
 
             var buf2 = binReader.ReadBytes((int) (memStream.Length - memStream.Position));
-            tm = tmfp.ParseMessage(buf2.ToSignedBytes(),
+            tm = tmfp.ParseMessage(buf2.ToInt8(),
                 0);
 
             var bbp = tm.WriteToBuffer(2);

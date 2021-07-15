@@ -10,7 +10,7 @@ namespace NetCore8583.Util
         /// </summary>
         /// <param name="bytes"></param>
         /// <returns></returns>
-        public static sbyte[] ToSignedBytes(this byte[] bytes)
+        public static sbyte[] ToInt8(this byte[] bytes)
         {
             return Array.ConvertAll(bytes,
                 b => unchecked((sbyte) b));
@@ -21,13 +21,13 @@ namespace NetCore8583.Util
         /// </summary>
         /// <param name="bytes"></param>
         /// <returns></returns>
-        public static byte[] ToUnsignedBytes(this sbyte[] bytes)
+        public static byte[] ToUint8(this sbyte[] bytes)
         {
             return Array.ConvertAll(bytes,
                 a => (byte) a);
         }
 
-        public static string BytesToString(this sbyte[] sbytes,
+        public static string ToString(this sbyte[] sbytes,
             int pos,
             int len,
             Encoding encoding)
@@ -45,7 +45,7 @@ namespace NetCore8583.Util
             }
         }
 
-        public static string BytesToString(this sbyte[] sbytes,
+        public static string ToString(this sbyte[] sbytes,
             Encoding encoding)
         {
             unsafe

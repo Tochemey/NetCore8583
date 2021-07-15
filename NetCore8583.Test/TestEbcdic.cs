@@ -52,7 +52,7 @@ namespace NetCore8583.Test
             llvar.Write(bout,
                 false,
                 false);
-            var buf = bout.ToArray().ToSignedBytes();
+            var buf = bout.ToArray().ToInt8();
             Assert.Equal(50,
                 buf[0]);
             Assert.Equal(49,
@@ -91,7 +91,7 @@ namespace NetCore8583.Test
                     (byte) 249,
                     (byte) 245,
                     (byte) 249
-                }.ToSignedBytes(),
+                }.ToInt8(),
                 0,
                 null);
             var val = (DateTime) v.Value;
@@ -118,7 +118,7 @@ namespace NetCore8583.Test
                     (byte) 241,
                     (byte) 242,
                     (byte) 245
-                }.ToSignedBytes(),
+                }.ToInt8(),
                 0,
                 null);
             var val = (DateTime) v.Value;
@@ -144,7 +144,7 @@ namespace NetCore8583.Test
                     (byte) 247,
                     (byte) 241,
                     (byte) 242
-                }.ToSignedBytes(),
+                }.ToInt8(),
                 0,
                 null);
             var val = (DateTime) v.Value;
@@ -162,7 +162,7 @@ namespace NetCore8583.Test
             llvar.Write(bout,
                 false,
                 true);
-            var buf = bout.ToArray().ToSignedBytes();
+            var buf = bout.ToArray().ToInt8();
             Assert.Equal(unchecked((sbyte) 242),
                 buf[0]);
             Assert.Equal(unchecked((sbyte) 241),
@@ -277,7 +277,7 @@ namespace NetCore8583.Test
                     (byte) 240,
                     (byte) 241,
                     (byte) 193
-                }.ToSignedBytes(),
+                }.ToInt8(),
                 0,
                 null);
             var string0 = CodePagesEncodingProvider.Instance.GetEncoding(1047).GetString(stringA);
@@ -297,10 +297,10 @@ namespace NetCore8583.Test
                     242,
                     67,
                     49
-                }.ToSignedBytes(),
+                }.ToInt8(),
                 0,
                 null);
-            Assert.Equal(stringA.ToSignedBytes(),
+            Assert.Equal(stringA.ToInt8(),
                 (sbyte[]) field.Value);
 
             var llbin = new LlbinParseInfo
@@ -315,10 +315,10 @@ namespace NetCore8583.Test
                     242,
                     67,
                     49
-                }.ToSignedBytes(),
+                }.ToInt8(),
                 0,
                 null);
-            Assert.Equal(stringA.ToSignedBytes(),
+            Assert.Equal(stringA.ToInt8(),
                 (sbyte[]) field.Value);
         }
 
@@ -339,7 +339,7 @@ namespace NetCore8583.Test
                     (byte) 244,
                     (byte) 245,
                     (byte) 246
-                }.ToSignedBytes(),
+                }.ToInt8(),
                 0,
                 null);
             var val = (DateTime) v.Value;

@@ -122,13 +122,13 @@ namespace NetCore8583.Test
             //HEXencode the binary message, headers should be similar to the ASCII version
             var v = bin.WriteData();
             var hexBin = HexCodec.HexEncode(v, 0, v.Length);
-            var hexAscii = ascii.WriteData().BytesToString(Encoding.Default).ToUpper(CultureInfo.CurrentCulture);
+            var hexAscii = ascii.WriteData().ToString(Encoding.Default).ToUpper(CultureInfo.CurrentCulture);
 
             Assert.Equal("0600", hexBin.Substring(0, 4));
 
             //Should be the same up to the field 42 (first 80 chars)
             Assert.Equal(hexAscii.Substring(0, 88), hexBin.Substring(0, 88));
-            Assert.Equal(ascii.GetObjectValue(43), v.BytesToString(44, 40, Encoding.Default).Trim());
+            Assert.Equal(ascii.GetObjectValue(43), v.ToString(44, 40, Encoding.Default).Trim());
             //Parse both messages
             var asciiBuf = ascii.WriteData();
             var ascii2 = _mfactAscii.ParseMessage(asciiBuf, 0);

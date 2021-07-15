@@ -28,7 +28,7 @@ namespace NetCore8583.Parse
 
             var binval = l == 0
                 ? new sbyte[0]
-                : HexCodec.HexDecode(buf.BytesToString(pos + 3,
+                : HexCodec.HexDecode(buf.ToString(pos + 3,
                     l,
                     Encoding.Default));
 
@@ -62,7 +62,7 @@ namespace NetCore8583.Parse
             {
                 var dec = custom.DecodeField(l == 0
                     ? ""
-                    : buf.BytesToString(pos + 3,
+                    : buf.ToString(pos + 3,
                         l,
                         Encoding.Default));
                 return dec == null

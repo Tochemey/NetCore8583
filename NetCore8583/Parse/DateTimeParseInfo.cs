@@ -4,11 +4,9 @@ namespace NetCore8583.Parse
 {
     public abstract class DateTimeParseInfo : FieldParseInfo
     {
-        private static readonly long FutureTolerance = 900000L;
+        private const long FutureTolerance = 900000L;
 
-        protected DateTimeParseInfo(IsoType isoType,
-            int length) : base(isoType,
-            length)
+        protected DateTimeParseInfo(IsoType isoType, int length) : base(isoType, length)
         {
         }
 

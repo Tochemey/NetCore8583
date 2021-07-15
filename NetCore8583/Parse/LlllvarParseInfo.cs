@@ -29,7 +29,7 @@ namespace NetCore8583.Parse
             {
                 v = len == 0
                     ? ""
-                    : buf.BytesToString(pos + 4,
+                    : buf.ToString(pos + 4,
                         len,
                         Encoding);
             }
@@ -43,7 +43,7 @@ namespace NetCore8583.Parse
             // So we create a String from the rest of the buffer, and then cut it to
             // the specified length.
             if (v.Length != len)
-                v = buf.BytesToString(pos + 4,
+                v = buf.ToString(pos + 4,
                     buf.Length - pos - 4,
                     Encoding).Substring(0,
                     len);
@@ -85,17 +85,17 @@ namespace NetCore8583.Parse
 
             if (custom == null)
                 return new IsoValue(IsoType,
-                    buf.BytesToString(pos + 2,
+                    buf.ToString(pos + 2,
                         len,
                         Encoding));
 
-            var dec = custom.DecodeField(buf.BytesToString(pos + 2,
+            var dec = custom.DecodeField(buf.ToString(pos + 2,
                 len,
                 Encoding));
 
             return dec == null
                 ? new IsoValue(IsoType,
-                    buf.BytesToString(pos + 2,
+                    buf.ToString(pos + 2,
                         len,
                         Encoding))
                 : new IsoValue(IsoType,

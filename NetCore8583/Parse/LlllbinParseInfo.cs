@@ -29,7 +29,7 @@ namespace NetCore8583.Parse
                 throw new ParseException($"Insufficient data for LLLLBIN field {field}, pos {pos}");
             var binval = l == 0
                 ? new sbyte[0]
-                : HexCodec.HexDecode(buf.BytesToString(pos + 4,
+                : HexCodec.HexDecode(buf.ToString(pos + 4,
                     l,
                     Encoding.Default));
             if (custom == null)
@@ -61,7 +61,7 @@ namespace NetCore8583.Parse
             {
                 var dec = custom.DecodeField(l == 0
                     ? ""
-                    : buf.BytesToString(pos + 4,
+                    : buf.ToString(pos + 4,
                         l,
                         Encoding.Default));
 

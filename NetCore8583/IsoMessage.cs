@@ -407,7 +407,7 @@ namespace NetCore8583
 
                 if (ForceStringEncoding)
                 {
-                    var hb = sbyteList.ToArray().BytesToString(Encoding.Default);
+                    var hb = sbyteList.ToArray().ToString(Encoding.Default);
                     sbyteList = sbyteList2;
                     try
                     {
@@ -420,7 +420,7 @@ namespace NetCore8583
                 }
             }
 
-            var byteArray = sbyteList.ToArray().ToUnsignedBytes();
+            var byteArray = sbyteList.ToArray().ToUint8();
             stream.Write(byteArray,
                 0,
                 byteArray.Length);
@@ -444,7 +444,7 @@ namespace NetCore8583
 
             Debug.Assert(stream != null,
                 "stream != null");
-            return stream.ToArray().ToSignedBytes();
+            return stream.ToArray().ToInt8();
         }
 
         /// <summary>
@@ -496,7 +496,7 @@ namespace NetCore8583
                 if (bs.Get(pos++)) nibble |= 4;
                 if (bs.Get(pos++)) nibble |= 2;
                 if (bs.Get(pos++)) nibble |= 1;
-                var string0 = Hex.BytesToString(nibble,
+                var string0 = Hex.ToString(nibble,
                     1,
                     Encoding);
                 sb.Append(string0);

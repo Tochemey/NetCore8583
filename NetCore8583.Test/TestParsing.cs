@@ -23,7 +23,7 @@ namespace NetCore8583.Test
         public void TestBinaryNumberParsing()
         {
             var npi = new NumericParseInfo(6);
-            var val = npi.ParseBinary(0, new byte[] {0x12, 0x34, 0x56}.ToSignedBytes(), 0, null);
+            var val = npi.ParseBinary(0, new byte[] {0x12, 0x34, 0x56}.ToInt8(), 0, null);
             Assert.Equal(123456, Convert.ToInt32(val.Value));
         }
 
@@ -69,7 +69,7 @@ namespace NetCore8583.Test
                     4,
                     0x65,
                     0
-                }.ToSignedBytes(),
+                }.ToInt8(),
                 0));
         }
 
@@ -135,7 +135,7 @@ namespace NetCore8583.Test
                     0x05,
                     0x12,
                     0x34
-                }.ToSignedBytes(),
+                }.ToInt8(),
                 0));
         }
 
@@ -198,7 +198,7 @@ namespace NetCore8583.Test
                     0x28,
                     0x08,
                     0x11
-                }.ToSignedBytes(),
+                }.ToInt8(),
                 0));
         }
 
@@ -233,7 +233,7 @@ namespace NetCore8583.Test
                     0,
                     0,
                     4
-                }.ToSignedBytes(),
+                }.ToInt8(),
                 0));
         }
 
@@ -274,7 +274,7 @@ namespace NetCore8583.Test
                     0,
                     0,
                     0
-                }.ToSignedBytes(),
+                }.ToInt8(),
                 0));
         }
     }
