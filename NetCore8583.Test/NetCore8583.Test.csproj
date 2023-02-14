@@ -5,6 +5,7 @@
     <IsPackable>false</IsPackable>
 
     <TargetFramework>net6.0</TargetFramework>
+    <ReleaseVersion>1.1.0</ReleaseVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
