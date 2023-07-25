@@ -34,8 +34,8 @@ Wikipedia has [a very good article](http://en.wikipedia.org/wiki/ISO_8583) on th
 
 The library is available on nuget package. You can get it via:
 
-```
-    PM> Install-Package NetCore8583
+```bash
+Install-Package NetCore8583
 ```
 
 ## How does NetCore8583 work?
