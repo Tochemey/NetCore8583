@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NetCore8583.Impl
+namespace NetCore8583.Tracer
 {
     public class SimpleTraceGenerator : ITraceNumberGenerator
     {
