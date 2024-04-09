@@ -17,7 +17,8 @@ namespace NetCore8583.Test.Parse
             var buf = IsoType.DATE10.Format(soon).GetSignedBytes();
             var comp = new Date10ParseInfo().Parse(0, buf, 0, null);
             var v = (DateTime) comp.Value;
-            Assert.True(v.CompareTo(DateTime.Now) > 0);
+            var now = DateTime.UtcNow;
+            Assert.True(v.CompareTo(now) > 0);
             var stream = new MemoryStream();
             comp.Write(stream, true, false);
             var bin = new Date10ParseInfo().ParseBinary(0, stream.ToArray().ToInt8(), 0, null);
