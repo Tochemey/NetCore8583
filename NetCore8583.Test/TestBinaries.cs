@@ -64,8 +64,7 @@ namespace NetCore8583.Test
                 buf.Length); // "field 42 wrong length"
             Assert.Equal(exp,
                 buf); // "Field 42 wrong value"
-            Assert.True(((string) m.GetObjectValue(43)).StartsWith("Field of length 40",
-                StringComparison.Ordinal));
+            Assert.StartsWith("Field of length 40", (string)m.GetObjectValue(43), StringComparison.Ordinal);
 
             buf = (sbyte[]) m.GetObjectValue(62);
             exp = new sbyte[]

@@ -23,17 +23,17 @@ namespace NetCore8583.Test
             Assert.NotNull(m.BinIsoHeader);
             var buf = m.WriteData();
             Assert.Equal(4 + 4 + 16 + 2, buf.Length);
-            for (var i = 0; i < 4; i++) Assert.Equal(buf[i], unchecked((sbyte) 0xff));
-            Assert.Equal(buf[4], 0x30);
-            Assert.Equal(buf[5], 0x32);
-            Assert.Equal(buf[6], 0x38);
-            Assert.Equal(buf[7], 0x30);
+            for (var i = 0; i < 4; i++) Assert.Equal(unchecked((sbyte)0xff), buf[i]);
+            Assert.Equal(0x30, buf[4]);
+            Assert.Equal(0x32, buf[5]);
+            Assert.Equal(0x38, buf[6]);
+            Assert.Equal(0x30, buf[7]);
             //Then parse and check the header is binary 0xffffffff
             m = mf.ParseMessage(buf, 4, true);
             Assert.Null(m.IsoHeader);
             buf = m.BinIsoHeader;
             Assert.NotNull(buf);
-            for (var i = 0; i < 4; i++) Assert.Equal(buf[i], unchecked((sbyte) 0xff));
+            for (var i = 0; i < 4; i++) Assert.Equal(unchecked((sbyte)0xff), buf[i]);
             Assert.Equal(0x280, m.Type);
             Assert.True(m.HasField(3));
         }
