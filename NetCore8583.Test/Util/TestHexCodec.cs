@@ -6,7 +6,7 @@ namespace NetCore8583.Test.Util
 {
     public class TestHexCodec
     {
-        public void EncodeDecode(string hex)
+        private void EncodeDecode(string hex)
         {
             var buf = HexCodec.HexDecode(hex);
             Assert.Equal(hex.Length / 2 + hex.Length % 2,
