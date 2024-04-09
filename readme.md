@@ -1,15 +1,15 @@
 NetCore8583
 =============
-[![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/Tochemey/NetCore8583/ci.yml?branch=master&style=flat-square)](https://github.com/Tochemey/NetCore8583/blob/master/.github/workflows/ci.yml)
+
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/Tochemey/NetCore8583/ci.yml?branch=main&style=flat-square)](https://github.com/Tochemey/NetCore8583/blob/main/.github/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 [![Nuget](https://img.shields.io/nuget/v/NetCore8583?style=flat-square)](https://www.nuget.org/packages/NetCore8583/)
 
 ## Introduction
 
-NetCore8583 is a dotnet core implementation of the ISO 8583 protocol. 
+NetCore8583 is a dotnet core implementation of the ISO 8583 protocol.
 
-NetCore8583 is a library that helps parse/read and generate ISO 8583 messages. It does not handle sending or reading them over a network connection, but it does parse the data you have read and can generate the data you need to write over a network connection. 
-
+NetCore8583 is a library that helps parse/read and generate ISO 8583 messages. It does not handle sending or reading them over a network connection, but it does parse the data you have read and can generate the data you need to write over a network connection.
 
 ## ISO 8583 overview
 
@@ -97,6 +97,7 @@ You can define a header as a reference to another header:
 ```
     <header type="0800" ref="0200" />
 ```
+
 The header for 0800 messages will be the same as the header for 0200 messages.
 
 #### Template Element
@@ -207,8 +208,10 @@ You can also create a CompositeField, store several subfields inside it, and sto
     .AddValue(new IsoValue(IsoType.ALPHA, "OK", 2));
     message.SetValue(125, f, f, IsoType.LLLVAR, 0);
 ```
+
 When the message is encoded, field 125 will be "018one 03two000123OK".
 
 ## Resources
+
 * [j8583](http://j8583.sourceforge.net/)
 * [ISO 8583](http://en.wikipedia.org/wiki/ISO_8583)
