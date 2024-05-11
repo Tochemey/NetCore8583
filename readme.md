@@ -1,5 +1,4 @@
-NetCore8583
-=============
+# NetCore8583
 
 [![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/Tochemey/NetCore8583/ci.yml?branch=main&style=flat-square)](https://github.com/Tochemey/NetCore8583/blob/main/.github/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
@@ -35,7 +34,7 @@ Wikipedia has [a very good article](http://en.wikipedia.org/wiki/ISO_8583) on th
 The library is available on nuget package. You can get it via:
 
 ```bash
-Install-Package NetCore8583
+dotnet add package NetCore8583
 ```
 
 ## How does NetCore8583 work?
@@ -87,14 +86,14 @@ There are three types of main elements that you need to specify in the config fi
 
 Specify a header element for every type of message that needs an ISO header. Only one per message type:
 
-```
+```xml
     <header type="0200">ISO015000050</header>
     <header type="0400">ISO015000050</header>
 ```
 
 You can define a header as a reference to another header:
 
-```
+```xml
     <header type="0800" ref="0200" />
 ```
 
@@ -104,7 +103,7 @@ The header for 0800 messages will be the same as the header for 0200 messages.
 
 Each template element defines a message template, with the message type and the fields that the template should include. Every new message of that type that the MessageFactory creates will contain those same values, so this is very useful for defining fixed values, which will be the same in every message. Only one template per type.
 
-```
+```xml
     <template type="0200">
         <field num="3" type="NUMERIC" length="6">650000</field>
         <field num="32" type="LLVAR">456</field>
@@ -121,7 +120,7 @@ Each template element defines a message template, with the message type and the 
 
 You can define a template as extending another template, so that it includes all the fields from the referenced template as well as any new fields defined in it, as well as excluding fields from the referenced template:
 
-```
+```xml
     <template type="0400" extends="0200">
         <field num="90" type="ALPHA" length="42">Bla bla</field>
         <field num="102" type="exclude" />
@@ -134,7 +133,7 @@ In the above example, the template for message type 0400 will include all fields
 
 Each parse element defines a parsing template for a message type. It must include all the fields that an incoming message can contain, each field with its type and length (if needed). Only ALPHA and NUMERIC types need to have a length specified. The other types either have a fixed length, or have their length specified as part of the field (LLVAR and LLLVAR).
 
-```
+```xml
     <parse type="0210">
         <field num="3" type="NUMERIC" length="6" />
         <field num="4" type="AMOUNT" />
@@ -164,7 +163,7 @@ Each parse element defines a parsing template for a message type. It must includ
 
 As with message templates, you can define parsing guides that extend other parsing guides:
 
-```
+```xml
     <parse type="0410" extends="0210">
         <field num="90" type="ALPHA" length="42" />
         <field num="102" type="exclude" />
@@ -175,7 +174,7 @@ As with message templates, you can define parsing guides that extend other parsi
 
 Another feature is the CompositeField. This is a CustomField that acts as a container for several IsoValues, and it can be configured in the parsing guide of a message type:
 
-```
+```xml
     <parse type="0410">
         <field num="125" type="LLLVAR">
             <field num="1" type="ALPHA" length="5" />
