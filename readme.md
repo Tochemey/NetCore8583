@@ -216,5 +216,4 @@ When the message is encoded, field 125 will be "018one 03two000123OK".
 
 ## Resources
 
-* [j8583](http://j8583.sourceforge.net/)
 * [ISO 8583](http://en.wikipedia.org/wiki/ISO_8583)
