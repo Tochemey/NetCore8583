@@ -41,35 +41,44 @@ The library is available on nuget package. You can get it via:
 dotnet add package NetCore8583
 ```
 
+## Support
+
+One can use the following channel to report a bug or discuss a feature or an enhancement:
+
+- [Issue Tracker](https://github.com/Tochemey/NetCore8583/issues)
+- [Discussions](https://github.com/Tochemey/NetCore8583/discussions)
+
+If you find this library very useful in your day job, kindly show some love by starring it.
+
 ## How does NetCore8583 work?
 
-NetCore8583 offers a MessageFactory, which once properly configured, can create different message types with some values predefined, and can also parse a byte array to create an ISO message. Messages are represented by IsoMessage objects, which store IsoValue instances for their data fields. You can work with the IsoValues or use the convenience methods of IsoMessage to work directly with the stored values.
+NetCore8583 offers a [`MessageFactory`](./NetCore8583/MessageFactory.cs), which once properly configured, can create different message types with some values predefined, and can also parse a byte array to create an ISO message. Messages are represented by [`IsoMessage`](./NetCore8583/IsoMessage.cs) objects, which store [`IsoValue`](./NetCore8583/IsoValue.cs) instances for their data fields. You can work with the [`IsoValue`](./NetCore8583/IsoValue.cs) or use the convenience methods of [`IsoMessage`](./NetCore8583/IsoMessage.cs) to work directly with the stored values.
 
 ### MessageFactory and IsoMessage classes
 
-These are the two main classes you need to use to work with ISO8583 messages. An IsoMessage can be encoded into a signed byte array. You can set and get the values for each field in an IsoMessage, and it will adjust itself to use a secondary bitmap if necessary. An IsoMessage has settings to encode itself in binary or ASCII, to use a secondary bitmap even if it's not necessary, and it can have its own ISO header.
+These are the two main classes you need to use to work with ISO8583 messages. An [`IsoMessage`](./NetCore8583/IsoMessage.cs) can be encoded into a signed byte array. You can set and get the values for each field in an [`IsoMessage`](./NetCore8583/IsoMessage.cs), and it will adjust itself to use a secondary bitmap if necessary. An [`IsoMessage`](./NetCore8583/IsoMessage.cs) has settings to encode itself in binary or ASCII, to use a secondary bitmap even if it's not necessary, and it can have its own ISO header.
 
-However, it can be cumbersome to programmatically create IsoMessages all the time. The MessageFactory is a big aid in creating IsoMessages with predefined values; also, it can set the date and the trace number in each new message.
+However, it can be cumbersome to programmatically create [`IsoMessage`](./NetCore8583/IsoMessage.cs) all the time. The MessageFactory is a big aid in creating [`IsoMessage`](./NetCore8583/IsoMessage.cs)  with predefined values; also, it can set the date and the trace number in each new message.
 
 * There is an extension method that helps switch between signed byte array and unsigned byte array.
 
 #### How to configure the MessageFactory
 
-There are five main things you need to configure in a MessageFactory: ISO headers, message templates, parsing templates, TraceNumberGenerator, and custom field encoders.
+There are five main things you need to configure in a [`MessageFactory`](./NetCore8583/MessageFactory.cs): ISO headers, message templates, parsing templates, TraceNumberGenerator, and custom field encoders.
 
-* Iso headers: ISO headers are strings that are associated with a message type. Whenever you ask the message factory to create an IsoMessage, it will pass the corresponding ISO header (if present) to the new message.
+* **Iso headers**: ISO headers are strings that are associated with a message type. Whenever you ask the message factory to create an [`IsoMessage`](./NetCore8583/IsoMessage.cs), it will pass the corresponding ISO header (if present) to the new message.
 
-* Message Templates: A message template is an IsoMessage itself; the MessageFactory can have a template for each message type it needs to create. When it creates a message and it has a template for that message type, it copies the fields from the template to the new message before returning it.
+* **Message Templates**: A message template is an [`IsoMessage`](./NetCore8583/IsoMessage.cs) itself; the [`MessageFactory`](./NetCore8583/MessageFactory.cs) can have a template for each message type it needs to create. When it creates a message and it has a template for that message type, it copies the fields from the template to the new message before returning it.
 
-* Parsing Templates: A parsing template is a map containing FieldParseInfo objects as values and the field numbers as the keys. A FieldParseInfo object contains an IsoType and an optional length; with this information and the field number, the MessageFactory can parse incoming messages, first analyzing the message type and then using the parsing template for that type; when parsing a message, the MessageFactory only parses the fields that are specified in the message's bitmap. For example if the bitmap specifies field 4, the factory will get the FieldParseInfo stored in the map under key 4, and will attempt to parse the field according to the type and length specified by the FieldParseInfo.
+* **Parsing Templates**: A parsing template is a map containing [`FieldParseInfo`](./NetCore8583/Parse/FieldParseInfo.cs) objects as values and the field numbers as the keys. A [`FieldParseInfo`](./NetCore8583/Parse/FieldParseInfo.cs) object contains an [`IsoType`](./NetCore8583/IsoType.cs) and an optional length; with this information and the field number, the [`MessageFactory`](./NetCore8583/MessageFactory.cs) can parse incoming messages, first analyzing the message type and then using the parsing template for that type; when parsing a message, the [`MessageFactory`](./NetCore8583/MessageFactory.cs) only parses the fields that are specified in the message's bitmap. For example if the bitmap specifies field 4, the factory will get the [`FieldParseInfo`](./NetCore8583/Parse/FieldParseInfo.cs) stored in the map under key 4, and will attempt to parse the field according to the type and length specified by the [`FieldParseInfo`](./NetCore8583/Parse/FieldParseInfo.cs).
 A message does not need to contain all the fields specified in a parsing template, but a parsing template must contain all the fields specified in the bitmap of a message, or the MessageFactory won't be able to parse it because it has no way of knowing how it should parse that field (and also all subsequent fields).
 
-* ITraceNumberGenerator: When creating new messages, they usually need to have a unique trace number, contained in field 11. Also, they usually need to have the date they were created (or the date the transaction was originated) in field 7. The MessageFactory can automatically set the current date on all new messages, you just need to set the assignDate property to true. And it can also assign a new trace number to each message it creates, but for this it needs a TraceNumberGenerator.
-The ITraceNumberGenerator interface defines a nextTrace() method, which must return a new trace number between 1 and 999999. It needs to be cyclic, so it returns 1 again after returning 999999. And usually, it needs to be thread-safe.
-NetCore8583 only defines the interface; in production environments you will usually need to implement your own TraceNumberGenerator, getting the new trace number from a sequence in a database or some similar mechanism. As an example, the library includes the SimpleTraceGenerator, which simply increments an in-memory value.
+* **ITraceNumberGenerator**: When creating new messages, they usually need to have a unique trace number, contained in field 11. Also, they usually need to have the date they were created (or the date the transaction was originated) in field 7. The [`MessageFactory`](./NetCore8583/MessageFactory.cs) can automatically set the current date on all new messages, you just need to set the assignDate property to true. And it can also assign a new trace number to each message it creates, but for this it needs a TraceNumberGenerator.
+The [`ITraceNumberGenerator`](./NetCore8583/ITraceNumberGenerator.cs) interface defines a `nextTrace()` method, which must return a new trace number between 1 and 999999. It needs to be cyclic, so it returns 1 again after returning 999999. And usually, it needs to be thread-safe.
+NetCore8583 only defines the interface; in production environments you will usually need to implement your own TraceNumberGenerator, getting the new trace number from a sequence in a database or some similar mechanism. As an example, the library includes the [`SimpleTraceGenerator`](./NetCore8583/Tracer/SimpleTraceGenerator.cs), which simply increments an in-memory value.
 
-* Custom fields encoders: Certain implementations of ISO8583 specify fields which contain many subfields. If you only handle strings in those fields, you'll have to encode all those values before storing them in an IsoMessage, and decode them when you get them from an IsoMessage.
-In these cases you can implement a CustomField, which is an interface that defines two methods, one for encoding an object into a String and another for decoding an object from a String. You can pass the MessageFactory a CustomField for every field where you want to store custom values, so that parsed messages will return the objects decoded by the CustomFields instead of just strings; and when you set a value in an IsoMessage, you can specify the CustomField to be used to encode the value as a String
+* **Custom fields encoders**: Certain implementations of ISO8583 specify fields which contain many subfields. If you only handle strings in those fields, you'll have to encode all those values before storing them in an [`IsoMessage`](./NetCore8583/IsoMessage.cs), and decode them when you get them from an IsoMessage.
+In these cases you can implement a [`CustomField`](./NetCore8583/ICustomField.cs), which is an interface that defines two methods, one for encoding an object into a String and another for decoding an object from a String. You can pass the [`MessageFactory`](./NetCore8583/MessageFactory.cs) a [`CustomField`](./NetCore8583/ICustomField.cs) for every field where you want to store custom values, so that parsed messages will return the objects decoded by the [`CustomField`](./NetCore8583/ICustomField.cs) instead of just strings; and when you set a value in an [`IsoMessage`](./NetCore8583/IsoMessage.cs), you can specify the CustomField to be used to encode the value as a String
 
 #### Custom Field encoders
 
@@ -79,12 +88,12 @@ NetCore8583 can help with this process, by means of the custom field encoders. T
 
 ### Easy way to configure ISO 8583 messages templates
 
-The easiest way to configure the message templates and parsing templates is by using a XML config file and pass it to the MessageFactory.
+The easiest way to configure the message templates and parsing templates is by using a XML config file and pass it to the [`MessageFactory`](./NetCore8583/MessageFactory.cs).
 
 ### XML configuration
 
-The MessageFactory can read a XML file to setup message templates, ISO headers by type and parsing templates, which are the most cumbersome parts to configure programmatically.
-There are three types of main elements that you need to specify in the config file: header, template, and parse. All these must be contained in a single n8583-config element.
+The [`MessageFactory`](./NetCore8583/MessageFactory.cs) can read a XML file to setup message templates, ISO headers by type and parsing templates, which are the most cumbersome parts to configure programmatically.
+There are three types of main elements that you need to specify in the config file: header, template, and parse. All these must be contained in a single `n8583-config` element.
 
 #### Header
 
@@ -105,7 +114,7 @@ The header for 0800 messages will be the same as the header for 0200 messages.
 
 #### Template Element
 
-Each template element defines a message template, with the message type and the fields that the template should include. Every new message of that type that the MessageFactory creates will contain those same values, so this is very useful for defining fixed values, which will be the same in every message. Only one template per type.
+Each template element defines a message template, with the message type and the fields that the template should include. Every new message of that type that the [`MessageFactory`](./NetCore8583/MessageFactory.cs) creates will contain those same values, so this is very useful for defining fixed values, which will be the same in every message. Only one template per type.
 
 ```xml
     <template type="0200">
@@ -135,7 +144,7 @@ In the above example, the template for message type 0400 will include all fields
 
 #### Parse Element
 
-Each parse element defines a parsing template for a message type. It must include all the fields that an incoming message can contain, each field with its type and length (if needed). Only ALPHA and NUMERIC types need to have a length specified. The other types either have a fixed length, or have their length specified as part of the field (LLVAR and LLLVAR).
+Each parse element defines a parsing template for a message type. It must include all the fields that an incoming message can contain, each field with its type and length (if needed). Only `ALPHA` and `NUMERIC` types need to have a length specified. The other types either have a fixed length, or have their length specified as part of the field (`LLVAR` and `LLLVAR`).
 
 ```xml
     <parse type="0210">
@@ -176,7 +185,7 @@ As with message templates, you can define parsing guides that extend other parsi
 
 #### Composite Fields
 
-Another feature is the CompositeField. This is a CustomField that acts as a container for several IsoValues, and it can be configured in the parsing guide of a message type:
+Another feature is the [`CompositeField`](./NetCore8583/Codecs/CompositeField.cs). This is a [`CustomField`](./NetCore8583/ICustomField.cs) that acts as a container for several [`IsoValue`](./NetCore8583/IsoValue.cs), and it can be configured in the parsing guide of a message type:
 
 ```xml
     <parse type="0410">
@@ -189,7 +198,7 @@ Another feature is the CompositeField. This is a CustomField that acts as a cont
     </parse>
 ```
 
-In the above example, when a message with type 0410 is parsed, the value for field 125 will be a CompositeField and you can obtain the subfields via **_GetField()_** or **_GetObjectValue()_**. The num attribute of the subfields is ignored.
+In the above example, when a message with type 0410 is parsed, the value for field 125 will be a [`CompositeField`](./NetCore8583/Codecs/CompositeField.cs) and you can obtain the subfields via **_GetField()_** or **_GetObjectValue()_**. The num attribute of the subfields is ignored.
 
 This means that you can do this via code:
 
@@ -202,7 +211,7 @@ This means that you can do this via code:
     string sub4 = (string)f.GetObjectValue(3); //"OK"
 ```
 
-You can also create a CompositeField, store several subfields inside it, and store it in any field inside an IsoMessage, specifying the same instance as the CustomField:
+You can also create a [`CompositeField`](./NetCore8583/Codecs/CompositeField.cs), store several subfields inside it, and store it in any field inside an [`IsoMessage`](./NetCore8583/IsoMessage.cs), specifying the same instance as the [`CustomField`](./NetCore8583/ICustomField.cs):
 
 ```c#
     CompositeField f = new CompositeField().AddValue(new IsoValue(IsoType.ALPHA, "one", 5))
