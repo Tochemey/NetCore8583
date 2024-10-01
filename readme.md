@@ -6,6 +6,7 @@ No future feature development is planned, though bugs and security issues are fi
 [![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/Tochemey/NetCore8583/ci.yml?branch=main&style=flat-square)](https://github.com/Tochemey/NetCore8583/blob/main/.github/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 [![Nuget](https://img.shields.io/nuget/v/NetCore8583?style=flat-square)](https://www.nuget.org/packages/NetCore8583/)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/NetCore8583?style=flat-square)](https://www.nuget.org/packages/NetCore8583/)
 [![Stability: Maintenance](https://masterminds.github.io/stability/maintenance.svg)](https://masterminds.github.io/stability/maintenance.html)
 
 ## Introduction
