@@ -13,7 +13,7 @@ namespace NetCore8583.Util
         public static sbyte[] ToInt8(this byte[] bytes)
         {
             return Array.ConvertAll(bytes,
-                b => unchecked((sbyte) b));
+                b => unchecked((sbyte)b));
         }
 
         /// <summary>
@@ -24,9 +24,17 @@ namespace NetCore8583.Util
         public static byte[] ToUint8(this sbyte[] bytes)
         {
             return Array.ConvertAll(bytes,
-                a => (byte) a);
+                a => (byte)a);
         }
 
+        /// <summary>
+        ///     Converts a signed bytes array to string from a given position to a given length
+        /// </summary>
+        /// <param name="sbytes">the signed bytes array</param>
+        /// <param name="pos">the starting position</param>
+        /// <param name="len">the length</param>
+        /// <param name="encoding">the encoding to use</param>
+        /// <returns></returns>
         public static string ToString(this sbyte[] sbytes,
             int pos,
             int len,
@@ -45,6 +53,12 @@ namespace NetCore8583.Util
             }
         }
 
+        /// <summary>
+        ///     Converts a signed bytes array to string given a encoding
+        /// </summary>
+        /// <param name="sbytes">the signed bytes array</param>
+        /// <param name="encoding">the encoding to use</param>
+        /// <returns></returns>
         public static string ToString(this sbyte[] sbytes,
             Encoding encoding)
         {

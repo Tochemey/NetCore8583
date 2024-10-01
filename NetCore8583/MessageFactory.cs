@@ -132,7 +132,6 @@ namespace NetCore8583
                 }
             }
         }
-
         public void SetCustomField(int index,
             ICustomField value)
         {
