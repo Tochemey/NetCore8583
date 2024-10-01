@@ -8,7 +8,7 @@
     <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
     <RepositoryUrl>https://github.com/Tochemey/NetCore8583</RepositoryUrl>
     <PackageProjectUrl>https://github.com/Tochemey/NetCore8583</PackageProjectUrl>
-     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>Iso8583 NetCore Banking C#</PackageTags>
     <Copyright>Tochemey 2018-2024</Copyright>
     <PackageVersion>2.2.0</PackageVersion>
@@ -40,7 +40,7 @@
     <None Update="Resources\n8583.dtd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-     <None Include="..\README.md" Pack="true" PackagePath="\"/>
+    <None Include="..\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
 </Project>
