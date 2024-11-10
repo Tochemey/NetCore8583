@@ -5,9 +5,7 @@ using System.Linq;
 using System.Text;
 using NetCore8583.Parse;
 using NetCore8583.Util;
-using Serilog;
-using Serilog.Core;
-using Serilog.Events;
+
 
 namespace NetCore8583
 {
@@ -37,11 +35,7 @@ namespace NetCore8583
         ///     The ISO header to be included in each message type
         /// </summary>
         private readonly Dictionary<int, string> _isoHeaders = new Dictionary<int, string>();
-
-        private readonly Logger _logger = new LoggerConfiguration().MinimumLevel.Debug()
-            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-            .Enrich.FromLogContext()
-            .WriteTo.Console().CreateLogger();
+        
 
         /// <summary>
         ///     This map stores the message template for each message type.
@@ -256,12 +250,13 @@ namespace NetCore8583
         /// <summary>
         ///     Sets the timezone for the specified FieldParseInfo, if it's needed for parsing dates.
         /// </summary>
-        /// <param name="messageType"></param>
-        /// <param name="field"></param>
-        /// <param name="tz"></param>
+        /// <param name="messageType">the message type</param>
+        /// <param name="field">the given field</param>
+        /// <param name="tz">the timezone information</param>
+        /// <param name="logger">a custom logger</param>
         public void SetTimezoneForParseGuide(int messageType,
             int field,
-            TimeZoneInfo tz)
+            TimeZoneInfo tz, ILogger logger = null)
         {
             var guide = ParseMap[messageType];
             var fpi = guide?[field];
@@ -271,9 +266,7 @@ namespace NetCore8583
                 return;
             }
 
-            _logger.Warning("Field {@Field} for message type {@MessageType} is not for dates, cannot set timezone",
-                field,
-                messageType);
+            logger?.Warning($"Field {field} for message type {messageType} is not for dates, cannot set timezone");
         }
 
         /// <summary>
@@ -290,10 +283,11 @@ namespace NetCore8583
         ///     type is located, which is also the length of the ISO header.
         /// </param>
         /// <param name="binaryIsoHeader"></param>
+        /// <param name="logger">the custom logger</param>
         /// <returns>The parsed message.</returns>
         public T ParseMessage(sbyte[] buf,
             int isoHeaderLength,
-            bool binaryIsoHeader = false)
+            bool binaryIsoHeader = false, ILogger logger = null)
         {
             var minlength = isoHeaderLength + (UseBinaryMessages ? 2 : 4) +
                             (UseBinaryBitmap || UseBinaryMessages ? 8 : 16);
@@ -514,7 +508,7 @@ namespace NetCore8583
             var index = ParseOrder[type];
             if (index == null)
             {
-                _logger.Error(
+                logger?.Error(
                     $"ISO8583 MessageFactory has no parsing guide for message type {type:X} [{buf.ToString(0, buf.Length, _encoding)}]");
                 throw new Exception(
                     $"ISO8583 MessageFactory has no parsing guide for message type {type:X} [{buf.ToString(0, buf.Length, _encoding)}]");
@@ -525,8 +519,7 @@ namespace NetCore8583
             for (var i = 1; i < bs.Length; i++)
                 if (bs.Get(i) && !index.Contains(i + 1))
                 {
-                    _logger.Warning("ISO8583 MessageFactory cannot parse field {Field}: unspecified in parsing guide",
-                        i + 1);
+                    logger?.Warning($"ISO8583 MessageFactory cannot parse field {i+1}: unspecified in parsing guide");
                     abandon = true;
                 }
 
@@ -540,16 +533,12 @@ namespace NetCore8583
                     if (!bs.Get(i - 1)) continue;
                     if (IgnoreLast && pos >= buf.Length && i == index[^1])
                     {
-                        _logger.Warning("Field {@Index} is not really in the message even though it's in the bitmap",
-                            i);
-
-                        bs.Set(i - 1,
-                            false);
+                        logger?.Warning($"Field {i} is not really in the message even though it's in the bitmap");
+                        bs.Set(i - 1, false);
                     }
                     else
                     {
                         var decoder = fpi.Decoder ?? GetCustomField(i);
-
                         var val = fpi.ParseBinary(i,
                             buf,
                             pos,
@@ -587,11 +576,8 @@ namespace NetCore8583
                     if (bs.Get(i - 1))
                         if (IgnoreLast && pos >= buf.Length && i == index[^1])
                         {
-                            _logger.Warning(
-                                "Field {@FieldId} is not really in the message even though it's in the bitmap",
-                                i);
-                            bs.Set(i - 1,
-                                false);
+                            logger?.Warning($"Field {i} is not really in the message even though it's in the bitmap");
+                            bs.Set(i - 1, false);
                         }
                         else
                         {
@@ -738,7 +724,7 @@ namespace NetCore8583
         }
 
         public void SetParseMap(int type,
-            Dictionary<int, FieldParseInfo> map)
+            Dictionary<int, FieldParseInfo> map, ILogger logger = null)
         {
             if (ParseMap.ContainsKey(type)) ParseMap[type] = map;
             else
@@ -748,7 +734,7 @@ namespace NetCore8583
             var index = new List<int>();
             index.AddRange(map.Keys);
             index.Sort();
-            _logger.Warning($"ISO8583 MessageFactory adding parse map for type {type:X} with fields {index}");
+            logger?.Warning($"ISO8583 MessageFactory adding parse map for type {type:X} with fields {index}");
 
             if (ParseOrder.ContainsKey(type)) ParseOrder[type] = index;
             else
