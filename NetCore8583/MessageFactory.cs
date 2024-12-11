@@ -149,6 +149,25 @@ namespace NetCore8583
         }
 
         /// <summary>
+        /// Creates a new message of the specified type, with proper ISO header set.
+        /// </summary>
+        /// <param name="type">The message type, for example 0x200, 0x400, etc. used to define header if available</param>
+        /// <returns></returns>
+        protected T CreateIsoMessageWithType(int type)
+        {
+            T m;
+            if (_binIsoHeaders.ContainsKey(type))
+                m = CreateIsoMessageWithBinaryHeader(_binIsoHeaders[type]);
+            else if (_isoHeaders.ContainsKey(type))
+                m = CreateIsoMessage(_isoHeaders[type]);
+            else
+                m = CreateIsoMessage(string.Empty);
+
+            m.Type = type;
+            return m;
+        }
+
+        /// <summary>
         ///     Creates a new message of the specified type, with optional trace and date values as well
         ///     as any other values specified in a message template. If the factory is set to use binary
         ///     messages, then the returned message will be written using binary coding.
@@ -157,17 +176,7 @@ namespace NetCore8583
         /// <returns></returns>
         public T NewMessage(int type)
         {
-            var keyPresent = _binIsoHeaders.ContainsKey(type);
-            sbyte[] val = null;
-            var valStr = string.Empty;
-
-            if (keyPresent)
-                val = _binIsoHeaders[type];
-            else if (_isoHeaders.ContainsKey(type))
-                valStr = _isoHeaders[type];
-
-            var m = keyPresent ? CreateIsoMessageWithBinaryHeader(val) : CreateIsoMessage(valStr);
-            m.Type = type;
+            T m = CreateIsoMessageWithType(type);
             m.Etx = Etx;
             m.Binary = UseBinaryMessages;
             m.EnforceSecondBitmap = EnforceSecondBitmap;
@@ -209,14 +218,13 @@ namespace NetCore8583
         /// <returns></returns>
         public T CreateResponse(T request, bool copyAllFields = true)
         {
-            var resp = CreateIsoMessage(_isoHeaders[request.Type + 16]);
+            var resp = CreateIsoMessageWithType(request.Type + 16);
             resp.Encoding = request.Encoding;
             resp.Binary = request.Binary;
             resp.BinBitmap = request.BinBitmap;
-            resp.Type = request.Type + 16;
             resp.Etx = request.Etx;
             resp.EnforceSecondBitmap = request.EnforceSecondBitmap;
-            IsoMessage templ = _typeTemplates[resp.Type];
+            IsoMessage templ = _typeTemplates.ContainsKey(resp.Type) ? _typeTemplates[resp.Type] : null;
             if (templ == null)
             {
                 for (var i = 2; i < 128; i++)
