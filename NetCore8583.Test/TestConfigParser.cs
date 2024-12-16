@@ -253,6 +253,23 @@ namespace NetCore8583.Test
         }
 
         [Fact]
+        public void TestCreatingResponseWithTypeNotInConfig()
+        {
+            var configXml = @"/Resources/issue36.xml";
+            var mfact = Config(configXml);
+            
+            var m = mfact.NewMessage(0x100);
+            Assert.NotNull(m);
+            Assert.True(m.HasField(2));
+            Assert.True(m.HasField(3));
+
+            var r = mfact.CreateResponse(m);
+            Assert.NotNull(r);
+            Assert.True(r.HasField(2));
+            Assert.True(r.HasField(3));
+        }
+
+        [Fact]
         public void TestAllTypesHaveParseInfo()
         {
             foreach (var isoType in (IsoType[])Enum.GetValues(typeof(IsoType)))
