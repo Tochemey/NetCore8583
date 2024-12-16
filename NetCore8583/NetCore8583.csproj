@@ -11,9 +11,10 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>Iso8583 NetCore Banking C#</PackageTags>
     <Copyright>Tochemey 2018-2024</Copyright>
-    <PackageVersion>2.2.0</PackageVersion>
+    <PackageVersion>2.2.1</PackageVersion>
     <TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
     <ReleaseVersion>2.2.0</ReleaseVersion>
+    <Title>NetCore8583</Title>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
