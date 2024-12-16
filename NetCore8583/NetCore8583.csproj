@@ -5,17 +5,24 @@
     <Description>NetCore8583 is a library that helps parse/read and generate ISO 8583 messages. It does not handle sending or reading them over a network connection, but it does parse the data you have read and can generate the data you need to write over a network connection.</Description>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
     <RepositoryUrl>https://github.com/Tochemey/NetCore8583</RepositoryUrl>
     <PackageProjectUrl>https://github.com/Tochemey/NetCore8583</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>Iso8583 NetCore Banking C#</PackageTags>
     <Copyright>Tochemey 2018-2024</Copyright>
     <PackageVersion>2.2.1</PackageVersion>
-    <TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net7.0;net8.0;net9.0</TargetFrameworks>
     <ReleaseVersion>2.2.0</ReleaseVersion>
     <Title>NetCore8583</Title>
   </PropertyGroup>
+
+  <PropertyGroup>
+      <PackageLicenseFile>LICENSE</PackageLicenseFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+      <None Include="../LICENSE" Pack="true" PackagePath="" Link="LICENSE"/>
+  </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -29,7 +36,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
+    <PackageReference Condition="'$(TargetFramework)' == 'net6.0' OR '$(TargetFramework)' == 'net7.0' OR '$(TargetFramework)' == 'net8.0'"
+      Include="System.Text.Encoding.CodePages" Version="8.0.0" />
+
+    <!-- Version 9 is not tested for dotnet 7 and below and will building will produce 'use at your own risk' warning -->
+    <PackageReference Condition="'$(TargetFramework)' == 'net9.0'"
+      Include="System.Text.Encoding.CodePages" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>
