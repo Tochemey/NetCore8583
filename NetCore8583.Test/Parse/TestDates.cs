@@ -12,13 +12,18 @@ namespace NetCore8583.Test.Parse
         [Fact]
         public void TestDate10FutureTolerance()
         {
-            var today = DateTime.UtcNow;
-            var soon = today.AddMilliseconds(50000);
+            var today = DateTime.UtcNow;            
+            var soon = today.AddMilliseconds(50000); 
             var buf = IsoType.DATE10.Format(soon).GetSignedBytes();
             var comp = new Date10ParseInfo().Parse(0, buf, 0, null);
             var v = (DateTime) comp.Value;
-            var now = DateTime.UtcNow;
-            Assert.True(v.CompareTo(now) > 0);
+
+            Assert.Equal(soon.Month, v.Month);
+            Assert.Equal(soon.Day, v.Day);
+            Assert.Equal(soon.Hour, v.Hour);
+            Assert.Equal(soon.Minute, v.Minute);
+            Assert.Equal(soon.Second, v.Second);
+
             var stream = new MemoryStream();
             comp.Write(stream, true, false);
             var bin = new Date10ParseInfo().ParseBinary(0, stream.ToArray().ToInt8(), 0, null);
@@ -30,11 +35,18 @@ namespace NetCore8583.Test.Parse
         [Fact]
         public void TestDate12FutureTolerance()
         {
-            var soon = DateTime.UtcNow.AddMilliseconds(50000);
+            var today = DateTime.UtcNow;
+            var soon = today.AddMilliseconds(50000); 
             var buf = IsoType.DATE12.Format(soon).GetSignedBytes();
             var comp = new Date12ParseInfo().Parse(0, buf, 0, null);
             var v = (DateTime) comp.Value;
-            Assert.True(v.CompareTo(DateTime.UtcNow) > 0);
+
+            Assert.Equal(soon.Month, v.Month);
+            Assert.Equal(soon.Day, v.Day);
+            Assert.Equal(soon.Hour, v.Hour);
+            Assert.Equal(soon.Minute, v.Minute);
+            Assert.Equal(soon.Second, v.Second);
+
             var stream = new MemoryStream();
             comp.Write(stream, true, false);
             var bin = new Date12ParseInfo().ParseBinary(0, stream.ToArray().ToInt8(), 0, null);
@@ -46,11 +58,18 @@ namespace NetCore8583.Test.Parse
         [Fact]
         public void TestDate14FutureTolerance()
         {
-            var soon = DateTime.UtcNow.AddMilliseconds(50000);
+            var today = DateTime.UtcNow;
+            var soon = today.AddMilliseconds(50000); 
             var buf = IsoType.DATE14.Format(soon).GetSignedBytes();
             var comp = new Date14ParseInfo().Parse(0, buf, 0, null);
             var v = (DateTime) comp.Value;
-            Assert.True(v.CompareTo(DateTime.UtcNow) > 0);
+
+            Assert.Equal(soon.Month, v.Month);
+            Assert.Equal(soon.Day, v.Day);
+            Assert.Equal(soon.Hour, v.Hour);
+            Assert.Equal(soon.Minute, v.Minute);
+            Assert.Equal(soon.Second, v.Second);
+
             var stream = new MemoryStream();
             comp.Write(stream, true, false);
             var bin = new Date14ParseInfo().ParseBinary(0, stream.ToArray().ToInt8(), 0, null);
