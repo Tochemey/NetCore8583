@@ -9,9 +9,9 @@
     <PackageProjectUrl>https://github.com/Tochemey/NetCore8583</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>Iso8583 NetCore Banking C#</PackageTags>
-    <Copyright>Tochemey 2018-2024</Copyright>
-    <PackageVersion>2.2.1</PackageVersion>
-    <TargetFrameworks>net6.0;net7.0;net8.0;net9.0</TargetFrameworks>
+    <Copyright>Tochemey 2018-2026</Copyright>
+    <PackageVersion>2.3.0</PackageVersion>
+    <TargetFrameworks>net6.0;net7.0;net8.0;net9.0;net10.0</TargetFrameworks>
     <ReleaseVersion>2.2.0</ReleaseVersion>
     <Title>NetCore8583</Title>
   </PropertyGroup>
@@ -42,6 +42,9 @@
     <!-- Version 9 is not tested for dotnet 7 and below and will building will produce 'use at your own risk' warning -->
     <PackageReference Condition="'$(TargetFramework)' == 'net9.0'"
       Include="System.Text.Encoding.CodePages" Version="9.0.0" />
+
+    <PackageReference Condition="'$(TargetFramework)' == 'net10.0'"
+      Include="System.Text.Encoding.CodePages" Version="10.0.0" />
   </ItemGroup>
 
   <ItemGroup>

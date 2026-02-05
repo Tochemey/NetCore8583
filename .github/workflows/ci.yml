@@ -31,11 +31,12 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: | 
+          dotnet-version: |
             6.x
             7.x
             8.x
             9.x
+            10.x
           dotnet-quality: 'ga'
       - name: Restore
         run: dotnet restore
@@ -62,11 +63,12 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: | 
+          dotnet-version: |
             6.x
             7.x
             8.x
             9.x
+            10.x
           dotnet-quality: 'ga'
       - name: Restore
         run: dotnet restore
