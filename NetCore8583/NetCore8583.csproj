@@ -11,8 +11,8 @@
     <PackageTags>Iso8583 NetCore Banking C#</PackageTags>
     <Copyright>Tochemey 2018-2026</Copyright>
     <PackageVersion>2.3.0</PackageVersion>
-    <TargetFrameworks>net6.0;net7.0;net8.0;net9.0;net10.0</TargetFrameworks>
-    <ReleaseVersion>2.2.0</ReleaseVersion>
+    <TargetFrameworks>net10.0;net8.0;net9.0</TargetFrameworks>
+    <ReleaseVersion>2.3.0</ReleaseVersion>
     <Title>NetCore8583</Title>
   </PropertyGroup>
 
@@ -36,15 +36,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Condition="'$(TargetFramework)' == 'net6.0' OR '$(TargetFramework)' == 'net7.0' OR '$(TargetFramework)' == 'net8.0'"
-      Include="System.Text.Encoding.CodePages" Version="8.0.0" />
+    <PackageReference Condition="'$(TargetFramework)' == 'net6.0' OR '$(TargetFramework)' == 'net7.0' OR '$(TargetFramework)' == 'net8.0'" Include="System.Text.Encoding.CodePages" Version="10.0.2" />
 
     <!-- Version 9 is not tested for dotnet 7 and below and will building will produce 'use at your own risk' warning -->
-    <PackageReference Condition="'$(TargetFramework)' == 'net9.0'"
-      Include="System.Text.Encoding.CodePages" Version="9.0.0" />
+    <PackageReference Condition="'$(TargetFramework)' == 'net9.0'" Include="System.Text.Encoding.CodePages" Version="10.0.2" />
 
-    <PackageReference Condition="'$(TargetFramework)' == 'net10.0'"
-      Include="System.Text.Encoding.CodePages" Version="10.0.0" />
+    <PackageReference Condition="'$(TargetFramework)' == 'net10.0'" Include="System.Text.Encoding.CodePages" Version="10.0.2" />
   </ItemGroup>
 
   <ItemGroup>
