@@ -4,7 +4,7 @@
 
     <IsPackable>false</IsPackable>
 
-    <TargetFrameworks>net6.0;net7.0;net8.0;net9.0;net10.0</TargetFrameworks>
+    <TargetFrameworks>net10.0;net8.0;net9.0</TargetFrameworks>
     <ReleaseVersion>1.1.0</ReleaseVersion>
   </PropertyGroup>
 
@@ -16,10 +16,10 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
-    <PackageReference Include="TimeZoneConverter" Version="6.1.0" />
-    <PackageReference Include="xunit" Version="2.9.2" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
+    <PackageReference Include="TimeZoneConverter" Version="7.2.0" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -27,15 +27,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Condition="'$(TargetFramework)' == 'net6.0' OR '$(TargetFramework)' == 'net7.0' OR '$(TargetFramework)' == 'net8.0'"
-      Include="System.Text.Encoding.CodePages" Version="8.0.0" />
+    <PackageReference Condition="'$(TargetFramework)' == 'net6.0' OR '$(TargetFramework)' == 'net7.0' OR '$(TargetFramework)' == 'net8.0'" Include="System.Text.Encoding.CodePages" Version="10.0.2" />
 
     <!-- Version 9 is not tested for dotnet 7 and below and building will produce 'use at your own risk' warning -->
-    <PackageReference Condition="'$(TargetFramework)' == 'net9.0'"
-      Include="System.Text.Encoding.CodePages" Version="9.0.0" />
+    <PackageReference Condition="'$(TargetFramework)' == 'net9.0'" Include="System.Text.Encoding.CodePages" Version="10.0.2" />
 
-    <PackageReference Condition="'$(TargetFramework)' == 'net10.0'"
-      Include="System.Text.Encoding.CodePages" Version="10.0.0" />
+    <PackageReference Condition="'$(TargetFramework)' == 'net10.0'" Include="System.Text.Encoding.CodePages" Version="10.0.2" />
   </ItemGroup>
 
   <ItemGroup>
