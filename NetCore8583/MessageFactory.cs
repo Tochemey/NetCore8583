@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using System.Collections.Frozen;
+using System.Runtime.CompilerServices;
 using System.Text;
+using NetCore8583.Extensions;
 using NetCore8583.Parse;
-using NetCore8583.Util;
 
 
 namespace NetCore8583
@@ -47,16 +48,18 @@ namespace NetCore8583
         private int _radix = 10;
 
         /// <summary>
-        ///     Stores the information needed to parse messages sorted by type
+        ///     Stores the information needed to parse messages sorted by type.
+        ///     Inner dictionaries are frozen for optimal read performance.
         /// </summary>
-        protected Dictionary<int, Dictionary<int, FieldParseInfo>> ParseMap =
-            new Dictionary<int, Dictionary<int, FieldParseInfo>>();
+        protected Dictionary<int, FrozenDictionary<int, FieldParseInfo>> ParseMap =
+            new Dictionary<int, FrozenDictionary<int, FieldParseInfo>>();
 
         /// <summary>
         ///     Stores the field numbers to be parsed, in order of appearance.
         /// </summary>
         protected Dictionary<int, List<int>> ParseOrder = new Dictionary<int, List<int>>();
 
+        /// <summary>Trace number generator used when creating new messages (e.g. for field 11).</summary>
         public ITraceNumberGenerator TraceGenerator { get; set; }
 
         /// <summary>
@@ -69,38 +72,54 @@ namespace NetCore8583
         /// </summary>
         public bool UseBinaryMessages { get; set; }
 
-        /// <summary>
-        /// </summary>
+        /// <summary>ETX (end-of-text) character to append to parsed/written messages; -1 means none. Default is -1.</summary>
         public int Etx { get; set; } = -1;
 
+        /// <summary>When true, the last byte of an incoming message is ignored (e.g. ETX).</summary>
         public bool IgnoreLast { get; set; }
 
+        /// <summary>When true, the secondary bitmap (field 1) is always written even if no fields 65–128 are set.</summary>
         public bool EnforceSecondBitmap { get; set; }
+
+        /// <summary>When true, the bitmap is encoded in binary (8 or 16 bytes) instead of ASCII hex.</summary>
         public bool UseBinaryBitmap { get; set; }
 
+        /// <summary>When true, variable-length length headers and compatible fields use string encoding; propagates to all parsers.</summary>
         public bool ForceStringEncoding
         {
             get => _forceStringEncoding;
             set
             {
                 _forceStringEncoding = value;
-                foreach (var parser in ParseMap.Values.SelectMany(mapValue => mapValue.Values))
-                    parser.ForceStringDecoding = value;
+                foreach (var mapValue in ParseMap.Values)
+                {
+                    foreach (var parser in mapValue.Values)
+                    {
+                        parser.ForceStringDecoding = value;
+                    }
+                }
             }
         }
 
+        /// <summary>Radix used when decoding length headers (e.g. 10 for decimal). Propagates to all parsers.</summary>
         public int Radix
         {
             get => _radix;
             set
             {
                 _radix = value;
-                foreach (var parser in ParseMap.Values.SelectMany(mapValue => mapValue.Values))
-                    parser.Radix = value;
+                foreach (var mapValue in ParseMap.Values)
+                {
+                    foreach (var parser in mapValue.Values)
+                    {
+                        parser.Radix = value;
+                    }
+                }
             }
         }
 
 
+        /// <summary>Character encoding for message and field string data. Cannot be null.</summary>
         public Encoding Encoding
         {
             get => _encoding;
@@ -110,8 +129,15 @@ namespace NetCore8583
                 if (_encoding == null) throw new ArgumentException("Cannot set null encoding.");
 
                 if (ParseMap.Count > 0)
-                    foreach (var fpi in ParseMap.Values.SelectMany(mapValue => mapValue.Values))
-                        fpi.Encoding = value;
+                {
+                    foreach (var mapValue in ParseMap.Values)
+                    {
+                        foreach (var fpi in mapValue.Values)
+                        {
+                            fpi.Encoding = value;
+                        }
+                    }
+                }
 
                 if (_typeTemplates.Count == 0) return;
 
@@ -126,6 +152,9 @@ namespace NetCore8583
                 }
             }
         }
+        /// <summary>Registers a custom encoder/decoder for the given field number.</summary>
+        /// <param name="index">Field number (2–128).</param>
+        /// <param name="value">The custom field implementation.</param>
         public void SetCustomField(int index,
             ICustomField value)
         {
@@ -133,16 +162,26 @@ namespace NetCore8583
                 value);
         }
 
+        /// <summary>Returns the custom encoder/decoder for the given field, or null if none.</summary>
+        /// <param name="index">Field number (2–128).</param>
+        /// <returns>The <see cref="ICustomField"/> for that field, or null.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ICustomField GetCustomField(int index)
         {
             return _customFields.ContainsKey(index) ? _customFields[index] : null;
         }
 
+        /// <summary>Creates a new message instance with the given binary ISO header. Override to use a subclass of <see cref="IsoMessage"/>.</summary>
+        /// <param name="binHeader">The binary header bytes.</param>
+        /// <returns>A new message of type <typeparamref name="T"/>.</returns>
         protected T CreateIsoMessageWithBinaryHeader(sbyte[] binHeader)
         {
             return (T) new IsoMessage(binHeader);
         }
 
+        /// <summary>Creates a new message instance with the given ASCII ISO header. Override to use a subclass of <see cref="IsoMessage"/>.</summary>
+        /// <param name="isoHeader">The header string.</param>
+        /// <returns>A new message of type <typeparamref name="T"/>.</returns>
         protected T CreateIsoMessage(string isoHeader)
         {
             return (T) new IsoMessage(isoHeader);
@@ -344,7 +383,7 @@ namespace NetCore8583
 
             m.Type = type;
             //Parse the bitmap (primary first)
-            var bs = new BitArray(64);
+            var bs = new Bitmap128();
             var pos = 0;
             if (UseBinaryMessages || UseBinaryBitmap)
             {
@@ -363,7 +402,6 @@ namespace NetCore8583
                 //Check for secondary bitmap and parse if necessary
                 if (bs.Get(0))
                 {
-                    bs.Length = 128;
                     if (buf.Length < minlength + 8)
                         throw new ParseException($"Insufficient length for secondary bitmap : {minlength}");
 
@@ -447,7 +485,6 @@ namespace NetCore8583
                     //Check for secondary bitmap and parse it if necessary
                     if (bs.Get(0))
                     {
-                        bs.Length = 128;
                         if (buf.Length < minlength + 16)
                             throw new ParseException($"Insufficient length for secondary bitmap :{minlength}");
                         if (ForceStringEncoding)
@@ -524,7 +561,8 @@ namespace NetCore8583
 
             //First we check if the message contains fields not specified in the parsing template
             var abandon = false;
-            for (var i = 1; i < bs.Length; i++)
+            var bitmapLength = bs.Get(0) ? 128 : 64;
+            for (var i = 1; i < bitmapLength; i++)
                 if (bs.Get(i) && !index.Contains(i + 1))
                 {
                     logger?.Warning($"ISO8583 MessageFactory cannot parse field {i+1}: unspecified in parsing guide");
@@ -678,10 +716,13 @@ namespace NetCore8583
             }
             else
             {
-                if (_binIsoHeaders.ContainsKey(type)) _binIsoHeaders[type] = val.ToInt8();
+                var signedBytes = new sbyte[val.Length];
+                val.AsSignedBytes().CopyTo(signedBytes);
+                
+                if (_binIsoHeaders.ContainsKey(type)) 
+                    _binIsoHeaders[type] = signedBytes;
                 else
-                    _binIsoHeaders.Add(type,
-                        val.ToInt8());
+                    _binIsoHeaders.Add(type, signedBytes);
 
                 _isoHeaders.Remove(type);
             }
@@ -734,10 +775,12 @@ namespace NetCore8583
         public void SetParseMap(int type,
             Dictionary<int, FieldParseInfo> map, ILogger logger = null)
         {
-            if (ParseMap.ContainsKey(type)) ParseMap[type] = map;
+            // Convert to FrozenDictionary for optimal read performance during message parsing
+            var frozenMap = map.ToFrozenDictionary();
+            
+            if (ParseMap.ContainsKey(type)) ParseMap[type] = frozenMap;
             else
-                ParseMap.Add(type,
-                    map);
+                ParseMap.Add(type, frozenMap);
 
             var index = new List<int>();
             index.AddRange(map.Keys);

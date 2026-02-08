@@ -1,15 +1,20 @@
-﻿using System;
-using NetCore8583.Util;
+using System;
+using System.Runtime.CompilerServices;
+using NetCore8583.Extensions;
 
 namespace NetCore8583.Parse
 {
+    /// <summary>Parse info for LLVAR (variable-length string with 2-digit length header) fields.</summary>
     public class LlvarParseInfo : FieldParseInfo
     {
+        /// <summary>Initializes parse info for LLVAR (2-digit length, then string data).</summary>
         public LlvarParseInfo() : base(IsoType.LLVAR,
             0)
         {
         }
 
+        /// <inheritdoc />
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public override IsoValue Parse(int field,
             sbyte[] buf,
             int pos,
@@ -44,10 +49,10 @@ namespace NetCore8583.Parse
             //buffer, there are probably some extended characters. So we create a String from
             //the rest of the buffer, and then cut it to the specified length.
             if (v.Length != len)
-                v = buf.ToString(pos + 2,
-                    buf.Length - pos - 2,
-                    Encoding).Substring(0,
-                    len);
+            {
+                var fullString = buf.ToString(pos + 2, buf.Length - pos - 2, Encoding);
+                v = fullString.AsSpan(0, Math.Min(len, fullString.Length)).ToString();
+            }
 
             if (custom == null)
                 return new IsoValue(IsoType,
@@ -67,6 +72,8 @@ namespace NetCore8583.Parse
                     custom);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        /// <inheritdoc />
         public override IsoValue ParseBinary(int field,
             sbyte[] buf,
             int pos,

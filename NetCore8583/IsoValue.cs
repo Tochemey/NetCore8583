@@ -1,14 +1,22 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Text;
-using NetCore8583.Util;
+using NetCore8583.Extensions;
 
 namespace NetCore8583
 {
+    /// <summary>
+    /// Holds a single ISO 8583 field value with its type, length, optional custom encoder, and encoding. Used both when building messages and when parsing.
+    /// </summary>
     public class IsoValue : ICloneable
     {
+        /// <summary>Creates an IsoValue for variable-length types (LLVAR, LLLVAR, LLLLVAR, LLBIN, LLLBIN, LLLLBIN). Length is derived from the value.</summary>
+        /// <param name="t">The ISO type (must not be ALPHA, NUMERIC, or BINARY).</param>
+        /// <param name="value">The field value (string, sbyte[], or custom object).</param>
+        /// <param name="custom">Optional custom encoder/decoder.</param>
         public IsoValue(IsoType t,
             object value,
             ICustomField custom = null)
@@ -89,6 +97,11 @@ namespace NetCore8583
         }
 
 
+        /// <summary>Creates an IsoValue with explicit length. Use for fixed-length types (ALPHA, NUMERIC, BINARY) or when length is known for variable-length types.</summary>
+        /// <param name="t">The ISO type.</param>
+        /// <param name="val">The field value.</param>
+        /// <param name="len">The length (required for fixed-length types).</param>
+        /// <param name="custom">Optional custom encoder/decoder.</param>
         public IsoValue(IsoType t,
             object val,
             int len,
@@ -158,17 +171,30 @@ namespace NetCore8583
             }
         }
 
+        /// <summary>Optional custom encoder/decoder for this field.</summary>
         public ICustomField Encoder { get; }
+
+        /// <summary>The ISO type of this field.</summary>
         public IsoType Type { get; }
+
+        /// <summary>The length of the field (fixed or computed for variable-length types).</summary>
         public int Length { get; }
+
+        /// <summary>Character encoding for string representation. Default is <see cref="Encoding.Default"/>.</summary>
         public Encoding Encoding { get; set; } = Encoding.Default;
+
+        /// <summary>The stored value (string, sbyte[], decimal, DateTime, or custom type).</summary>
         public object Value { get; }
 
+        /// <summary>Creates a shallow copy of this IsoValue.</summary>
+        /// <returns>A new IsoValue with the same type, value, length, and encoder.</returns>
         public object Clone()
         {
             return MemberwiseClone();
         }
 
+        /// <summary>Returns the encoded string representation of the value for writing to the message (e.g. formatted numeric, hex for binary).</summary>
+        /// <returns>Encoded string for this field.</returns>
         public override string ToString()
         {
             if (Value == null) return "ISOValue<null>";
@@ -239,13 +265,24 @@ namespace NetCore8583
             return Encoder == null ? Value.ToString() : Encoder.EncodeField(Value);
         }
 
+        /// <summary>
+        /// Writes the length header for variable-length fields (LLVAR, LLLVAR, LLLLVAR, LLBIN, LLLBIN, LLLLBIN) in ASCII or BCD as appropriate.
+        /// </summary>
+        /// <param name="l">The length value to write.</param>
+        /// <param name="outs">The output stream.</param>
+        /// <param name="type">The ISO type (determines number of digits: 2, 3, or 4).</param>
+        /// <param name="binary">True to write BCD-encoded length; false for ASCII digits.</param>
+        /// <param name="forceStringEncoding">When true, length is encoded as string using current encoding.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected void WriteLengthHeader(int l,
             Stream outs,
             IsoType type,
             bool binary,
             bool forceStringEncoding)
         {
-            var sbytes = new List<sbyte>();
+            Span<sbyte> buffer = stackalloc sbyte[4];
+            int position = 0;
+            
             var digits = type switch
             {
                 IsoType.LLLLBIN => 4,
@@ -260,30 +297,37 @@ namespace NetCore8583
                 switch (digits)
                 {
                     case 4:
-                        sbytes.Add((sbyte) (((l % 10000 / 1000) << 4) | (l % 1000 / 100)));
+                        buffer[position++] = (sbyte) (((l % 10000 / 1000) << 4) | (l % 1000 / 100));
                         break;
                     case 3:
-                        sbytes.Add((sbyte) (l / 100)); //00 to 09 automatically in BCD
+                        buffer[position++] = (sbyte) (l / 100); //00 to 09 automatically in BCD
                         break;
                 }
 
                 //BCD encode the rest of the length
-                sbytes.Add((sbyte) (((l % 100 / 10) << 4) | (l % 10)));
+                buffer[position++] = (sbyte) (((l % 100 / 10) << 4) | (l % 10));
             }
             else if (forceStringEncoding)
             {
-                var lhead = Convert.ToString(l);
-                var ldiff = digits - lhead.Length;
-                lhead = ldiff switch
+                Span<char> charBuffer = stackalloc char[4];
+                l.TryFormat(charBuffer, out int charsWritten);
+                
+                // Pad with zeros
+                var ldiff = digits - charsWritten;
+                if (ldiff > 0)
                 {
-                    1 => ('0' + lhead),
-                    2 => ("00" + lhead),
-                    3 => ("000" + lhead),
-                    _ => lhead
-                };
+                    for (int i = charsWritten - 1; i >= 0; i--)
+                    {
+                        charBuffer[i + ldiff] = charBuffer[i];
+                    }
+                    for (int i = 0; i < ldiff; i++)
+                    {
+                        charBuffer[i] = '0';
+                    }
+                    charsWritten = digits;
+                }
 
-                var bytes = lhead.GetSignedBytes(Encoding);
-                sbytes.AddRange(bytes);
+                position = new string(charBuffer.Slice(0, charsWritten)).GetSignedBytes(buffer, Encoding);
             }
             else
             {
@@ -291,24 +335,32 @@ namespace NetCore8583
                 switch (digits)
                 {
                     case 4:
-                        sbytes.Add((sbyte) (l / 1000 + 48));
-                        sbytes.Add((sbyte) (l % 1000 / 100 + 48));
+                        buffer[position++] = (sbyte) (l / 1000 + 48);
+                        buffer[position++] = (sbyte) (l % 1000 / 100 + 48);
                         break;
                     case 3:
-                        sbytes.Add((sbyte) (l / 100 + 48));
+                        buffer[position++] = (sbyte) (l / 100 + 48);
                         break;
                 }
 
-                if (l >= 10) sbytes.Add((sbyte) (l % 100 / 10 + 48));
-                else sbytes.Add(48);
-                sbytes.Add((sbyte) (l % 10 + 48));
+                if (l >= 10) 
+                    buffer[position++] = (sbyte) (l % 100 / 10 + 48);
+                else 
+                    buffer[position++] = 48;
+                    
+                buffer[position++] = (sbyte) (l % 10 + 48);
             }
 
-            outs.Write(sbytes.ToArray().ToUint8(),
-                0,
-                sbytes.Count);
+            var byteSpan = buffer.Slice(0, position).AsUnsignedBytes();
+            outs.Write(byteSpan.ToArray(), 0, byteSpan.Length);
         }
 
+        /// <summary>
+        /// Writes this field's value to the output stream (including length header for variable-length types), using binary or ASCII encoding as specified.
+        /// </summary>
+        /// <param name="outs">The output stream.</param>
+        /// <param name="binary">True for binary encoding (BCD for numerics/dates, raw bytes for binary types).</param>
+        /// <param name="forceStringEncoding">When true, use string encoding for length headers and compatible fields.</param>
         public void Write(Stream outs,
             bool binary,
             bool forceStringEncoding)
@@ -356,10 +408,8 @@ namespace NetCore8583
                         {
                             Bcd.Encode(ToString(),
                                 buf);
-                            outs.Write(buf.ToUint8(),
-                                0,
-                                buf.Length);
-
+                            var unsignedBuf = buf.AsUnsignedBytes();
+                            outs.Write(unsignedBuf.ToArray(), 0, unsignedBuf.Length);
                             return;
                         }
                     }
@@ -373,10 +423,8 @@ namespace NetCore8583
                 var missing = 0;
                 if (Value is sbyte[] bytes)
                 {
-                    outs.Write(bytes.ToUint8(),
-                        0,
-                        bytes.Length);
-
+                    var unsignedBytes = bytes.AsUnsignedBytes();
+                    outs.Write(unsignedBytes.ToArray(), 0, unsignedBytes.Length);
                     missing = Length - bytes.Length;
                 }
                 else switch (Encoder)
@@ -384,19 +432,16 @@ namespace NetCore8583
                     case ICustomBinaryField customBinaryField:
                     {
                         var binval = customBinaryField.EncodeBinaryField(Value);
-                        outs.Write(binval.ToUint8(),
-                            0,
-                            binval.Length);
+                        var unsignedBinval = binval.AsUnsignedBytes();
+                        outs.Write(unsignedBinval.ToArray(), 0, unsignedBinval.Length);
                         missing = Length - binval.Length;
                         break;
                     }
                     default:
                     {
                         var binval = HexCodec.HexDecode(Value.ToString());
-                        outs.Write(binval.ToUint8(),
-                            0,
-                            binval.Length);
-
+                        var unsignedBinval = binval.AsUnsignedBytes();
+                        outs.Write(unsignedBinval.ToArray(), 0, unsignedBinval.Length);
                         missing = Length - binval.Length;
                         break;
                     }
@@ -407,13 +452,16 @@ namespace NetCore8583
             }
             else
             {
-                var bytes = ToString().GetSignedBytes(Encoding);
-                outs.Write(bytes.ToUint8(),
-                    0,
-                    bytes.Length);
+                var signedBytes = ToString().GetSignedBytes(Encoding);
+                var unsignedBytes = signedBytes.AsUnsignedBytes();
+                outs.Write(unsignedBytes.ToArray(), 0, unsignedBytes.Length);
             }
         }
 
+        /// <summary>Compares this IsoValue to another by type, value, and length.</summary>
+        /// <param name="other">The object to compare.</param>
+        /// <returns>True if the other object is an IsoValue with the same type, value, and length.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object other)
         {
             if (!(other is IsoValue)) return false;
@@ -421,6 +469,9 @@ namespace NetCore8583
             return comp.GetType() == GetType() && comp.Value.Equals(Value) && comp.Length == Length;
         }
 
+        /// <summary>Returns a hash code based on the string representation of the value.</summary>
+        /// <returns>Hash code for this IsoValue.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode() => Value == null ? 0 : ToString().GetHashCode();
     }
 }

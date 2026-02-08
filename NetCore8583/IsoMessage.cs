@@ -1,13 +1,17 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
-using NetCore8583.Util;
+using NetCore8583.Extensions;
 
 namespace NetCore8583
 {
+  /// <summary>
+  /// Represents an ISO 8583 financial message with a type, optional header, bitmap, and up to 128 fields (fields 2–128; field 1 is the secondary bitmap).
+  /// Supports both ASCII and binary encoding, configurable encoding, and optional ETX terminator.
+  /// </summary>
   public class IsoMessage
   {
     private static readonly sbyte[] Hex =
@@ -35,16 +39,23 @@ namespace NetCore8583
     /// </summary>
     private readonly IsoValue[] _fields = new IsoValue[129];
 
+    /// <summary>Initializes a new ISO message with no header.</summary>
     public IsoMessage()
     {
     }
 
+    /// <summary>Initializes a new ISO message with the given ASCII header.</summary>
+    /// <param name="header">The ISO header string (e.g. TPDU or application header).</param>
     public IsoMessage(string header) => IsoHeader = header;
 
+    /// <summary>Initializes a new ISO message with the given binary header.</summary>
+    /// <param name="binaryHeader">The raw binary ISO header bytes.</param>
     public IsoMessage(sbyte[] binaryHeader) => BinIsoHeader = binaryHeader;
 
+    /// <summary>When true, field values (e.g. bitmap) are encoded as strings using the message encoding instead of raw bytes.</summary>
     public bool ForceStringEncoding { get; set; } = false;
 
+    /// <summary>Optional binary ISO header; used when the message uses a binary header instead of <see cref="IsoHeader"/>.</summary>
     public sbyte[] BinIsoHeader { get; set; }
 
     /// <summary>
@@ -73,8 +84,10 @@ namespace NetCore8583
     /// </summary>
     public bool EnforceSecondBitmap { get; set; }
 
+    /// <summary>When true, the bitmap is written in binary form (8 bytes for 64 fields, 16 for 128) instead of ASCII hex.</summary>
     public bool BinBitmap { get; set; }
 
+    /// <summary>Character encoding used for string fields and ASCII headers. Default is <see cref="Encoding.Default"/>.</summary>
     public Encoding Encoding { get; set; } = Encoding.Default;
 
     /// <summary>
@@ -84,6 +97,7 @@ namespace NetCore8583
     /// </summary>
     /// <param name="field">The field number (2 to 128)</param>
     /// <returns>The stored object value in that field, or null if the message does not have the field.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public object GetObjectValue(int field)
     {
       var v = _fields[field];
@@ -95,14 +109,14 @@ namespace NetCore8583
     /// </summary>
     /// <param name="field">The field index (2 to 128).</param>
     /// <returns>The IsoValue for the specified field.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public IsoValue GetField(int field) => _fields[field];
 
     /// <summary>
-    ///   Stored the field in the specified index. The first field is the secondary bitmap and has index 1,
-    ///   o the first valid value for index must be 2.
+    /// Stores the field at the specified index. The first data field is index 2 (index 1 is the secondary bitmap).
     /// </summary>
-    /// <param name="index"></param>
-    /// <param name="field"></param>
+    /// <param name="index">The field index (2 to 128).</param>
+    /// <param name="field">The <see cref="IsoValue"/> to store; can be null to clear the field.</param>
     /// <returns>The receiver (useful for setting several fields in sequence).</returns>
     public IsoMessage SetField(int index,
       IsoValue field)
@@ -114,10 +128,10 @@ namespace NetCore8583
     }
 
     /// <summary>
-    ///   Convenient method for setting several fields in one call
+    /// Sets multiple fields in one call from a dictionary of field index to <see cref="IsoValue"/>.
     /// </summary>
-    /// <param name="values"></param>
-    /// <returns></returns>
+    /// <param name="values">Dictionary of field index (2–128) to value.</param>
+    /// <returns>This message.</returns>
     public IsoMessage SetFields(Dictionary<int, IsoValue> values)
     {
       foreach (var (key, value) in values)
@@ -129,12 +143,12 @@ namespace NetCore8583
     /// <summary>
     ///   Sets the specified value in the specified field, creating an IsoValue internally.
     /// </summary>
-    /// <param name="index">The field number (2 to 128)</param>
+    /// <param name="index">The field number (2 to 128).</param>
     /// <param name="value">The value to be stored.</param>
-    /// <param name="encoder">An optional CustomField to encode/decode the value.</param>
-    /// <param name="t"></param>
-    /// <param name="length"></param>
-    /// <returns></returns>
+    /// <param name="encoder">An optional <see cref="ICustomField"/> to encode/decode the value.</param>
+    /// <param name="t">The ISO type of the field.</param>
+    /// <param name="length">The length for fixed-length types (ALPHA, NUMERIC, BINARY); ignored for variable-length types.</param>
+    /// <returns>This message.</returns>
     public IsoMessage SetValue(int index,
       object value,
       ICustomField encoder,
@@ -166,11 +180,11 @@ namespace NetCore8583
     /// <summary>
     ///   Sets the specified value in the specified field, creating an IsoValue internally.
     /// </summary>
-    /// <param name="index">The field number (2 to 128)</param>
+    /// <param name="index">The field number (2 to 128).</param>
     /// <param name="value">The value to be stored.</param>
-    /// <param name="t">he ISO type.</param>
-    /// <param name="length">The length of the field, used for ALPHA and NUMERIC values only, ignored with any other type.</param>
-    /// <returns></returns>
+    /// <param name="t">The ISO type.</param>
+    /// <param name="length">The length of the field, used for ALPHA and NUMERIC values only; ignored for other types.</param>
+    /// <returns>This message.</returns>
     public IsoMessage SetValue(int index,
       object value,
       IsoType t,
@@ -206,10 +220,11 @@ namespace NetCore8583
     }
 
     /// <summary>
-    ///   Returns true is the message has a value in the specified field.
+    /// Returns true if the message has a value in the specified field.
     /// </summary>
-    /// <param name="idx">The field number.</param>
-    /// <returns></returns>
+    /// <param name="idx">The field number (2 to 128).</param>
+    /// <returns>True if the field is set; otherwise false.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool HasField(int idx) => _fields[idx] != null;
 
     /// <summary>
@@ -264,40 +279,30 @@ namespace NetCore8583
     }
 
     /// <summary>
-    ///   Creates a BitSet for the bitmap.
+    /// Builds a 128-bit bitmap indicating which fields (2–128) are present; bit 0 is set if the secondary bitmap (fields 65–128) is used or enforced.
     /// </summary>
-    /// <returns></returns>
-    private BitArray CreateBitmapBitSet()
+    /// <returns>A <see cref="Bitmap128"/> with bits set for present fields.</returns>
+    private Bitmap128 CreateBitmapBitSet()
     {
-      var bs = new BitArray(EnforceSecondBitmap ? 128 : 64);
+      var bs = new Bitmap128();
+      var hasSecondary = false;
+      
       for (var i = 2; i < 129; i++)
+      {
         if (_fields[i] != null)
         {
-          if (i > 64 && !EnforceSecondBitmap)
+          if (i > 64)
           {
-            //Extend to 128 if needed
-            bs.Length = 128;
-            bs.Set(0,
-              true);
+            hasSecondary = true;
           }
-
-          bs.Set(i - 1,
-            true);
+          bs.Set(i - 1, true);
         }
-
-      if (EnforceSecondBitmap)
-      {
-        bs.Set(0,
-          true);
       }
-      else if (bs.Length > 64)
+
+      // Set bit 0 (field 1) if secondary bitmap is present or enforced
+      if (EnforceSecondBitmap || hasSecondary)
       {
-        //Extend to 128 if needed
-        var b2 = new BitArray(128);
-        b2.Or(bs);
-        bs = b2;
-        bs.Set(0,
-          true);
+        bs.Set(0, true);
       }
 
       return bs;
@@ -306,7 +311,7 @@ namespace NetCore8583
     /// <summary>
     ///   Writes the message to a memory stream and returns a byte array with the result.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>The encoded message as a signed byte array.</returns>
     public sbyte[] WriteData()
     {
       var sbyteList = new List<sbyte>();
@@ -314,8 +319,7 @@ namespace NetCore8583
       if (IsoHeader != null)
         try
         {
-          var bytes = IsoHeader.GetSignedBytes(Encoding);
-          sbyteList.AddRange(bytes);
+          sbyteList.AddRange(IsoHeader.GetSignedBytes(Encoding));
         }
         catch (IOException)
         {
@@ -341,9 +345,7 @@ namespace NetCore8583
       {
         try
         {
-          var x = Type.ToString("x4");
-          var bytes = x.GetSignedBytes(Encoding);
-          sbyteList.AddRange(bytes);
+          sbyteList.AddRange(Type.ToString("x4").GetSignedBytes(Encoding));
         }
         catch (IOException)
         {
@@ -353,13 +355,14 @@ namespace NetCore8583
 
       //Bitmap
       var bits = CreateBitmapBitSet();
+      var bitmapLength = bits.Get(0) ? 128 : 64; // Secondary bitmap present if bit 0 is set
 
       // Write bitmap to stream
       if (Binary || BinBitmap)
       {
         var pos = 128;
         var b = 0;
-        for (var i = 0; i < bits.Length; i++)
+        for (var i = 0; i < bitmapLength; i++)
         {
           if (bits.Get(i)) b |= pos;
           pos >>= 1;
@@ -379,7 +382,7 @@ namespace NetCore8583
         }
 
         var pos = 0;
-        var lim = bits.Length / 4;
+        var lim = bitmapLength / 4;
         for (var i = 0; i < lim; i++)
         {
           var nibble = 0;
@@ -392,7 +395,8 @@ namespace NetCore8583
 
         if (ForceStringEncoding)
         {
-          var hb = sbyteList.ToArray().ToString(Encoding.Default);
+          ReadOnlySpan<sbyte> bitmapSpan = sbyteList.ToArray();
+          var hb = bitmapSpan.ToString(Encoding.Default);
           sbyteList = sbyteList2;
           try
           {
@@ -405,10 +409,8 @@ namespace NetCore8583
         }
       }
 
-      var byteArray = sbyteList.ToArray().ToUint8();
-      stream.Write(byteArray,
-        0,
-        byteArray.Length);
+      var sbyteArray = sbyteList.ToArray();
+      stream.Write(sbyteArray.AsUnsignedBytes().ToArray(), 0, sbyteArray.Length);
 
       //Fields
       for (var i = 2; i < 129; i++)
@@ -427,15 +429,17 @@ namespace NetCore8583
         }
       }
 
-      return stream.ToArray().ToInt8();
+      var resultBytes = stream.ToArray();
+      var resultSigned = new sbyte[resultBytes.Length];
+      resultBytes.AsSignedBytes().CopyTo(resultSigned);
+      return resultSigned;
     }
 
     /// <summary>
-    ///   Creates and returns a ByteBuffer with the data of the message, including the length header.
-    ///   The returned buffer is already flipped, so it is ready to be written to a Channel.
+    /// Builds a byte array with the message data, optionally prefixed by a length header and suffixed by ETX if configured.
     /// </summary>
-    /// <param name="lengthBytes"></param>
-    /// <returns></returns>
+    /// <param name="lengthBytes">Size of the length header (0–4 bytes).</param>
+    /// <returns>The complete message bytes (length header + message + optional ETX).</returns>
     public sbyte[] WriteToBuffer(int lengthBytes)
     {
       if (lengthBytes > 4) throw new ArgumentException("The length header can have at most 4 bytes");
@@ -459,6 +463,10 @@ namespace NetCore8583
       return stream.ToArray();
     }
 
+    /// <summary>
+    /// Returns a human-readable string representation of the message (header, type, hex bitmap, and field values) for debugging.
+    /// </summary>
+    /// <returns>A debug string of the message content.</returns>
     public string DebugString()
     {
       var sb = new StringBuilder();
@@ -470,8 +478,9 @@ namespace NetCore8583
       sb.Append(Type.ToString("x4"));
       //Bitmap
       var bs = CreateBitmapBitSet();
+      var bitmapLength = bs.Get(0) ? 128 : 64;
       var pos = 0;
-      var lim = bs.Length / 4;
+      var lim = bitmapLength / 4;
       for (var i = 0; i < lim; i++)
       {
         var nibble = 0;
@@ -514,27 +523,40 @@ namespace NetCore8583
     }
 
     /// <summary>
-    ///   Returns true is the message contains all the specified fields.
-    ///   A convenience for m.hasField(x) && m.hasField(y) && m.hasField(z) && ...
+    /// Returns true if the message contains all of the specified fields.
     /// </summary>
-    /// <param name="idx"></param>
-    /// <returns></returns>
-    public bool HasEveryField(params int[] idx) => idx.All(HasField);
+    /// <param name="idx">One or more field numbers to check.</param>
+    /// <returns>True if every specified field is set; otherwise false.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool HasEveryField(params int[] idx)
+    {
+      foreach (var i in idx)
+      {
+        if (!HasField(i)) return false;
+      }
+      return true;
+    }
 
     /// <summary>
-    ///   Returns true is the message contains at least one of the specified fields.
-    ///   A convenience for m.hasField(x) || m.hasField(y) || m.hasField(z) || ...
+    /// Returns true if the message contains at least one of the specified fields.
     /// </summary>
-    /// <param name="idx"></param>
-    /// <returns></returns>
-    public bool HasAnyField(params int[] idx) => idx.Any(HasField);
+    /// <param name="idx">One or more field numbers to check.</param>
+    /// <returns>True if any specified field is set; otherwise false.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool HasAnyField(params int[] idx)
+    {
+      foreach (var i in idx)
+      {
+        if (HasField(i)) return true;
+      }
+      return false;
+    }
 
     /// <summary>
-    ///   Copies the specified fields from the other message into the recipient.
-    ///   If a specified field is not present in the source message it is simply ignored.
+    /// Copies the specified fields from the source message into this message. Fields not present in the source are skipped.
     /// </summary>
-    /// <param name="source">the source iso message to copy from</param>
-    /// <param name="fields">the fields to copy</param>
+    /// <param name="source">The source ISO message to copy from.</param>
+    /// <param name="fields">The field numbers (2–128) to copy.</param>
     public void CopyFieldsFrom(IsoMessage source, params int[] fields)
     {
       foreach (var field in fields)
@@ -546,9 +568,9 @@ namespace NetCore8583
     }
 
     /// <summary>
-    ///   Remove the specified fields from the message.
+    /// Removes the specified fields from the message (sets them to null).
     /// </summary>
-    /// <param name="fields"></param>
+    /// <param name="fields">The field numbers (2–128) to remove.</param>
     public void RemoveFields(params int[] fields)
     {
       foreach (var field in fields) SetField(field, null);

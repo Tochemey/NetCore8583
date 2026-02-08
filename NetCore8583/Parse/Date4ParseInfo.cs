@@ -1,5 +1,5 @@
-﻿using System;
-using NetCore8583.Util;
+using System;
+using NetCore8583.Extensions;
 
 namespace NetCore8583.Parse
 {
@@ -8,11 +8,13 @@ namespace NetCore8583.Parse
     /// </summary>
     public class Date4ParseInfo : DateTimeParseInfo
     {
+        /// <summary>Initializes parse info for DATE4 (MMdd).</summary>
         public Date4ParseInfo() : base(IsoType.DATE4,
             4)
         {
         }
 
+        /// <inheritdoc />
         public override IsoValue Parse(int field,
             sbyte[] buf,
             int pos,
@@ -63,6 +65,7 @@ namespace NetCore8583.Parse
                 AdjustWithFutureTolerance(new DateTimeOffset(dt)).DateTime);
         }
 
+        /// <inheritdoc />
         public override IsoValue ParseBinary(int field,
             sbyte[] buf,
             int pos,

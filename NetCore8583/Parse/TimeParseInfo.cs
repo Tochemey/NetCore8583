@@ -1,15 +1,18 @@
-﻿using System;
-using NetCore8583.Util;
+using System;
+using NetCore8583.Extensions;
 
 namespace NetCore8583.Parse
 {
+    /// <summary>Parse info for TIME (HHmmss) fields.</summary>
     public class TimeParseInfo : DateTimeParseInfo
     {
+        /// <summary>Initializes parse info for TIME (6 digits).</summary>
         public TimeParseInfo() : base(IsoType.TIME,
             6)
         {
         }
 
+        /// <inheritdoc />
         public override IsoValue Parse(int field,
             sbyte[] buf,
             int pos,
@@ -55,6 +58,7 @@ namespace NetCore8583.Parse
                 calendar);
         }
 
+        /// <inheritdoc />
         public override IsoValue ParseBinary(int field,
             sbyte[] buf,
             int pos,

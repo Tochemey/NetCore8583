@@ -1,16 +1,19 @@
-﻿using System;
+using System;
 using System.Text;
-using NetCore8583.Util;
+using NetCore8583.Extensions;
 
 namespace NetCore8583.Parse
 {
+    /// <summary>Parse info for LLLBIN (variable-length binary with 3-digit length header) fields.</summary>
     public class LllbinParseInfo : FieldParseInfo
     {
+        /// <summary>Initializes parse info for LLLBIN (3-digit length, then binary data).</summary>
         public LllbinParseInfo() : base(IsoType.LLLBIN,
             0)
         {
         }
 
+        /// <inheritdoc />
         public override IsoValue Parse(int field,
             sbyte[] buf,
             int pos,
@@ -80,6 +83,7 @@ namespace NetCore8583.Parse
             }
         }
 
+        /// <inheritdoc />
         public override IsoValue ParseBinary(int field,
             sbyte[] buf,
             int pos,

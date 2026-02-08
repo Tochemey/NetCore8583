@@ -1,5 +1,5 @@
 using System;
-using NetCore8583.Util;
+using NetCore8583.Extensions;
 
 namespace NetCore8583.Parse
 {
@@ -8,10 +8,12 @@ namespace NetCore8583.Parse
     /// </summary>
     public class Date6ParseInfo : DateTimeParseInfo
     {
+        /// <summary>Initializes parse info for DATE6 (yyMMdd).</summary>
         public Date6ParseInfo() : base(IsoType.DATE6, 6)
         {
         }
 
+        /// <inheritdoc />
         public override IsoValue Parse(int field, sbyte[] buf, int pos, ICustomField custom)
         {
             if (pos < 0) throw new ParseException($"Invalid DATE6 field {field} position {pos}");
@@ -60,6 +62,7 @@ namespace NetCore8583.Parse
                 dt);
         }
 
+        /// <inheritdoc />
         public override IsoValue ParseBinary(int field, sbyte[] buf, int pos, ICustomField custom)
         {
             if (pos < 0) throw new ParseException($"Invalid DATE6 field {field} position {pos}");

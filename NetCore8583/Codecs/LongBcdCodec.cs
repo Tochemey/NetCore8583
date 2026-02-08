@@ -1,21 +1,24 @@
-﻿using System;
-using NetCore8583.Util;
+using System;
+using NetCore8583.Extensions;
 
 namespace NetCore8583.Codecs
 {
     /// <summary>
-    ///     A custom field encoder/decoder to be used with LLBIN/LLLBIN fields
-    ///     that contain Longs in BCD encoding.
+    /// Custom field encoder/decoder for LLBIN/LLLBIN fields that contain long integers in BCD encoding.
     /// </summary>
     public class LongBcdCodec : ICustomBinaryField
     {
+        /// <inheritdoc />
         public object DecodeField(string val) => long.Parse(val);
 
+        /// <inheritdoc />
         public string EncodeField(object obj) => Convert.ToString(obj);
 
+        /// <inheritdoc />
         public object DecodeBinaryField(sbyte[] bytes, int offset, int length) =>
             Bcd.DecodeToLong(bytes, offset, length * 2);
 
+        /// <inheritdoc />
         public sbyte[] EncodeBinaryField(object obj)
         {
             var s = Convert.ToString(obj);

@@ -1,11 +1,17 @@
-﻿using System;
+using System;
 
-namespace NetCore8583.Util
+namespace NetCore8583.Extensions
 {
+    /// <summary>Hex encoding/decoding for binary ISO 8583 fields (e.g. BINARY, LLBIN).</summary>
     public static class HexCodec
     {
         private static readonly char[] Hex = "0123456789ABCDEF".ToCharArray();
 
+        /// <summary>Encodes a slice of bytes to an uppercase hex string (two chars per byte).</summary>
+        /// <param name="buffer">Source buffer.</param>
+        /// <param name="start">Start index.</param>
+        /// <param name="length">Number of bytes to encode.</param>
+        /// <returns>Hex string.</returns>
         public static string HexEncode(sbyte[] buffer,
             int start,
             int length)
@@ -24,6 +30,9 @@ namespace NetCore8583.Util
             return new string(chars);
         }
 
+        /// <summary>Decodes a hex string to a signed byte array. Accepts odd-length strings (leading zero implied).</summary>
+        /// <param name="hex">Hex string (0-9, A-F, a-f).</param>
+        /// <returns>Decoded bytes; empty array if null or empty.</returns>
         public static sbyte[] HexDecode(string hex)
         {
             //A null string returns an empty array

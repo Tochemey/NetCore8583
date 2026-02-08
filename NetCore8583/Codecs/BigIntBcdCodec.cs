@@ -1,23 +1,26 @@
-﻿using System;
+using System;
 using System.Globalization;
 using System.Numerics;
-using NetCore8583.Util;
+using NetCore8583.Extensions;
 
 namespace NetCore8583.Codecs
 {
     /// <summary>
-    ///     A custom field encoder/decoder to be used with LLBIN/LLLBIN fields
-    ///     hat contain BigIntegers in BCD encoding.
+    /// Custom field encoder/decoder for LLBIN/LLLBIN fields that contain <see cref="BigInteger"/> values in BCD encoding.
     /// </summary>
     public class BigIntBcdCodec : ICustomBinaryField
     {
+        /// <inheritdoc />
         public object DecodeField(string val) => new BigInteger(Convert.ToInt32(val, 10));
 
+        /// <inheritdoc />
         public string EncodeField(object obj) => obj.ToString();
 
+        /// <inheritdoc />
         public object DecodeBinaryField(sbyte[] bytes, int offset, int length) =>
             Bcd.DecodeToBigInteger(bytes, offset, length * 2);
 
+        /// <inheritdoc />
         public sbyte[] EncodeBinaryField(object val)
         {
             var value = (BigInteger) val;

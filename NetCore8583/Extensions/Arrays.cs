@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 
-namespace NetCore8583.Util
+namespace NetCore8583.Extensions
 {
+    /// <summary>Array utility methods used by the ISO 8583 library.</summary>
     public static class Arrays
     {
         /// <summary>

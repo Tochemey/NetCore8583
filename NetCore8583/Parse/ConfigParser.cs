@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -6,7 +6,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml;
 using NetCore8583.Codecs;
-using NetCore8583.Util;
+using NetCore8583.Extensions;
 
 namespace NetCore8583.Parse
 {
@@ -69,7 +69,12 @@ namespace NetCore8583.Parse
                     var header = elem.ChildNodes.Item(0)?.Value;
                     var binHeader = "true".Equals(elem.GetAttribute("binary"));
                     if (binHeader)
-                        mfact.SetBinaryIsoHeader(type, HexCodec.HexDecode(header).ToUint8());
+                    {
+                        var decoded = HexCodec.HexDecode(header);
+                        var unsignedBytes = new byte[decoded.Length];
+                        decoded.AsUnsignedBytes().CopyTo(unsignedBytes);
+                        mfact.SetBinaryIsoHeader(type, unsignedBytes);
+                    }
                     else
                         mfact.SetIsoHeader(type, header);
                 }

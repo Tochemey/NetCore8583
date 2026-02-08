@@ -1,10 +1,16 @@
-﻿using System;
+using System;
 using System.Numerics;
 
-namespace NetCore8583.Util
+namespace NetCore8583.Extensions
 {
+    /// <summary>Binary-coded decimal (BCD) encode/decode helpers for ISO 8583 numeric and amount fields.</summary>
     public static class Bcd
     {
+        /// <summary>Decodes a BCD-encoded region of the buffer into a long. Supports up to 18 digits.</summary>
+        /// <param name="buf">Buffer containing BCD data.</param>
+        /// <param name="pos">Start position.</param>
+        /// <param name="length">Number of BCD digits (not bytes).</param>
+        /// <returns>The decoded long value.</returns>
         public static long DecodeToLong(sbyte[] buf,
             int pos,
             int length)
@@ -23,6 +29,9 @@ namespace NetCore8583.Util
             return l;
         }
 
+        /// <summary>Encodes a string of decimal digits into BCD in the given buffer (two digits per byte, optional leading zero for odd length).</summary>
+        /// <param name="value">String of digits (0-9).</param>
+        /// <param name="buf">Output buffer; must be at least (value.Length + 1) / 2 bytes.</param>
         public static void Encode(string value,
             sbyte[] buf)
         {
@@ -45,6 +54,11 @@ namespace NetCore8583.Util
             }
         }
 
+        /// <summary>Decodes a BCD-encoded region into a <see cref="BigInteger"/> (for values exceeding long range).</summary>
+        /// <param name="buf">Buffer containing BCD data.</param>
+        /// <param name="pos">Start position.</param>
+        /// <param name="length">Number of BCD digits (not bytes).</param>
+        /// <returns>The decoded value.</returns>
         public static BigInteger DecodeToBigInteger(sbyte[] buf,
             int pos,
             int length)
@@ -68,12 +82,9 @@ namespace NetCore8583.Util
         }
 
 
-        /// <summary>
-        ///     Convert two bytes of BCD length to an int,
-        ///     e.g. 0x4521 into 4521, starting at the specified offset.
-        /// </summary>
-        /// <param name="b"></param>
-        /// <returns></returns>
+        /// <summary>Converts a single BCD byte to a two-digit integer (e.g. 0x21 → 21).</summary>
+        /// <param name="b">One BCD byte (high nibble = tens, low nibble = units).</param>
+        /// <returns>Integer value 0–99.</returns>
         public static int ParseBcdLength(sbyte b)
         {
             return ((b & 0xf0) >> 4) * 10 + (b & 0xf);

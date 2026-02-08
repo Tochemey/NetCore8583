@@ -1,6 +1,7 @@
-﻿using System;
+using System;
+using System.Runtime.CompilerServices;
 using System.Text;
-using NetCore8583.Util;
+using NetCore8583.Extensions;
 
 namespace NetCore8583.Parse
 {
@@ -10,6 +11,9 @@ namespace NetCore8583.Parse
     /// </summary>
     public abstract class FieldParseInfo
     {
+        /// <summary>Initializes parse info for the given ISO type and fixed length (for fixed-length types).</summary>
+        /// <param name="isoType">The ISO field type.</param>
+        /// <param name="length">The fixed length for ALPHA/NUMERIC/BINARY; ignored for variable-length types.</param>
         protected FieldParseInfo(IsoType isoType,
             int length)
         {
@@ -17,21 +21,32 @@ namespace NetCore8583.Parse
             Length = length;
         }
 
+        /// <summary>The ISO type this parser handles.</summary>
         protected IsoType IsoType { get; }
+
+        /// <summary>The fixed length for fixed-length types.</summary>
         protected int Length { get; }
+
+        /// <summary>When true, variable-length headers are decoded as string digits using <see cref="Encoding"/> and <see cref="Radix"/> instead of ASCII digits.</summary>
         public bool ForceStringDecoding { get; set; }
+
+        /// <summary>Radix used when decoding length headers (e.g. 10 for decimal, 16 for hex). Default is 10.</summary>
         public int Radix { get; set; } = 10;
+
+        /// <summary>Optional custom decoder for this field.</summary>
         public ICustomField Decoder { get; set; }
+
+        /// <summary>Character encoding for string decoding. Default is <see cref="Encoding.Default"/>.</summary>
         public Encoding Encoding { get; set; } = Encoding.Default;
 
         /// <summary>
         ///     Parses the character data from the buffer and returns the IsoValue with the correct data type in it.
         /// </summary>
-        /// <param name="field">he field index, useful for error reporting.</param>
+        /// <param name="field">The field index, useful for error reporting.</param>
         /// <param name="buf">The full ISO message buffer.</param>
         /// <param name="pos">The starting position for the field data.</param>
-        /// <param name="custom">A CustomField to decode the field.</param>
-        /// <returns></returns>
+        /// <param name="custom">An optional <see cref="ICustomField"/> to decode the field.</param>
+        /// <returns>An <see cref="IsoValue"/> containing the parsed value.</returns>
         public abstract IsoValue Parse(int field,
             sbyte[] buf,
             int pos,
@@ -41,51 +56,67 @@ namespace NetCore8583.Parse
         ///     Parses binary data from the buffer, creating and returning an IsoValue of the configured
         ///     type and length.
         /// </summary>
-        /// <param name="field">he field index, useful for error reporting.</param>
+        /// <param name="field">The field index, useful for error reporting.</param>
         /// <param name="buf">The full ISO message buffer.</param>
         /// <param name="pos">The starting position for the field data.</param>
-        /// <param name="custom">A CustomField to decode the field.</param>
-        /// <returns></returns>
+        /// <param name="custom">An optional <see cref="ICustomField"/> to decode the field.</param>
+        /// <returns>An <see cref="IsoValue"/> containing the parsed value.</returns>
         public abstract IsoValue ParseBinary(int field,
             sbyte[] buf,
             int pos,
             ICustomField custom);
 
         /// <summary>
+        /// Decodes a length header from the buffer at the given position.
         /// </summary>
-        /// <param name="buf"></param>
-        /// <param name="pos"></param>
-        /// <param name="digits"></param>
-        /// <returns></returns>
+        /// <param name="buf">The message buffer.</param>
+        /// <param name="pos">Start position of the length digits.</param>
+        /// <param name="digits">Number of length digits (2, 3, or 4).</param>
+        /// <returns>The decoded length value.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected int DecodeLength(sbyte[] buf,
+            int pos,
+            int digits)
+        {
+            return DecodeLength(buf.AsSpan(), pos, digits);
+        }
+
+        /// <summary>
+        ///     Decodes length header from a span.
+        /// </summary>
+        /// <param name="buf">Buffer span containing the length data.</param>
+        /// <param name="pos">Starting position in the span.</param>
+        /// <param name="digits">Number of digits in the length (2, 3, or 4).</param>
+        /// <returns>Decoded length value.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected int DecodeLength(ReadOnlySpan<sbyte> buf,
             int pos,
             int digits)
         {
             if (ForceStringDecoding)
             {
-                var string0 = buf.ToString(pos,
-                    digits,
-                    Encoding);
+                var string0 = buf.Slice(pos, digits).ToString(Encoding);
                 return Convert.ToInt32(string0, Radix);
             }
 
-            switch (digits)
+            return digits switch
             {
-                case 2:
-                    return (buf[pos] - 48) * 10 + (buf[pos + 1] - 48);
-
-                case 3:
-                    return (buf[pos] - 48) * 100 + (buf[pos + 1] - 48) * 10
-                                                 + (buf[pos + 2] - 48);
-
-                case 4:
-                    return (buf[pos] - 48) * 1000 + (buf[pos + 1] - 48) * 100
-                                                  + (buf[pos + 2] - 48) * 10 + (buf[pos + 3] - 48);
-            }
-
-            return -1;
+                2 => (buf[pos] - 48) * 10 + (buf[pos + 1] - 48),
+                3 => (buf[pos] - 48) * 100 + (buf[pos + 1] - 48) * 10 + (buf[pos + 2] - 48),
+                4 => (buf[pos] - 48) * 1000 + (buf[pos + 1] - 48) * 100 + 
+                     (buf[pos + 2] - 48) * 10 + (buf[pos + 3] - 48),
+                _ => -1
+            };
         }
 
+        /// <summary>
+        /// Creates a <see cref="FieldParseInfo"/> instance for the given ISO type and length.
+        /// </summary>
+        /// <param name="t">The ISO field type.</param>
+        /// <param name="len">The fixed length for ALPHA, NUMERIC, or BINARY types; ignored for variable-length types.</param>
+        /// <param name="encoding">The encoding to use for string decoding.</param>
+        /// <returns>A parser instance for the specified type.</returns>
+        /// <exception cref="ArgumentException">Thrown when the type is not supported.</exception>
         public static FieldParseInfo GetInstance(IsoType t,
             int len,
             Encoding encoding)

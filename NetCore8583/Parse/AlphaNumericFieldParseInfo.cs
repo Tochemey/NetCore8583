@@ -1,5 +1,5 @@
-﻿using System;
-using NetCore8583.Util;
+using System;
+using NetCore8583.Extensions;
 
 namespace NetCore8583.Parse
 {
@@ -8,12 +8,16 @@ namespace NetCore8583.Parse
     /// </summary>
     public abstract class AlphaNumericFieldParseInfo : FieldParseInfo
     {
+        /// <summary>Initializes parse info for a fixed-length alpha/numeric field.</summary>
+        /// <param name="isoType">The ISO type (ALPHA or NUMERIC).</param>
+        /// <param name="length">The fixed field length.</param>
         protected AlphaNumericFieldParseInfo(IsoType isoType,
             int length) : base(isoType,
             length)
         {
         }
 
+        /// <inheritdoc />
         public override IsoValue Parse(int field,
             sbyte[] buf,
             int pos,
