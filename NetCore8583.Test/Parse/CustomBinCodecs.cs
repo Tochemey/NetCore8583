@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Numerics;
 using NetCore8583.Codecs;
+using NetCore8583.Extensions;
 using NetCore8583.Parse;
-using NetCore8583.Util;
 using Xunit;
 
 namespace NetCore8583.Test.Parse

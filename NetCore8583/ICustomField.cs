@@ -1,5 +1,6 @@
-﻿namespace NetCore8583
+namespace NetCore8583
 {
+    /// <summary>Interface for custom encoding/decoding of ISO 8583 field values (e.g. special formats, encryption).</summary>
     public interface ICustomField
     {
         /// <summary>

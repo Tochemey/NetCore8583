@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Globalization;
 
 namespace NetCore8583
@@ -100,20 +100,20 @@ namespace NetCore8583
     public static class IsoTypeHelper
     {
         /// <summary>
-        ///     Checks whether an IsoType need length attribute
+        /// Returns true if this ISO type requires an explicit length (ALPHA, NUMERIC, BINARY).
         /// </summary>
-        /// <param name="isoType"></param>
-        /// <returns></returns>
+        /// <param name="isoType">The ISO type.</param>
+        /// <returns>True if the type has a fixed length that must be specified.</returns>
         public static bool NeedsLength(this IsoType isoType)
         {
             return isoType is IsoType.ALPHA or IsoType.NUMERIC or IsoType.BINARY;
         }
 
         /// <summary>
-        ///     Gets the length of an IsoType
+        /// Returns the default/formatted length for this ISO type (e.g. 12 for AMOUNT, 6 for TIME). Variable-length types return 0.
         /// </summary>
-        /// <param name="isoType"></param>
-        /// <returns></returns>
+        /// <param name="isoType">The ISO type.</param>
+        /// <returns>The length in characters or digits; 0 for variable-length types.</returns>
         public static int Length(this IsoType isoType)
         {
             return isoType switch
@@ -140,11 +140,11 @@ namespace NetCore8583
         }
 
         /// <summary>
-        ///     Format Date IsoType value
+        /// Formats a date/time value as the string representation for this date/time ISO type (e.g. DATE14 → yyyyMMddHHmmss).
         /// </summary>
-        /// <param name="isoType">date IsoType</param>
-        /// <param name="dateTime">the IsoType value</param>
-        /// <returns></returns>
+        /// <param name="isoType">A date/time ISO type (DATE4, DATE6, DATE10, DATE12, DATE14, DATE_EXP, TIME).</param>
+        /// <param name="dateTime">The value to format.</param>
+        /// <returns>The formatted string.</returns>
         public static string Format(this IsoType isoType,
             DateTimeOffset dateTime)
         {
@@ -161,6 +161,11 @@ namespace NetCore8583
             };
         }
 
+        /// <summary>Formats a string value for this ISO type (e.g. ALPHA pad right with spaces, NUMERIC pad left with zeros).</summary>
+        /// <param name="isoType">The ISO type.</param>
+        /// <param name="value">The string value.</param>
+        /// <param name="length">The target length.</param>
+        /// <returns>The formatted string.</returns>
         public static string Format(this IsoType isoType,
             string value,
             int length)
@@ -259,6 +264,11 @@ namespace NetCore8583
             }
         }
 
+        /// <summary>Formats a long value for this ISO type (e.g. NUMERIC zero-padded, AMOUNT in cents).</summary>
+        /// <param name="isoType">The ISO type.</param>
+        /// <param name="value">The numeric value.</param>
+        /// <param name="length">The target length for fixed-length types.</param>
+        /// <returns>The formatted string.</returns>
         public static string Format(this IsoType isoType,
             long value,
             int length)
@@ -295,6 +305,11 @@ namespace NetCore8583
             return string.Empty;
         }
 
+        /// <summary>Formats a decimal value for this ISO type (e.g. AMOUNT as 12-digit cents).</summary>
+        /// <param name="isoType">The ISO type.</param>
+        /// <param name="value">The decimal value.</param>
+        /// <param name="length">The target length for fixed-length types.</param>
+        /// <returns>The formatted string.</returns>
         public static string Format(this IsoType isoType,
             decimal value,
             int length)

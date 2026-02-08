@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
+using NetCore8583.Extensions;
 using NetCore8583.Parse;
-using NetCore8583.Util;
 using TimeZoneConverter;
 using Xunit;
 

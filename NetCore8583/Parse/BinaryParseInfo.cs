@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 using System.Text;
-using NetCore8583.Util;
+using NetCore8583.Extensions;
 
 namespace NetCore8583.Parse
 {
@@ -9,11 +9,14 @@ namespace NetCore8583.Parse
     /// </summary>
     public class BinaryParseInfo : FieldParseInfo
     {
+        /// <summary>Initializes parse info for a fixed-length BINARY field (hex in ASCII, raw bytes in binary).</summary>
+        /// <param name="len">The fixed length in bytes.</param>
         public BinaryParseInfo(int len) : base(IsoType.BINARY,
             len)
         {
         }
 
+        /// <inheritdoc />
         public override IsoValue Parse(int field,
             sbyte[] buf,
             int pos,
@@ -55,6 +58,7 @@ namespace NetCore8583.Parse
                     custom);
         }
 
+        /// <inheritdoc />
         public override IsoValue ParseBinary(int field,
             sbyte[] buf,
             int pos,

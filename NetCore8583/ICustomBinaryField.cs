@@ -1,5 +1,6 @@
-﻿namespace NetCore8583
+namespace NetCore8583
 {
+    /// <summary>Extends <see cref="ICustomField"/> for fields that are transmitted as raw binary (e.g. LLBIN, LLLBIN) with encode/decode of byte buffers.</summary>
     public interface ICustomBinaryField : ICustomField
     {
         /// <summary>

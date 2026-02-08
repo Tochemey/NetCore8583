@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NetCore8583.Util
+namespace NetCore8583.Extensions
 {
     public static class OsUtil
     {

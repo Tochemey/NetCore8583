@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using NetCore8583.Util;
+using NetCore8583.Extensions;
 using Xunit;
 
 namespace NetCore8583.Test

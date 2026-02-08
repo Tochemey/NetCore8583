@@ -1,7 +1,7 @@
-﻿using NetCore8583.Util;
+﻿using NetCore8583.Extensions;
 using Xunit;
 
-namespace NetCore8583.Test.Util
+namespace NetCore8583.Test.Extensions
 {
     public class TestBcd
     {

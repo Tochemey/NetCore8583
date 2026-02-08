@@ -1,14 +1,18 @@
-﻿using System;
-using NetCore8583.Util;
+using System;
+using NetCore8583.Extensions;
 
 namespace NetCore8583.Parse
 {
+    /// <summary>Parse info for fixed-length NUMERIC (BCD or ASCII digits) fields.</summary>
     public class NumericParseInfo : AlphaNumericFieldParseInfo
     {
+        /// <summary>Initializes parse info for a fixed-length NUMERIC field.</summary>
+        /// <param name="len">The fixed length in digits.</param>
         public NumericParseInfo(int len) : base(IsoType.NUMERIC, len)
         {
         }
 
+        /// <inheritdoc />
         public override IsoValue ParseBinary(int field, sbyte[] buf, int pos, ICustomField custom)
         {
             if (pos < 0) throw new ParseException($"Invalid bin NUMERIC field {field} pos {pos}");
