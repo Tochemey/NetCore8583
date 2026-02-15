@@ -9,13 +9,13 @@ No future feature development is planned, though bugs and security issues are fi
 [![NuGet Downloads](https://img.shields.io/nuget/dt/NetCore8583?style=flat-square)](https://www.nuget.org/packages/NetCore8583/)
 [![Stability: Maintenance](https://masterminds.github.io/stability/maintenance.svg)](https://masterminds.github.io/stability/maintenance.html)
 
-## Introduction
+## 📖 Introduction
 
 NetCore8583 is a dotnet core implementation of the ISO 8583 protocol.
 
 NetCore8583 is a library that helps parse/read and generate ISO 8583 messages. It does not handle sending or reading them over a network connection, but it does parse the data you have read and can generate the data you need to write over a network connection.
 
-## ISO 8583 overview
+## 🏦 ISO 8583 overview
 
 ISO8583 is a message format used for credit card transactions, banking and other commercial interaction between different systems. It has an ASCII variant and a binary one, and it is somewhat convoluted and difficult to implement.
 
@@ -34,7 +34,7 @@ The fields in the message are numbered from 1 to 64. Field 1 is the secondary bi
 
 Wikipedia has [a very good article](http://en.wikipedia.org/wiki/ISO_8583) on the whole specification.
 
-## Usage
+## 📦 Usage
 
 The library is available on nuget package. You can get it via:
 
@@ -42,7 +42,7 @@ The library is available on nuget package. You can get it via:
 dotnet add package NetCore8583
 ```
 
-## Support
+## 💬 Support
 
 One can use the following channel to report a bug or discuss a feature or an enhancement:
 
@@ -51,11 +51,11 @@ One can use the following channel to report a bug or discuss a feature or an enh
 
 If you find this library very useful in your day job, kindly show some love by starring it.
 
-## How does NetCore8583 work?
+## ⚙️ How does NetCore8583 work?
 
 NetCore8583 offers a [`MessageFactory`](./NetCore8583/MessageFactory.cs), which once properly configured, can create different message types with some values predefined, and can also parse a byte array to create an ISO message. Messages are represented by [`IsoMessage`](./NetCore8583/IsoMessage.cs) objects, which store [`IsoValue`](./NetCore8583/IsoValue.cs) instances for their data fields. You can work with the [`IsoValue`](./NetCore8583/IsoValue.cs) or use the convenience methods of [`IsoMessage`](./NetCore8583/IsoMessage.cs) to work directly with the stored values.
 
-### MessageFactory and IsoMessage classes
+### 🏗️ MessageFactory and IsoMessage classes
 
 These are the two main classes you need to use to work with ISO8583 messages. An [`IsoMessage`](./NetCore8583/IsoMessage.cs) can be encoded into a signed byte array. You can set and get the values for each field in an [`IsoMessage`](./NetCore8583/IsoMessage.cs), and it will adjust itself to use a secondary bitmap if necessary. An [`IsoMessage`](./NetCore8583/IsoMessage.cs) has settings to encode itself in binary or ASCII, to use a secondary bitmap even if it's not necessary, and it can have its own ISO header.
 
@@ -63,7 +63,7 @@ However, it can be cumbersome to programmatically create [`IsoMessage`](./NetCor
 
 - There is an extension method that helps switch between signed byte array and unsigned byte array.
 
-#### How to configure the MessageFactory
+#### 🔧 How to configure the MessageFactory
 
 There are five main things you need to configure in a [`MessageFactory`](./NetCore8583/MessageFactory.cs): ISO headers, message templates, parsing templates, TraceNumberGenerator, and custom field encoders.
 
@@ -81,22 +81,25 @@ There are five main things you need to configure in a [`MessageFactory`](./NetCo
 - **Custom fields encoders**: Certain implementations of ISO8583 specify fields which contain many subfields. If you only handle strings in those fields, you'll have to encode all those values before storing them in an [`IsoMessage`](./NetCore8583/IsoMessage.cs), and decode them when you get them from an IsoMessage.
   In these cases you can implement a [`CustomField`](./NetCore8583/ICustomField.cs), which is an interface that defines two methods, one for encoding an object into a String and another for decoding an object from a String. You can pass the [`MessageFactory`](./NetCore8583/MessageFactory.cs) a [`CustomField`](./NetCore8583/ICustomField.cs) for every field where you want to store custom values, so that parsed messages will return the objects decoded by the [`CustomField`](./NetCore8583/ICustomField.cs) instead of just strings; and when you set a value in an [`IsoMessage`](./NetCore8583/IsoMessage.cs), you can specify the CustomField to be used to encode the value as a String
 
-#### Custom Field encoders
+#### 🔌 Custom Field encoders
 
 Sometimes there are fields that contain several sub-fields or separate pieces of data. NetCore8583 will only parse the field for you, but you still have to parse those pieces of data from the field when you parse a message, and/or encode several pieces of data into a field when creating a message.
 
 NetCore8583 can help with this process, by means of the custom field encoders. To use this feature, first you need to implement the ICustomField interface. You can see how it is done in the following test classes **_TestParsing.cs_** and **_TestIsoMessage.cs_** using the **_CustomField48.cs_** class.
 
-### Easy way to configure ISO 8583 messages templates
+### 🛠️ Easy way to configure ISO 8583 messages templates
 
-The easiest way to configure the message templates and parsing templates is by using a XML config file and pass it to the [`MessageFactory`](./NetCore8583/MessageFactory.cs).
+There are two ways to configure message templates and parsing templates:
 
-### XML configuration
+1. **XML configuration** -- declare templates, headers, and parse guides in a XML file and load it into the [`MessageFactory`](./NetCore8583/MessageFactory.cs).
+2. **Programmatic configuration (Builder API)** -- use the fluent [`MessageFactoryBuilder`](./NetCore8583/Builder/MessageFactoryBuilder.cs) to configure everything in code, with full support for inheritance, composite fields, and all factory settings.
+
+### 📄 XML configuration
 
 The [`MessageFactory`](./NetCore8583/MessageFactory.cs) can read a XML file to setup message templates, ISO headers by type and parsing templates, which are the most cumbersome parts to configure programmatically.
 There are three types of main elements that you need to specify in the config file: header, template, and parse. All these must be contained in a single `n8583-config` element.
 
-#### Header
+#### 🏷️ Header
 
 Specify a header element for every type of message that needs an ISO header. Only one per message type:
 
@@ -113,7 +116,7 @@ You can define a header as a reference to another header:
 
 The header for 0800 messages will be the same as the header for 0200 messages.
 
-#### Template Element
+#### 📋 Template Element
 
 Each template element defines a message template, with the message type and the fields that the template should include. Every new message of that type that the [`MessageFactory`](./NetCore8583/MessageFactory.cs) creates will contain those same values, so this is very useful for defining fixed values, which will be the same in every message. Only one template per type.
 
@@ -143,7 +146,7 @@ You can define a template as extending another template, so that it includes all
 
 In the above example, the template for message type 0400 will include all fields defined in the template for message type 0200 except field 102, and will additionally include field 90.
 
-#### Parse Element
+#### 🔍 Parse Element
 
 Each parse element defines a parsing template for a message type. It must include all the fields that an incoming message can contain, each field with its type and length (if needed). Only `ALPHA` and `NUMERIC` types need to have a length specified. The other types either have a fixed length, or have their length specified as part of the field (`LLVAR` and `LLLVAR`).
 
@@ -184,7 +187,7 @@ As with message templates, you can define parsing guides that extend other parsi
     </parse>
 ```
 
-#### Composite Fields
+#### 🧩 Composite Fields
 
 Another feature is the [`CompositeField`](./NetCore8583/Codecs/CompositeField.cs). This is a [`CustomField`](./NetCore8583/ICustomField.cs) that acts as a container for several [`IsoValue`](./NetCore8583/IsoValue.cs), and it can be configured in the parsing guide of a message type:
 
@@ -224,6 +227,226 @@ You can also create a [`CompositeField`](./NetCore8583/Codecs/CompositeField.cs)
 
 When the message is encoded, field 125 will be "018one 03two000123OK".
 
-## Resources
+### 🧱 Programmatic Configuration (Builder API)
+
+If you prefer to configure the [`MessageFactory`](./NetCore8583/MessageFactory.cs) entirely in code -- without any XML files -- you can use the [`MessageFactoryBuilder`](./NetCore8583/Builder/MessageFactoryBuilder.cs). It provides a fluent API that supports all the same features as XML configuration: headers, templates, parse maps, inheritance, composite fields, and custom field encoders.
+
+```c#
+using NetCore8583.Builder;
+
+var factory = new MessageFactoryBuilder<IsoMessage>()
+    .WithEncoding(Encoding.UTF8)
+    .WithBinaryMessages()
+    .WithBinaryBitmap()
+    // ... more factory settings
+    .Build();
+```
+
+#### 🏷️ Headers
+
+Set ASCII headers per message type, or reuse one via `WithHeaderRef`:
+
+```c#
+var factory = new MessageFactoryBuilder<IsoMessage>()
+    .WithHeader(0x0200, "ISO015000050")
+    .WithHeader(0x0210, "ISO015000055")
+    .WithHeaderRef(0x0400, 0x0200)        // 0400 reuses the 0200 header
+    .WithBinaryHeader(0x0280, new byte[] { 0xFF, 0xFF, 0xFF, 0xFF })
+    .Build();
+```
+
+#### 📋 Templates
+
+Define message templates with default field values. Fixed-length types (`ALPHA`, `NUMERIC`, `BINARY`) require a length parameter; variable-length types (`LLVAR`, `LLLVAR`, etc.) and date/time types do not:
+
+```c#
+var factory = new MessageFactoryBuilder<IsoMessage>()
+    .WithTemplate(0x0200, t => t
+        .Field(3,   IsoType.NUMERIC, "650000", 6)
+        .Field(32,  IsoType.LLVAR,   "456")
+        .Field(43,  IsoType.ALPHA,   "Fixed-width data", 40)
+        .Field(48,  IsoType.LLLVAR,  "Life, the Universe, and Everything|42")
+        .Field(49,  IsoType.ALPHA,   "484", 3)
+        .Field(102, IsoType.LLVAR,   "ABCD"))
+    .Build();
+```
+
+#### 🔗 Template Inheritance
+
+A template can inherit all fields from another template using `Extends`, then add new fields or remove inherited ones with `Exclude`. This is the programmatic equivalent of the XML `extends` attribute:
+
+```c#
+var factory = new MessageFactoryBuilder<IsoMessage>()
+    .WithTemplate(0x0200, t => t
+        .Field(3,   IsoType.NUMERIC, "650000", 6)
+        .Field(49,  IsoType.ALPHA,   "484", 3)
+        .Field(102, IsoType.LLVAR,   "ABCD"))
+    .WithTemplate(0x0400, t => t
+        .Extends(0x0200)                           // inherits fields 3, 49, 102
+        .Field(90, IsoType.ALPHA, "BLA", 42)       // adds field 90
+        .Exclude(102))                             // removes field 102
+    .Build();
+```
+
+> **Note:** The base template must be defined **before** the template that extends it.
+
+#### 🔍 Parse Maps
+
+Parse maps define how incoming messages are parsed. Each field specifies its `IsoType` and, for fixed-length types, its length:
+
+```c#
+var factory = new MessageFactoryBuilder<IsoMessage>()
+    .WithParseMap(0x0200, p => p
+        .Field(3,  IsoType.NUMERIC, 6)
+        .Field(4,  IsoType.AMOUNT)
+        .Field(7,  IsoType.DATE10)
+        .Field(11, IsoType.NUMERIC, 6)
+        .Field(12, IsoType.TIME)
+        .Field(32, IsoType.LLVAR)
+        .Field(41, IsoType.ALPHA, 8)
+        .Field(49, IsoType.ALPHA, 3))
+    .Build();
+```
+
+#### 🔗 Parse Map Inheritance
+
+Just like templates, parse maps support `Extends` and `Exclude`:
+
+```c#
+var factory = new MessageFactoryBuilder<IsoMessage>()
+    .WithParseMap(0x0200, p => p
+        .Field(3,  IsoType.NUMERIC, 6)
+        .Field(11, IsoType.NUMERIC, 6)
+        .Field(12, IsoType.TIME)
+        .Field(41, IsoType.ALPHA, 8)
+        .Field(49, IsoType.ALPHA, 3))
+    .WithParseMap(0x0210, p => p
+        .Extends(0x0200)                   // inherits all 0200 fields
+        .Field(39, IsoType.ALPHA, 2)       // adds field 39
+        .Field(62, IsoType.LLLVAR))        // adds field 62
+    .WithParseMap(0x0400, p => p
+        .Extends(0x0200)                   // inherits all 0200 fields
+        .Field(62, IsoType.LLLVAR))        // adds field 62
+    .WithParseMap(0x0410, p => p
+        .Extends(0x0400)                   // multi-level: inherits from 0400
+        .Field(39, IsoType.ALPHA, 2)
+        .Exclude(12))                      // removes field 12
+    .Build();
+```
+
+> **Note:** The base parse map must be defined **before** the parse map that extends it.
+
+#### 🧩 Composite Fields
+
+Composite fields (fields that contain multiple subfields) are supported in both templates and parse maps.
+
+**In a template** -- use `CompositeField` with `SubField` to define the subfield values:
+
+```c#
+var factory = new MessageFactoryBuilder<IsoMessage>()
+    .WithTemplate(0x0100, t => t
+        .CompositeField(10, IsoType.LLLVAR, cf => cf
+            .SubField(IsoType.ALPHA,   "abcde", 5)
+            .SubField(IsoType.LLVAR,   "llvar")
+            .SubField(IsoType.NUMERIC, "12345", 5)
+            .SubField(IsoType.ALPHA,   "X", 1)))
+    .Build();
+
+var m = factory.NewMessage(0x0100);
+var f = (CompositeField)m.GetObjectValue(10);
+string sub1 = (string)f.GetObjectValue(0); // "abcde"
+string sub2 = (string)f.GetObjectValue(1); // "llvar"
+```
+
+**In a parse map** -- use `CompositeField` with `SubParser` to define the subfield parsers:
+
+```c#
+var factory = new MessageFactoryBuilder<IsoMessage>()
+    .WithParseMap(0x0100, p => p
+        .CompositeField(10, IsoType.LLLVAR, cf => cf
+            .SubParser(IsoType.ALPHA, 5)
+            .SubParser(IsoType.LLVAR)
+            .SubParser(IsoType.NUMERIC, 5)
+            .SubParser(IsoType.ALPHA, 1)))
+    .Build();
+```
+
+#### 🔌 Custom Field Encoders
+
+Register custom field encoders/decoders for fields that need special handling:
+
+```c#
+var factory = new MessageFactoryBuilder<IsoMessage>()
+    .WithCustomField(48, new CustomField48())
+    .WithTemplate(0x0200, t => t
+        .Field(48, IsoType.LLLVAR, myObject, new CustomField48()))
+    .Build();
+```
+
+#### ⚙️ Factory Settings
+
+All [`MessageFactory`](./NetCore8583/MessageFactory.cs) properties can be set through the builder:
+
+| Method                                      | Description                                       |
+| ------------------------------------------- | ------------------------------------------------- |
+| `WithEncoding(Encoding)`                    | Character encoding for messages and fields        |
+| `WithForceStringEncoding()`                 | Force string encoding for variable-length headers |
+| `WithRadix(int)`                            | Radix for length headers (default: 10)            |
+| `WithBinaryMessages()`                      | Use binary message encoding                       |
+| `WithBinaryBitmap()`                        | Use binary bitmap encoding                        |
+| `WithEnforceSecondBitmap()`                 | Always write the secondary bitmap                 |
+| `WithEtx(int)`                              | End-of-text character (-1 = none)                 |
+| `WithIgnoreLast()`                          | Ignore last byte when parsing                     |
+| `WithAssignDate()`                          | Auto-set field 7 with current date                |
+| `WithTraceGenerator(ITraceNumberGenerator)` | Auto-set field 11 with trace numbers              |
+
+#### 🚀 Complete Example
+
+Below is a complete example that configures headers, templates with inheritance, and parse maps with multi-level inheritance -- equivalent to what you would typically set up via XML:
+
+```c#
+var factory = new MessageFactoryBuilder<IsoMessage>()
+    .WithEncoding(Encoding.UTF8)
+    // Headers
+    .WithHeader(0x0200, "ISO015000050")
+    .WithHeader(0x0210, "ISO015000055")
+    .WithHeaderRef(0x0400, 0x0200)
+    .WithHeader(0x0800, "ISO015000015")
+    .WithHeaderRef(0x0810, 0x0800)
+    // Templates
+    .WithTemplate(0x0200, t => t
+        .Field(3,   IsoType.NUMERIC, "650000", 6)
+        .Field(32,  IsoType.LLVAR,   "456")
+        .Field(35,  IsoType.LLVAR,   "4591700012340000=")
+        .Field(43,  IsoType.ALPHA,   "Fixed-width data", 40)
+        .Field(49,  IsoType.ALPHA,   "484", 3)
+        .Field(100, IsoType.LLVAR,   "999")
+        .Field(102, IsoType.LLVAR,   "ABCD"))
+    .WithTemplate(0x0400, t => t
+        .Extends(0x0200)
+        .Field(90, IsoType.ALPHA, "BLA", 42)
+        .Exclude(102))
+    // Parse maps
+    .WithParseMap(0x0800, p => p
+        .Field(3,  IsoType.ALPHA, 6)
+        .Field(12, IsoType.DATE4)
+        .Field(17, IsoType.DATE4))
+    .WithParseMap(0x0810, p => p
+        .Extends(0x0800)
+        .Exclude(17)
+        .Field(39, IsoType.ALPHA, 2))
+    .Build();
+
+// Create a new message from the template
+var request = factory.NewMessage(0x0200);
+
+// Parse an incoming message
+var parsed = factory.ParseMessage(data, 0);
+
+// Create a response
+var response = factory.CreateResponse(request);
+```
+
+## 📚 Resources
 
 - [ISO 8583](http://en.wikipedia.org/wiki/ISO_8583)
