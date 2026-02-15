@@ -10,11 +10,28 @@
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>Iso8583 NetCore Banking C#</PackageTags>
-    <Copyright>Tochemey 2018-2026</Copyright>
-    <PackageVersion>2.3.0</PackageVersion>
+    <Copyright>Arsene Tochemey Gandote 2018-2026</Copyright>
+    <PackageVersion>2.4.0</PackageVersion>
     <TargetFrameworks>net10.0;net8.0;net9.0</TargetFrameworks>
-    <ReleaseVersion>2.3.0</ReleaseVersion>
+    <ReleaseVersion>2.4.0</ReleaseVersion>
     <Title>NetCore8583</Title>
+    <PackageReleaseNotes>
+      v2.4.0
+
+      New Features:
+      - Fluent MessageFactoryBuilder API for code-first configuration without XML. Supports headers, templates with inheritance, parse maps with inheritance and exclusion, composite fields, custom fields, and all factory properties.
+
+      Performance:
+      - Bitmap128 struct backed by UInt128 replaces BitArray for field-presence tracking with zero heap allocations.
+      - Span and ReadOnlySpan used throughout parsing and encoding for zero-copy byte/string conversions.
+      - Zero-copy byte utilities via MemoryMarshal.Cast; Stringx extensions encode directly into destination buffers.
+      - EncodingCache and ArrayPool pooled variants reduce allocations on hot paths.
+      - All parsers, IsoMessage, IsoValue, MessageFactory, and codecs updated to use span-based APIs.
+
+      Breaking Changes:
+      - NetCore8583.Util namespace reorganised into NetCore8583.Extensions. Update using statements if you reference HexCodec, Bcd, Arrays, OsUtil, or other utilities directly.
+      - Removed: ByteUtil, DateUtil, StringUtil from NetCore8583.Util (replaced by equivalents in NetCore8583.Extensions).
+    </PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup>
