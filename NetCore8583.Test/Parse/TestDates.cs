@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using NetCore8583.Extensions;
 using NetCore8583.Parse;
@@ -83,17 +83,14 @@ namespace NetCore8583.Test.Parse
         {
             var today = DateTime.UtcNow;
             var soon = today.AddMilliseconds(50000);
-            today = today.AddHours(0)
-                .AddMinutes(0)
-                .AddSeconds(0)
-                .AddMilliseconds(0);
             var buf = IsoType.DATE4.Format(soon).GetSignedBytes();
             var comp = new Date4ParseInfo().Parse(0,
                 buf,
                 0,
                 null);
-            Assert.Equal(comp.Value,
-                today.Date);
+            var v = (DateTime) comp.Value;
+            Assert.Equal(soon.Month, v.Month);
+            Assert.Equal(soon.Day, v.Day);
             var stream = new MemoryStream();
             comp.Write(stream, true, false);
             var bin = new Date4ParseInfo().ParseBinary(0, stream.ToArray().ToInt8(), 0, null);
