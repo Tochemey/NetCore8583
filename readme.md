@@ -3,7 +3,7 @@
 _NetCore8583 is feature complete and mature._
 
 [![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/Tochemey/NetCore8583/ci.yml?branch=main&style=flat-square)](https://github.com/Tochemey/NetCore8583/blob/main/.github/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/Tochemey/NetCore8583/graph/badge.svg?token=wXApKse0tW)](https://codecov.io/gh/Tochemey/NetCore8583)
+[![codecov](https://codecov.io/gh/Tochemey/NetCore8583/branch/main/graph/badge.svg?token=wXApKse0tW)](https://codecov.io/gh/Tochemey/NetCore8583)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 [![Nuget](https://img.shields.io/nuget/v/NetCore8583?style=flat-square)](https://www.nuget.org/packages/NetCore8583/)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/NetCore8583?style=flat-square)](https://www.nuget.org/packages/NetCore8583/)
