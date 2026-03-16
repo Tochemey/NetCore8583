@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Config for issue 15: conditional fields beyond bit 64 (no secondary bitmap in message) -->
+<n8583-config>
+    <parse type="9800">
+        <field num="24" type="NUMERIC" length="3" />
+        <field num="31" type="LLVAR" />
+        <field num="125" type="LLVAR" />
+    </parse>
+</n8583-config>
