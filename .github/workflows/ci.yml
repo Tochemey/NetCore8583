@@ -41,7 +41,18 @@ jobs:
       - name: Build
         run: dotnet build -c Release --no-restore
       - name: Test
+        if: matrix.os != 'ubuntu-latest'
         run: dotnet test -c Release
+      - name: Test with Coverage
+        if: matrix.os == 'ubuntu-latest'
+        run: dotnet test -c Release --collect:"XPlat Code Coverage" --framework net8.0 --results-directory ./coverage
+      - name: Upload coverage to Codecov
+        if: matrix.os == 'ubuntu-latest'
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./coverage
+          fail_ci_if_error: true
       - name: Pack
         if: matrix.os == 'ubuntu-latest'
         run: dotnet pack -v normal -c Release --no-restore --include-symbols --include-source -p:PackageVersion=0.0.0 $PROJECT_NAME/$PROJECT_NAME.csproj
