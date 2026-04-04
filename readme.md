@@ -227,6 +227,231 @@ You can also create a [`CompositeField`](./NetCore8583/Codecs/CompositeField.cs)
 
 When the message is encoded, field 125 will be "018one 03two000123OK".
 
+### 💳 EMV TLV Support (Field 55)
+
+NetCore8583 includes built-in support for EMV chip card data encoded in [BER-TLV](https://en.wikipedia.org/wiki/X.690#BER_encoding) format as defined by the [EMV v4.3 Specification](https://www.emvco.com/specifications/) (specifically [Book 3 -- Application Specification](https://www.emvco.com/specifications/) and [Book 1 -- ICC to Terminal Interface Requirements](https://www.emvco.com/specifications/)), with BER-TLV encoding rules per [ISO/IEC 8825-1](https://www.iso.org/standard/73409.html). This data is typically carried in ISO 8583 field 55 (ICC System Related Data).
+
+The TLV module lives in the `NetCore8583.Tlv` namespace and provides:
+
+- **[`TlvParser`](./NetCore8583/Tlv/TlvParser.cs)** -- parses raw BER-TLV bytes into structured [`TlvTag`](./NetCore8583/Tlv/TlvTag.cs) records
+- **[`TlvBuilder`](./NetCore8583/Tlv/TlvBuilder.cs)** -- fluent API for constructing BER-TLV byte sequences
+- **[`TlvField`](./NetCore8583/Tlv/TlvField.cs)** -- [`ICustomBinaryField`](./NetCore8583/ICustomBinaryField.cs) implementation for automatic TLV encode/decode in the message factory
+- **[`EmvTags`](./NetCore8583/Tlv/EmvTags.cs)** -- built-in dictionary of common EMV tag descriptions
+- **[`IsoMessageTlvExtensions`](./NetCore8583/Tlv/IsoMessageTlvExtensions.cs)** -- convenience extension methods on [`IsoMessage`](./NetCore8583/IsoMessage.cs) for field 55 access
+
+#### 📐 BER-TLV Encoding Rules
+
+The parser and builder fully implement:
+
+- **Single-byte tags** (e.g. `82`, `95`, `9A`, `9C`)
+- **Multi-byte tags** (e.g. `9F26`, `5F2A`, `DF8101`) -- when bits 5-1 of the first byte are all set (`0x1F`), subsequent bytes form part of the tag
+- **Short-form lengths** (0-127: single byte)
+- **Long-form lengths** (128+: first byte encodes the count of subsequent length bytes)
+- **Constructed tags** with nested TLV objects (e.g. tag `70` containing child TLVs)
+- **Padding bytes** (`0x00` and `0xFF`) between TLV objects are skipped
+
+#### 🔧 Standalone Parsing and Building
+
+You can use [`TlvParser`](./NetCore8583/Tlv/TlvParser.cs) and [`TlvBuilder`](./NetCore8583/Tlv/TlvBuilder.cs) independently of [`IsoMessage`](./NetCore8583/IsoMessage.cs):
+
+```c#
+using NetCore8583.Tlv;
+
+// Parse raw TLV data
+byte[] rawTlv = Convert.FromHexString("9F2608A1B2C3D4E5F607089F270180");
+IReadOnlyList<TlvTag> tags = TlvParser.Parse(rawTlv);
+
+foreach (var tag in tags)
+{
+    Console.WriteLine($"Tag: {tag.Tag}, Length: {tag.Length}, Value: {Convert.ToHexString(tag.Value)}");
+    if (tag.Description != null)
+        Console.WriteLine($"  Description: {tag.Description}");
+}
+// Output:
+//   Tag: 9F26, Length: 8, Value: A1B2C3D4E5F60708
+//     Description: Application Cryptogram
+//   Tag: 9F27, Length: 1, Value: 80
+//     Description: Cryptogram Information Data
+
+// Build TLV data using the fluent API
+byte[] built = new TlvBuilder()
+    .AddTag("9F26", new byte[] { 0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6, 0x07, 0x08 })
+    .AddTag("9F27", new byte[] { 0x80 })
+    .AddTag("95",   new byte[] { 0x00, 0x00, 0x08, 0x00, 0x00 })
+    .AddTag("9A",   new byte[] { 0x26, 0x04, 0x01 })
+    .AddTag("9C",   new byte[] { 0x00 })
+    .AddTag("5F2A", new byte[] { 0x08, 0x40 })
+    .AddTag("82",   new byte[] { 0x19, 0x80 })
+    .Build();
+```
+
+#### 🔧 Constructed (Nested) Tags
+
+Tags whose bit 6 is set (e.g. `70`, `77`) are constructed and contain nested TLV data:
+
+```c#
+var tags = TlvParser.Parse(rawData);
+var template = tags.First(t => t.Tag == "70");
+
+if (template.IsConstructed)
+{
+    IReadOnlyList<TlvTag> nested = template.GetNestedTags();
+    // Work with nested tags...
+}
+```
+
+#### 📖 EMV Tag Dictionary
+
+The built-in [`EmvTags`](./NetCore8583/Tlv/EmvTags.cs) dictionary provides human-readable descriptions for commonly used EMV tags, sourced from the [EMV v4.3 Specification](https://www.emvco.com/specifications/) (Book 3, Annex A) and [ISO/IEC 7816-4](https://www.iso.org/standard/77180.html). The spec version is available programmatically via `EmvTags.SpecVersion`.
+
+```c#
+string desc = EmvTags.GetDescription("9F26"); // "Application Cryptogram"
+string desc2 = EmvTags.GetDescription("5F2A"); // "Transaction Currency Code"
+string unknown = EmvTags.GetDescription("FF99"); // null (unknown tag)
+
+string version = EmvTags.SpecVersion; // "EMV v4.3"
+```
+
+Tags are looked up case-insensitively. The dictionary includes descriptions for the following tags (among others):
+
+| Tag  | Description                                  | Source                  |
+|------|----------------------------------------------|-------------------------|
+| 50   | Application Label                            | EMV Book 3              |
+| 57   | Track 2 Equivalent Data                      | EMV Book 3              |
+| 5A   | Application Primary Account Number (PAN)     | EMV Book 3              |
+| 5F24 | Application Expiration Date                  | EMV Book 3              |
+| 5F25 | Application Effective Date                   | EMV Book 3              |
+| 5F28 | Issuer Country Code                          | EMV Book 3              |
+| 5F2A | Transaction Currency Code                    | EMV Book 3              |
+| 5F34 | Application PAN Sequence Number              | EMV Book 3              |
+| 70   | EMV Proprietary Template                     | ISO 7816-4 / EMV Book 1 |
+| 77   | Response Message Template Format 2           | ISO 7816-4 / EMV Book 1 |
+| 80   | Response Message Template Format 1           | EMV Book 3              |
+| 82   | Application Interchange Profile              | EMV Book 3              |
+| 84   | Dedicated File (DF) Name                     | ISO 7816-4 / EMV Book 1 |
+| 94   | Application File Locator (AFL)               | EMV Book 3              |
+| 95   | Terminal Verification Results                | EMV Book 3              |
+| 9A   | Transaction Date                             | EMV Book 3              |
+| 9C   | Transaction Type                             | EMV Book 3              |
+| 9F02 | Amount, Authorised (Numeric)                 | EMV Book 3              |
+| 9F03 | Amount, Other (Numeric)                      | EMV Book 3              |
+| 9F06 | Application Identifier (AID) - Terminal      | EMV Book 3              |
+| 9F07 | Application Usage Control                    | EMV Book 3              |
+| 9F08 | Application Version Number (Card)            | EMV Book 3              |
+| 9F09 | Application Version Number (Terminal)        | EMV Book 3              |
+| 9F0D | Issuer Action Code - Default                 | EMV Book 3              |
+| 9F0E | Issuer Action Code - Denial                  | EMV Book 3              |
+| 9F0F | Issuer Action Code - Online                  | EMV Book 3              |
+| 9F10 | Issuer Application Data                      | EMV Book 3              |
+| 9F17 | PIN Try Counter                              | EMV Book 3              |
+| 9F1A | Terminal Country Code                        | EMV Book 3              |
+| 9F1E | Interface Device (IFD) Serial Number         | EMV Book 3              |
+| 9F21 | Transaction Time                             | EMV Book 3              |
+| 9F26 | Application Cryptogram                       | EMV Book 3              |
+| 9F27 | Cryptogram Information Data                  | EMV Book 3              |
+| 9F33 | Terminal Capabilities                        | EMV Book 3              |
+| 9F34 | Cardholder Verification Method (CVM) Results | EMV Book 3              |
+| 9F35 | Terminal Type                                | EMV Book 3              |
+| 9F36 | Application Transaction Counter (ATC)        | EMV Book 3              |
+| 9F37 | Unpredictable Number                         | EMV Book 3              |
+| 9F41 | Transaction Sequence Counter                 | EMV Book 3              |
+
+> **Specification references:**
+>
+> - [EMVCo Specifications](https://www.emvco.com/specifications/) -- official EMV v4.3 Books 1-4 (free registration required)
+> - [EMV Tag Search (UCL)](https://emvlab.cs.ucl.ac.uk/emvtags/) -- searchable EMV tag database
+> - [EMV Tag List (NeaPay)](https://neapay.com/online-tools/emv-tags-list.html) -- community reference with per-tag details
+> - [ISO/IEC 7816-4](https://www.iso.org/standard/77180.html) -- smart card APDU commands and data structures
+> - [ISO/IEC 8825-1](https://www.iso.org/standard/73409.html) -- ASN.1 BER encoding rules
+
+#### 📄 XML Configuration with TLV Field
+
+To configure field 55 as a TLV-aware field via XML, define it in your parse template as `LLLBIN`, then register a [`TlvField`](./NetCore8583/Tlv/TlvField.cs) encoder programmatically:
+
+```xml
+<!-- In your n8583-config XML -->
+<parse type="0100">
+    <!-- other fields... -->
+    <field num="55" type="LLLBIN" />
+    <!-- other fields... -->
+</parse>
+
+<template type="0100">
+    <!-- other fields... -->
+    <field num="55" type="LLLBIN">9F2608A1B2C3D4E5F607089F270180</field>
+    <!-- other fields... -->
+</template>
+```
+
+Then register the [`TlvField`](./NetCore8583/Tlv/TlvField.cs) custom encoder:
+
+```c#
+using NetCore8583;
+using NetCore8583.Tlv;
+
+var factory = new MessageFactory<IsoMessage>();
+factory.SetConfigPath(@"/Resources/config.xml");
+factory.SetCustomField(55, new TlvField());
+
+// Parsing: field 55 is automatically decoded into IReadOnlyList<TlvTag>
+var message = factory.ParseMessage(data, 0);
+var tags = (IReadOnlyList<TlvTag>)message.GetObjectValue(55);
+
+// Creating: set field 55 with TLV tags
+var request = factory.NewMessage(0x0100);
+request.SetValue(55, tags, new TlvField(), IsoType.LLLBIN, tlvBytes.Length);
+```
+
+#### 🧱 Programmatic Configuration with TLV Field
+
+Using the [`MessageFactoryBuilder`](./NetCore8583/Builder/MessageFactoryBuilder.cs), register the TLV encoder inline:
+
+```c#
+using NetCore8583.Builder;
+using NetCore8583.Tlv;
+
+var factory = new MessageFactoryBuilder<IsoMessage>()
+    .WithCustomField(55, new TlvField())
+    .WithParseMap(0x0100, p => p
+        .Field(3,  IsoType.NUMERIC, 6)
+        .Field(11, IsoType.NUMERIC, 6)
+        .Field(55, IsoType.LLLBIN))
+    .Build();
+
+// Parsed messages automatically decode field 55 as TLV
+var message = factory.ParseMessage(data, 0);
+var tags = (IReadOnlyList<TlvTag>)message.GetObjectValue(55);
+```
+
+#### 🚀 IsoMessage Extension Methods
+
+The easiest way to work with field 55 is via the extension methods on [`IsoMessage`](./NetCore8583/IsoMessage.cs):
+
+```c#
+using NetCore8583.Tlv;
+
+// Get all TLV tags from field 55
+IReadOnlyList<TlvTag> tags = message.GetTlvTags();
+
+// Find a specific tag
+TlvTag cryptogram = message.FindTlvTag("9F26");
+Console.WriteLine(Convert.ToHexString(cryptogram.Value)); // "A1B2C3D4E5F60708"
+
+// Get the raw TLV bytes
+byte[] rawBytes = message.GetTlvBytes();
+
+// Set field 55 with TLV tags
+var newTags = new List<TlvTag>
+{
+    new("9F26", 8, new byte[] { 0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6, 0x07, 0x08 }),
+    new("9F27", 1, new byte[] { 0x80 }),
+    new("82",   2, new byte[] { 0x19, 0x80 })
+};
+message.SetTlvTags(newTags);
+```
+
+These extension methods handle all underlying formats transparently -- they work whether the field value is already parsed as `IReadOnlyList<TlvTag>`, stored as raw `byte[]`, or stored as a hex string.
+
 ### 🧱 Programmatic Configuration (Builder API)
 
 If you prefer to configure the [`MessageFactory`](./NetCore8583/MessageFactory.cs) entirely in code -- without any XML files -- you can use the [`MessageFactoryBuilder`](./NetCore8583/Builder/MessageFactoryBuilder.cs). It provides a fluent API that supports all the same features as XML configuration: headers, templates, parse maps, inheritance, composite fields, and custom field encoders.
@@ -388,7 +613,7 @@ var factory = new MessageFactoryBuilder<IsoMessage>()
 All [`MessageFactory`](./NetCore8583/MessageFactory.cs) properties can be set through the builder:
 
 | Method                                      | Description                                       |
-| ------------------------------------------- | ------------------------------------------------- |
+|---------------------------------------------|---------------------------------------------------|
 | `WithEncoding(Encoding)`                    | Character encoding for messages and fields        |
 | `WithForceStringEncoding()`                 | Force string encoding for variable-length headers |
 | `WithRadix(int)`                            | Radix for length headers (default: 10)            |
@@ -449,4 +674,8 @@ var response = factory.CreateResponse(request);
 
 ## 📚 Resources
 
-- [ISO 8583](http://en.wikipedia.org/wiki/ISO_8583)
+- [ISO 8583](http://en.wikipedia.org/wiki/ISO_8583) -- message format for financial transactions
+- [EMVCo Specifications](https://www.emvco.com/specifications/) -- official EMV v4.3 contact and contactless specifications
+- [EMV Tag Search (UCL)](https://emvlab.cs.ucl.ac.uk/emvtags/) -- searchable EMV tag database
+- [ISO/IEC 7816-4](https://www.iso.org/standard/77180.html) -- smart card APDU commands and TLV data structures
+- [ISO/IEC 8825-1](https://www.iso.org/standard/73409.html) -- ASN.1 BER-TLV encoding rules

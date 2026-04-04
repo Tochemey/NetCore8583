@@ -11,11 +11,22 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>Iso8583 NetCore Banking C#</PackageTags>
     <Copyright>Arsene Tochemey Gandote 2018-2026</Copyright>
-    <PackageVersion>2.4.0</PackageVersion>
+    <PackageVersion>2.5.0</PackageVersion>
     <TargetFrameworks>net10.0;net8.0;net9.0</TargetFrameworks>
-    <ReleaseVersion>2.4.0</ReleaseVersion>
+    <ReleaseVersion>2.5.0</ReleaseVersion>
     <Title>NetCore8583</Title>
     <PackageReleaseNotes>
+      v2.5.0
+
+      New Features:
+      - EMV TLV support: new NetCore8583.Tlv namespace with full BER-TLV parsing, building, and ISO 8583 field integration.
+      - TlvParser: parses BER-TLV encoded byte data into TlvTag records, handling single-byte tags, multi-byte tags (2–3+ bytes), and multi-byte lengths (definite form).
+      - TlvBuilder: fluent API for constructing BER-TLV encoded byte sequences with .AddTag(tag, value).Build().
+      - TlvTag: immutable record type with Tag (hex string), Length, Value (byte[]), Description, nested tag support for constructed data objects.
+      - EmvTags: built-in frozen dictionary of common EMV tag descriptions (9F26, 9F27, 9F10, 9F37, 9F36, 95, 9A, 9C, 5F2A, 82, 9F1A, 9F03, 9F33, 9F34, 9F35, 9F09, 84, and more).
+      - TlvField: ICustomBinaryField implementation for registering field 55 (or any TLV field) as a TLV-aware composite field.
+      - IsoMessage TLV extensions: GetTlvTags(), SetTlvTags(), GetTlvBytes(), FindTlvTag() helpers for convenient field 55 access.
+
       v2.4.0
 
       New Features:
