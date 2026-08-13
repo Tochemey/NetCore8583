@@ -41,6 +41,14 @@ namespace NetCore8583.Test.Parse
     {
         private static sbyte[] Ascii(string s) => s.GetSignedBytes(Encoding.ASCII);
 
+        private static Encoding GetTestEncoding(string name) => name switch
+        {
+            "ASCII" => Encoding.ASCII,
+            "UTF8" => Encoding.UTF8,
+            "IBM037" => CodePagesEncodingProvider.Instance.GetEncoding(37),
+            _ => throw new ArgumentOutOfRangeException(nameof(name), name, null)
+        };
+
         // ═══════════════════════════════════════════════════════════════════════
         // Parse (ASCII)
         // ═══════════════════════════════════════════════════════════════════════
@@ -53,6 +61,31 @@ namespace NetCore8583.Test.Parse
             var val = fpi.Parse(1, Ascii("260316143000"), 0, null);
             Assert.Equal(IsoType.DATE12, val.Type);
             var dt = (DateTime) val.Value;
+            Assert.Equal(2026, dt.Year);
+            Assert.Equal(3, dt.Month);
+            Assert.Equal(16, dt.Day);
+            Assert.Equal(14, dt.Hour);
+            Assert.Equal(30, dt.Minute);
+            Assert.Equal(0, dt.Second);
+        }
+
+        [Theory]
+        [InlineData("ASCII")]
+        [InlineData("UTF8")]
+        [InlineData("IBM037")]
+        public void Parse_ForceStringDecoding_ReturnsCorrectDateTime(string encodingName)
+        {
+            // Regression for issue #50:
+            // var val = fpi.Parse(1, "260316143000".GetSignedBytes(Encoding.ASCII), 0, null);
+            var encoding = GetTestEncoding(encodingName);
+            var fpi = new Date12ParseInfo
+            {
+                ForceStringDecoding = true,
+                Encoding = encoding
+            };
+            var val = fpi.Parse(1, "260316143000".GetSignedBytes(encoding), 0, null);
+            var dt = (DateTime) val.Value;
+
             Assert.Equal(2026, dt.Year);
             Assert.Equal(3, dt.Month);
             Assert.Equal(16, dt.Day);

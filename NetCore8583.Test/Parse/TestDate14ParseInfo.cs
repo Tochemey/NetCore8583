@@ -41,6 +41,14 @@ namespace NetCore8583.Test.Parse
     {
         private static sbyte[] Ascii(string s) => s.GetSignedBytes(Encoding.ASCII);
 
+        private static Encoding GetTestEncoding(string name) => name switch
+        {
+            "ASCII" => Encoding.ASCII,
+            "UTF8" => Encoding.UTF8,
+            "IBM037" => CodePagesEncodingProvider.Instance.GetEncoding(37),
+            _ => throw new ArgumentOutOfRangeException(nameof(name), name, null)
+        };
+
         // ═══════════════════════════════════════════════════════════════════════
         // Parse (ASCII)
         // ═══════════════════════════════════════════════════════════════════════
@@ -59,6 +67,24 @@ namespace NetCore8583.Test.Parse
             Assert.Equal(14, dt.Hour);
             Assert.Equal(30, dt.Minute);
             Assert.Equal(0, dt.Second);
+        }
+
+        [Theory]
+        [InlineData("ASCII")]
+        [InlineData("UTF8")]
+        [InlineData("IBM037")]
+        public void Parse_ForceStringDecoding_ReturnsCorrectDateTime(string encodingName)
+        {
+            var encoding = GetTestEncoding(encodingName);
+            var fpi = new Date14ParseInfo
+            {
+                ForceStringDecoding = true,
+                Encoding = encoding
+            };
+            var val = fpi.Parse(1, "20260316143000".GetSignedBytes(encoding), 0, null);
+            var dt = (DateTime) val.Value;
+
+            Assert.Equal(new DateTime(2026, 3, 16, 14, 30, 0), dt);
         }
 
         [Fact]
