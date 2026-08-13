@@ -11,11 +11,17 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>Iso8583 NetCore Banking C#</PackageTags>
     <Copyright>Arsene Tochemey Gandote 2018-2026</Copyright>
-    <PackageVersion>2.5.0</PackageVersion>
+    <PackageVersion>2.5.1</PackageVersion>
     <TargetFrameworks>net10.0;net8.0;net9.0</TargetFrameworks>
-    <ReleaseVersion>2.5.0</ReleaseVersion>
+    <ReleaseVersion>2.5.1</ReleaseVersion>
     <Title>NetCore8583</Title>
     <PackageReleaseNotes>
+      v2.5.1
+
+      Bug Fixes:
+      - Corrected DATE12 and DATE14 ForceStringDecoding field offsets for year, month, day, hour, minute, and second parsing.
+      - Added regression coverage for ASCII, UTF-8, and IBM037 encoded date fields.
+
       v2.5.0
 
       New Features:
